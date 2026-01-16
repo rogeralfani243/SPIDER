@@ -1,0 +1,269 @@
+/* src/styles/report/report-list.css */
+
+.my-reports-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.my-reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.my-reports-header h2 {
+  margin: 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.my-reports-header h2 i {
+  color: #ff0050;
+}
+
+.my-reports-stats .badge {
+  font-size: 0.9rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* Loading state */
+.my-reports-loading {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.my-reports-loading .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.my-reports-loading p {
+  color: #666;
+  margin-top: 15px;
+}
+
+/* Error state */
+.my-reports-error {
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.my-reports-error .alert {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Empty state */
+.my-reports-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  border: 2px dashed #dee2e6;
+}
+
+.my-reports-empty i {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+.my-reports-empty h4 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+/* Report items */
+.my-report-item {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.my-report-item:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.my-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.my-report-meta {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.my-report-id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  background: #f8f9fa;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+
+.my-report-id .text-muted {
+  color: #6c757d;
+  font-weight: normal;
+}
+
+.my-report-type .badge {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.my-report-status .badge {
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+
+/* Report content */
+.my-report-content {
+  font-size: 0.95rem;
+}
+
+.my-report-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.my-report-detail {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.my-report-detail .text-muted {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.my-report-detail strong {
+  color: #495057;
+}
+
+/* Reason section */
+.my-report-reason {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.my-report-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.my-report-label i {
+  margin-right: 5px;
+}
+
+.my-report-text {
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Moderation section */
+.my-report-moderation {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f0fff4;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+}
+
+.my-report-moderation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #d4edda;
+}
+
+.my-report-moderation-header strong {
+  color: #155724;
+}
+
+.my-report-moderation-notes {
+  margin: 10px 0;
+}
+
+.my-report-action {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #d4edda;
+}
+
+.my-report-action .my-report-label {
+  color: #155724;
+}
+
+/* Footer */
+.my-reports-footer {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .my-reports-container {
+    padding: 10px;
+  }
+  
+  .my-reports-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .my-report-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .my-report-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .my-report-details {
+    grid-template-columns: 1fr;
+  }
+  
+  .my-report-moderation-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}

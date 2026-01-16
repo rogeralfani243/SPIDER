@@ -1,0 +1,140 @@
+.comment-replies {
+  margin-top: 16px;
+}
+
+.reply-form-container {
+  margin-bottom: 16px;
+}
+
+.show-reply-form-btn {
+  padding: 6px 12px;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+}
+
+.show-reply-form-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.replies-list {
+  margin-left: 24px;
+  padding-left: 16px;
+  border-left: 2px solid #e5e7eb;
+}
+
+.reply-item {
+  margin-bottom: 12px;
+}
+
+.replies-loading {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  color: #6b7280;
+}
+
+.load-more-replies-btn {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.load-more-replies-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.no-replies {
+  text-align: center;
+  padding: 16px;
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 14px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .replies-list {
+    margin-left: 12px;
+    padding-left: 8px;
+  }
+}
+/* CommentReplies.css */
+.comment-replies-section {
+  margin-top: 20px;
+  padding-left: 20px;
+  border-left: 3px solid #e0e0e0;
+  margin-left: 10px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.replies-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.replies-icon {
+  color: #666;
+}
+
+.replies-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95em;
+}
+
+/* Nested comments */
+.comment-replies-section .comment {
+  margin-bottom: 8px;
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+}
+
+.comment-replies-section .comment:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comment-replies-section {
+    padding-left: 15px;
+    margin-left: 5px;
+    border-left-width: 2px;
+  }
+  
+  .replies-header {
+    padding: 6px 10px;
+    font-size: 0.9em;
+  }
+}

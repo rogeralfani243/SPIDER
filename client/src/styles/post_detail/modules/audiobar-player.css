@@ -1,0 +1,251 @@
+/* WhatsApp Audio Player Styles */
+.whatsapp-audio-player {
+ 
+  width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+.whatsapp-player-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.whatsapp-audio-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.whatsapp-audio-icon {
+  font-size: 32px;
+  color: #25D366;
+  background: #e8f5e9;
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.whatsapp-audio-details {
+  flex: 1;
+}
+
+.whatsapp-audio-title {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whatsapp-audio-time {
+  display: flex;
+  gap: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* WhatsApp Waveform */
+.whatsapp-waveform-container {
+  position: relative;
+  padding: 10px 0;
+}
+
+.whatsapp-waveform {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 80px;
+  cursor: pointer;
+  padding: 10px 0;
+  position: relative;
+}
+
+.whatsapp-waveform-bar {
+  transition: all 0.3s ease;
+  min-height: 10px;
+}
+
+.whatsapp-waveform-bar.played {
+  background: var(--primary-color-bar) !important;
+}
+
+.whatsapp-progress-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: rgba(37, 211, 102, 0.2);
+}
+
+.whatsapp-progress-bar {
+  height: 100%;
+  background: #25D366;
+  transition: width 0.1s linear;
+  border-radius: 1px;
+}
+
+/* Controls */
+.whatsapp-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 50px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.whatsapp-control-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.whatsapp-control-btn:hover {
+  background: #f0f0f0;
+  color: #581500;
+}
+
+.whatsapp-control-btn.active {
+  color: #581500;
+}
+
+.whatsapp-play-btn {
+  background: var(--secondary-color-bar);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(211, 37, 37, 0.3);
+  transition: all 0.2s ease;
+}
+
+.whatsapp-play-btn:hover {
+  background: var(--primary-color-bar);
+  transform: scale(1.05);
+}
+
+/* Volume and Speed Controls */
+.whatsapp-secondary-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 10px;
+}
+
+.whatsapp-volume-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.whatsapp-volume-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.whatsapp-volume-btn:hover {
+  background: #f0f0f0;
+  color:#581500;
+}
+
+.whatsapp-volume-slider-container {
+  position: relative;
+  width: 120px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.whatsapp-volume-slider-track {
+  width: 6px;
+  height: 80px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  position: relative;
+  cursor: pointer;
+}
+
+.whatsapp-volume-slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #581500;
+  border-radius: 3px;
+  transition: height 0.1s ease;
+}
+
+.whatsapp-volume-percentage {
+  font-size: 14px;
+  color: #666;
+  min-width: 50px;
+}
+
+/* Speed Control */
+.whatsapp-speed-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.whatsapp-speed-select {
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.whatsapp-speed-select:hover {
+  border-color: #581500;
+}
+
+.whatsapp-speed-select:focus {
+  border-color: #581500;
+  box-shadow: 0 0 0 2px rgba(211, 37, 37, 0.2);
+}
+
+@media(max-width:946px){
+  .whatsapp-audio-player {
+ 
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+}

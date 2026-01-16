@@ -1,0 +1,49 @@
+/* User Information Styles */
+.user-info {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  height: auto;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+}
+.user-div{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.user-avatars {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  box-shadow: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.user-avatars:hover{
+  box-shadow: none;
+}
+.user-details {
+  flex: 1;
+}
+
+.usernames {
+  margin: 0 0 4px 0;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.post-date {
+  margin: 0;
+  margin-top: 1em;
+  color: #666;
+  font-size: 11px;
+}

@@ -1,0 +1,45 @@
+/* En-tête du post */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: center;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.user-info-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  margin: 0;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.post-time {
+  margin: 0;
+  font-size: 12px;
+  color: gray;
+}

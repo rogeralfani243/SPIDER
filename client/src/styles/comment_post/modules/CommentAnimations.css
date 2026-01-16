@@ -1,0 +1,170 @@
+/* CommentAnimations.css */
+/* Animations du cœur */
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.2);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  75% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes heartPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes heartDislike {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.8) rotate(-10deg);
+  }
+  50% {
+    transform: scale(0.9) rotate(10deg);
+  }
+  75% {
+    transform: scale(0.85) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes particleExplosion {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx), var(--ty)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Animation pour les coeurs */
+.comment-like-btn.liked {
+  color: #ff4757;
+  animation: heartBeat 0.6s ease;
+}
+
+.comment-like-btn.liked .heart-icon {
+  animation: heartPop 0.4s ease-out;
+}
+
+.comment-like-btn:not(.liked):active .heart-icon {
+  animation: heartDislike 0.5s ease;
+}
+
+.comment-like-btn.liked .heart-fill {
+  animation: fillPulse 0.6s ease;
+}
+
+@keyframes fillPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Effet de vibration pour l'appel à l'action */
+@keyframes pulseAttention {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 71, 87, 0);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(255, 71, 87, 0.3);
+  }
+}
+
+.pulse-attention {
+  animation: pulseAttention 2s infinite;
+}
+
+/* Animations pour les particules */
+.heart-particle {
+  animation: particleExplosion 0.8s ease forwards;
+}
+
+/* Transition pour les réponses */
+.comment-replies-section {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation pour l'édition */
+.comment.editing {
+  animation: editingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes editingPulse {
+  0%, 100% {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3);
+  }
+}
+
+/* Animation pour les mentions */
+.comment-mention-link {
+  animation: mentionFadeIn 0.3s ease;
+}
+
+@keyframes mentionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

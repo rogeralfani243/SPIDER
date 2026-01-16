@@ -1,0 +1,340 @@
+@import '../modules_colors/var.css';
+.comments-section {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comments-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.comments-controls {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.comments-sort-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.comments-sort-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.show-pinned-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.show-pinned-toggle input[type="checkbox"] {
+  margin: 0;
+}
+
+.main-comment-form {
+  margin-bottom: 32px;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 24px;
+  background-color: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.login-prompt a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+.comments-list {
+  margin-bottom: 24px;
+}
+
+.comments-error {
+  text-align: center;
+  padding: 16px;
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #dc2626;
+  margin-bottom: 16px;
+}
+/* CommentsSection.css - Check for these */
+.pinned-comments-section {
+  /* Remove any background here if it's causing issues */
+  background: transparent !important;
+}
+
+.pinned-comments-section .comment-wrapper {
+  background: transparent !important;
+}
+
+.comment-wrapper {
+  background: transparent !important;
+}
+.comments-error button {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background-color: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pinned-comments-section {
+  margin-bottom: 32px;
+}
+
+.pinned-comments-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-wrapper {
+  margin-bottom: 16px;
+}
+
+.comments-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  color: #6b7280;
+}
+
+.load-more-comments-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.load-more-comments-btn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.load-more-comments-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comments-section {
+    padding: 16px;
+  }
+  
+  .comments-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  .comments-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .comments-sort-select {
+    width: 100%;
+  }
+}
+.comments-title-container{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* Styles pour le message "Be the first to comment" */
+.no-comments-message {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  border: 2px dashed #cbd5e1;
+  margin: 2rem 0;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.no-comments-icon {
+  color: #94a3b8;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+  animation: float 3s ease-in-out infinite;
+}
+
+.no-comments-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 0.75rem;
+  background:var(--primary-color-dash);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.no-comments-subtitle {
+  color: #64748b;
+  font-size: 1.1rem;
+  max-width: 500px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.no-comments-tips {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tip-icon {
+  font-size: 1.25rem;
+}
+
+.tip span:last-child {
+  color: #475569;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Animation pour l'icône */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Focus automatique sur le champ de commentaire quand il n'y a pas de commentaires */
+.main-comment-form:has(+ .comments-list .no-comments-message) {
+  animation: highlightForm 1s ease-out;
+}
+
+@keyframes highlightForm {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 2px 15px rgba(59, 130, 246, 0.1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .no-comments-message {
+    padding: 2rem 1rem;
+  }
+  
+  .no-comments-title {
+    font-size: 1.5rem;
+  }
+  
+  .no-comments-subtitle {
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+  
+  .no-comments-tips {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .tip {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}

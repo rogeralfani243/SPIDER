@@ -1,0 +1,294 @@
+/* CommentFooter.css */
+.comment-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+/* Boutons généraux */
+.comment-like-btn,
+.comment-reply-btn,
+.comment-show-replies-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.comment-like-btn:hover,
+.comment-reply-btn:hover,
+.comment-show-replies-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.comment-like-btn:disabled,
+.comment-reply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton like spécifique */
+.comment-like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.comment-like-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.comment-like-btn:active {
+  transform: translateY(0);
+}
+
+.comment-like-btn.liked {
+  color: #ff4757;
+  background-color: rgba(255, 71, 87, 0.1);
+}
+
+.comment-like-btn.liked:hover {
+  background-color: rgba(255, 71, 87, 0.15);
+}
+
+.comment-like-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Animation pour le compteur */
+.like-count {
+  transition: all 0.3s ease;
+  min-width: 20px;
+  text-align: center;
+}
+
+.like-count-pop {
+  display: inline-block;
+  animation: countPop 0.3s ease;
+}
+
+@keyframes countPop {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.2);
+    color: #ff4757;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Composants du bouton like */
+.heart-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.heart-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,71,87,0.2) 0%, rgba(255,71,87,0) 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.4s ease;
+}
+
+.heart-icon {
+  font-size: 1.1em;
+  transition: all 0.2s ease;
+}
+
+/* Bouton Show/Hide Replies amélioré */
+.comment-show-replies-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border-radius: 20px;
+  padding: 6px 15px;
+  color: #666;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.2s;
+}
+
+.comment-show-replies-btn:hover {
+  background: #f8f9fa;
+  border-color: #bbb;
+  color: #333;
+}
+
+/* New like indicator */
+.new-like-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 16px;
+  height: 16px;
+  background: #ff4757;
+  border-radius: 50%;
+  animation: newLikePulse 1s ease;
+}
+
+@keyframes newLikePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+}
+
+/* Double tap hint */
+.double-tap-hint {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.comment-like-btn:hover .double-tap-hint {
+  opacity: 1;
+}
+
+/* Heart particles */
+.heart-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100px;
+  height: 100px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.heart-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #ff4757;
+  border-radius: 50%;
+  opacity: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comment-footer {
+    gap: 12px;
+  }
+  
+  .comment-like-btn {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .double-tap-hint {
+    font-size: 10px;
+    padding: 3px 6px;
+    top: -25px;
+  }
+  
+  .comment-show-replies-btn {
+    padding: 5px 12px;
+    font-size: 0.85em;
+  }
+}
+/* RÉINITIALISATION COMPLÈTE POUR REPLY */
+.comment-reply-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  /* DÉSACTIVE TOUS LES EFFETS PAR DÉFAUT */
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none;
+  
+  /* Isolement CSS3 */
+  isolation: isolate;
+  contain: content;
+}
+
+/* Réapplique un style contrôlé POUR L'ACCESSIBILITÉ SEULEMENT */
+.comment-reply-btn:focus-visible {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
+  /* MAIS contenu dans le bouton */
+  position: relative;
+  z-index: 1000;
+}
+
+/* Désactive COMPLÈTEMENT pour les autres états */
+.comment-reply-btn:focus,
+.comment-reply-btn:active,
+.comment-reply-btn:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: inherit !important;
+}
+
+/* Style normal pour hover */
+.comment-reply-btn:hover {
+  background-color: #f3f4f6;
+}
+
+/* Style pour active (click) */
+.comment-reply-btn:active {
+  background-color: #e5e7eb;
+  transform: scale(0.98);
+}

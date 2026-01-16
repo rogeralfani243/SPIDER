@@ -1,0 +1,900 @@
+/* src/styles/main_post/software-card-playstore.css */
+.software-card-playstore {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #e0e0e0;
+  position: relative;
+  overflow: hidden;
+}
+
+.software-card-playstore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* App Header */
+.app-header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+.app-icon-container {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+
+.app-icon {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.app-icon-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.featured-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ffa8a8 100%);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.app-basic-info {
+  flex: 1;
+}
+
+.app-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.app-title:hover {
+  color: #4285f4;
+}
+
+.app-developer {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 8px 0;
+}
+
+.app-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star-icon {
+  color: #FFC107;
+}
+
+.star-icon.filled {
+  fill: #FFC107;
+}
+
+.star-icon.half {
+  fill: url(#half-gradient);
+}
+
+.star-icon.empty {
+  fill: #E0E0E0;
+}
+
+.rating-text {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.rating-count {
+  color: #999;
+  margin-left: 4px;
+}
+
+/* App Meta Info */
+.app-meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+.app-category {
+  background: #e8f0fe;
+  color: #4285f4;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.app-updated,
+.app-size {
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+
+/* App Description */
+.app-description {
+  margin-bottom: 12px;
+}
+
+.description-text {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.4;
+  margin: 0 0 8px 0;
+}
+
+.read-more-btn {
+  background: none;
+  border: none;
+  color: #4285f4;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.read-more-btn:hover {
+  color: #3367d6;
+}
+
+/* App Features */
+.app-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.feature-tag {
+  background: #f8f9fa;
+  color: #5f6368;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border: 1px solid #dadce0;
+}
+
+/* Developer Info */
+.developer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.developer-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.developer-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.developer-avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.developer-details {
+  flex: 1;
+}
+
+.developer-name {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.developer-role {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Post Stats */
+.post-stats {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.stat-icon {
+  font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.app-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.install-btn {
+  background: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.3s;
+  min-width: 120px;
+}
+
+.install-btn:hover {
+  background: #3367d6;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #dadce0;
+  background: white;
+  color: #5f6368;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.action-btn:hover {
+  background: #f8f9fa;
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+.like-icon {
+  font-size: 16px;
+}
+
+/* Screenshots Preview */
+.screenshots-preview {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.screenshots-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.screenshots-header span {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.view-all-btn {
+  background: none;
+  border: none;
+  color: #4285f4;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.view-all-btn:hover {
+  text-decoration: underline;
+}
+
+.screenshots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.screenshot-item {
+  aspect-ratio: 16/9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.screenshot-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.screenshot-img:hover {
+  transform: scale(1.05);
+}
+
+/* In-App Purchases Warning */
+.in-app-warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #856404;
+}
+
+.warning-icon {
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .software-card-playstore {
+    padding: 12px;
+  }
+  
+  .app-header {
+    gap: 12px;
+  }
+  
+  .app-icon-container {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .app-title {
+    font-size: 1rem;
+  }
+  
+  .screenshots-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .app-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .install-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .post-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .screenshots-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .action-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+/* src/styles/main_post/software-category-playstore.css */
+.software-category-playstore {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* Play Store Header */
+.playstore-header {
+  background: white;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.store-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #4285f4;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.play-icon {
+  font-size: 1.2rem;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+}
+
+.user-points {
+  font-size: 0.85rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.header-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.header-btn:hover {
+  background: #f8f9fa;
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+/* Search Container */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  color: #999;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 24px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.3s;
+  background: #f8f9fa;
+}
+
+.search-input:focus {
+  border-color: #4285f4;
+  background: white;
+}
+
+.clear-search {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.clear-search:hover {
+  color: #666;
+}
+
+/* Category Tabs */
+.category-tabs {
+  display: flex;
+  overflow-x: auto;
+  padding: 16px 20px;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  gap: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex-shrink: 0;
+  background: #f8f9fa;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.tab.active {
+  background: #4285f4;
+  color: white;
+}
+
+.tab:hover:not(.active) {
+  background: #e9ecef;
+}
+
+/* Quick Categories */
+.quick-categories {
+  background: white;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.categories-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.categories-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  flex-shrink: 0;
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 80px;
+}
+
+.category-btn.active {
+  background: #4285f4;
+  border-color: #4285f4;
+  color: white;
+}
+
+.category-btn:hover:not(.active) {
+  border-color: #4285f4;
+}
+
+.category-icon {
+  font-size: 1.5rem;
+}
+
+.category-btn span:last-child {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Sorting Section */
+.sorting-section {
+  background: white;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.sort-btn {
+  background: #f8f9fa;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.sort-btn.active {
+  background: #4285f4;
+  border-color: #4285f4;
+  color: white;
+}
+
+.sort-btn:hover:not(.active) {
+  border-color: #4285f4;
+}
+
+.new-icon {
+  font-size: 0.9rem;
+}
+
+/* Apps Section */
+.apps-section {
+  padding: 20px;
+  display: grid;
+  justify-content: center;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.apps-count {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.apps-grid {
+  display: grid;
+gap: 20px;
+  width: 100%;
+}
+
+/* No Results */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.no-results h3 {
+  font-size: 1.2rem;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.no-results p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Loading State */
+.playstore-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  gap: 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #4285f4;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.playstore-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .software-category-playstore{
+    width: 100%;
+  }
+  .playstore-header {
+    padding: 12px 16px;
+    width: 100%;
+  }
+  .category-tabs{
+    display: flex;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+  .store-title {
+    font-size: 1.3rem;
+  }
+  
+  .category-tabs {
+    padding: 12px 16px;
+  }
+  
+  .tab {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .quick-categories {
+    padding: 12px 16px;
+  }
+  
+  .category-btn {
+    min-width: 70px;
+    padding: 10px 12px;
+  }
+  
+  .sorting-section,
+  .apps-section {
+    padding: 0px;
+  }
+  
+  .apps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-left {
+    gap: 12px;
+  }
+  
+  .store-title {
+    font-size: 1.1rem;
+  }
+  
+  .user-points {
+    display: none;
+  }
+  
+  .search-input {
+    padding: 10px 16px 10px 44px;
+    font-size: 0.9rem;
+  }
+  
+  .app-title {
+    font-size: 0.95rem;
+  }
+}

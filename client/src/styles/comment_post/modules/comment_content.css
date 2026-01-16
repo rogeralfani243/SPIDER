@@ -1,0 +1,522 @@
+/* CommentContent.css - Styles pour le contenu du commentaire */
+
+/* Conteneur principal du contenu */
+.comment-content {
+  margin-bottom: 12px;
+  line-height: 1.5;
+  color: #1f2937;
+  word-break: break-word;
+  white-space: pre-wrap;
+  position: relative;
+}
+
+/* Positionnement du texte */
+.comment-text {
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Texte aligné à droite (pour RTL) */
+.comment-content.rtl .comment-text {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Texte centré */
+.comment-content.centered .comment-text {
+  text-align: center;
+}
+
+/* Texte justifié */
+.comment-content.justified .comment-text {
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+/* Espacement des lignes */
+.comment-content.line-spacing-small {
+  line-height: 1.4;
+}
+
+.comment-content.line-spacing-medium {
+  line-height: 1.6;
+}
+
+.comment-content.line-spacing-large {
+  line-height: 1.8;
+}
+
+/* Indentation */
+.comment-content.indented {
+  margin-left: 20px;
+  padding-left: 10px;
+  border-left: 3px solid #e5e7eb;
+}
+
+.comment-content.indented-large {
+  margin-left: 40px;
+  padding-left: 15px;
+  border-left: 4px solid #3b82f6;
+}
+
+/* Conteneur pour le texte et les médias */
+.content-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Conteneur avec texte à côté du média */
+.content-with-side-media {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.content-with-side-media .comment-text {
+  flex: 1;
+  min-width: 0; /* Empêche le dépassement */
+}
+
+.content-with-side-media .comment-media {
+  flex-shrink: 0;
+  margin-top: 0;
+}
+
+/* Média sur le côté droit */
+.content-with-side-media.right {
+  flex-direction: row;
+}
+
+/* Média sur le côté gauche */
+.content-with-side-media.left {
+  flex-direction: row-reverse;
+}
+
+/* Média au-dessus du texte */
+.content-with-side-media.top {
+  flex-direction: column;
+}
+
+/* Média en dessous du texte */
+.content-with-side-media.bottom {
+  flex-direction: column-reverse;
+}
+
+/* Conteneur pour les mentions */
+.mentions-container {
+  display: inline;
+  position: relative;
+}
+
+/* Liens de mention avec positionnement */
+.comment-mention-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 2px 4px;
+  border-radius: 4px;
+  background-color: rgba(59, 130, 246, 0.1);
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  vertical-align: baseline;
+  line-height: 1;
+  margin: 0 1px;
+}
+
+.comment-mention-link:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+.comment-mention-link:active {
+  transform: translateY(0);
+}
+
+.mention-icon {
+  font-size: 0.8em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Position des badges de mention */
+.mention-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Conteneur des médias */
+.comment-media {
+  margin-top: 12px;
+  position: relative;
+}
+
+/* Grille pour multiples médias */
+.media-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.media-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.media-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.media-grid-4 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Image avec positionnement */
+.comment-image {
+  max-width: 300px;
+  max-height: 200px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  object-fit: cover;
+  display: block;
+}
+
+/* Image alignée à gauche */
+.comment-image.left {
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 8px;
+  clear: left;
+}
+
+/* Image alignée à droite */
+.comment-image.right {
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 8px;
+  clear: right;
+}
+
+/* Image centrée */
+.comment-image.center {
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+.comment-image:hover {
+  transform: scale(1.02);
+}
+
+/* audio avec positionnement */
+.comment-audio {
+  width: fit-content;
+  border-radius: 6px;
+  background: #000;
+  display: block;
+  height: 300px;
+}
+
+.comment-audio.left {
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 8px;
+}
+
+.comment-audio.right {
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 8px;
+}
+
+.comment-audio.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Vidéo avec positionnement */
+.comment-video {
+  width: fit-content;
+  border-radius: 6px;
+  background: #00000000;
+  display: block;
+  height: 300px;
+  max-height: fit-content;
+}
+
+.comment-video.left {
+  float: left;
+  margin-right: 16px;
+  margin-bottom: 8px;
+}
+
+.comment-video.right {
+  float: right;
+  margin-left: 16px;
+  margin-bottom: 8px;
+}
+
+.comment-video.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Fichier joint avec positionnement */
+.comment-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+.comment-file:hover {
+  background-color: #e5e7eb;
+  text-decoration: none;
+}
+
+/* Fichier aligné */
+.comment-file.left {
+  align-self: flex-start;
+}
+
+.comment-file.right {
+  align-self: flex-end;
+}
+
+.comment-file.center {
+  align-self: center;
+}
+
+/* Badge pour nouveau contenu */
+.new-content-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #10b981;
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  z-index: 1;
+}
+
+/* Indicateur d'édition */
+.edit-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Clearfix pour les éléments flottants */
+.comment-content::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* Conteneur pour les citations */
+.quote-container {
+  border-left: 3px solid #d1d5db;
+  padding-left: 12px;
+  margin: 8px 0;
+  background-color: #f9fafb;
+  border-radius: 0 4px 4px 0;
+}
+
+.quote-container .comment-text {
+  font-style: italic;
+  color: #4b5563;
+}
+
+/* Code block */
+.code-container {
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+/* Liste */
+.comment-list {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.comment-list li {
+  margin: 4px 0;
+}
+
+/* Zone de texte avec fond coloré */
+.highlighted-text {
+  background: linear-gradient(120deg, rgba(254, 240, 138, 0.3) 0%, rgba(254, 240, 138, 0) 100%);
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .comment-content {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  
+  .content-with-side-media {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .content-with-side-media.right,
+  .content-with-side-media.left {
+    flex-direction: column;
+  }
+  
+  .comment-image,
+  .comment-video {
+    max-width: 100%;
+    float: none;
+    margin: 8px 0;
+  }
+  
+  .comment-image.left,
+  .comment-image.right,
+  .comment-video.left,
+  .comment-video.right {
+    float: none;
+    margin: 8px 0;
+  }
+  
+  .media-grid-2,
+  .media-grid-3,
+  .media-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .comment-content.indented,
+  .comment-content.indented-large {
+    margin-left: 10px;
+    padding-left: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .comment-media {
+    margin-top: 10px;
+  }
+  
+  .comment-file {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  
+  .mention-badge {
+    top: -6px;
+    right: -6px;
+    width: 14px;
+    height: 14px;
+    font-size: 9px;
+  }
+}
+
+/* Pour les écrans larges */
+@media (min-width: 1200px) {
+  .comment-content {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  
+  .content-with-side-media .comment-media {
+    max-width: 400px;
+  }
+}
+
+/* Animation pour l'apparition du contenu */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.comment-content {
+  animation: contentFadeIn 0.3s ease;
+}
+
+/* Classes utilitaires pour le positionnement */
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-justify { text-align: justify; }
+
+.float-left { float: left; }
+.float-right { float: right; }
+.float-none { float: none; }
+
+.clear-left { clear: left; }
+.clear-right { clear: right; }
+.clear-both { clear: both; }
+
+.margin-auto { margin: auto; }
+.margin-left-auto { margin-left: auto; }
+.margin-right-auto { margin-right: auto; }
+
+.align-start { align-self: flex-start; }
+.align-center { align-self: center; }
+.align-end { align-self: flex-end; }
+
+.flex-row { display: flex; flex-direction: row; }
+.flex-column { display: flex; flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.flex-1 { flex: 1; }
+.flex-auto { flex: auto; }
+.flex-none { flex: none; }
+
+.gap-small { gap: 8px; }
+.gap-medium { gap: 12px; }
+.gap-large { gap: 16px; }
+
+/* Espacement */
+.padding-small { padding: 8px; }
+.padding-medium { padding: 12px; }
+.padding-large { padding: 16px; }
+
+.margin-small { margin: 8px; }
+.margin-medium { margin: 12px; }
+.margin-large { margin: 16px; }

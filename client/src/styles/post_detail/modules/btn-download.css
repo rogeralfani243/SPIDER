@@ -1,0 +1,87 @@
+/* styles/post_detail/post_detail.css */
+
+/* Styles pour le bouton de téléchargement dans PostDetail */
+.download-button-post-section {
+  margin: 20px 0;
+  display: grid;
+  flex:1;
+    float: right;
+  width: 200px;
+  position: absolute;
+    justify-content: center;
+  margin-top: 3em;
+  z-index: 100;
+}
+.container-download-btn-post-detail{
+  display: flex;
+  justify-content: flex-end;
+}
+.post-menu-toggles {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: 90%;
+}
+.comment-options-toggles{
+  float: right;
+}
+.post-menu-toggles:hover {
+  background-color: #f8f9fa;
+  color: #495057;
+  transform: scale(1.1);
+}
+
+.download-btn-post-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--primary-color-bar);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  width: 175px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.download-btn-post-detail:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: var(--secondary-color-bar);;
+}
+
+.download-btn-post-detail:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.download-btn-post-detail:disabled {
+  display: none;}
+
+.download-btn-post-detail svg {
+  transition: transform 0.3s ease;
+}
+
+.download-btn-post-detail:hover:not(:disabled) svg {
+  transform: translateY(-1px);
+}
+
+.file-count-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}

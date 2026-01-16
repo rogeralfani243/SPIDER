@@ -1,0 +1,138 @@
+/* MediaPlayers.css */
+.audio-player {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #e1e5e9;
+}
+
+.audio-controls2 {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.audio-form {
+  min-width: 850px;
+
+}
+.audio-form-container2 {
+  box-shadow: none;
+  background-color: red;
+}
+.play-pause-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.play-pause-btn:hover {
+  background: #0056b3;
+}
+
+.audio-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e1e5e9;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress {
+  height: 100%;
+  background: #007bff;
+  border-radius: 3px;
+  transition: width 0.1s;
+}
+
+.time-display {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.volume-icon {
+  color: #666;
+  padding: 0.5rem;
+}
+
+.video-player {
+  width: 100%;
+  height: fit-content;
+}
+
+.video-element {
+  width: 100%;
+   min-height: 600px;
+  border-radius: 8px;
+}
+
+.media-container {
+  width: 100%;
+}
+
+.media-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e1e5e9;
+  transition: all 0.2s;
+}
+
+
+
+.file-link {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.file-link:hover {
+  text-decoration: underline;
+}
+@media(max-Width:768px){
+  .audio-form {
+    min-width: 100%;
+  
+  }
+}
+@media(max-Width:368px){
+  .audio-form {
+    min-width: 100%;
+  
+  }
+}

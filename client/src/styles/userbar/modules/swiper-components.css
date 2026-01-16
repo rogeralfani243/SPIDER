@@ -1,0 +1,146 @@
+
+
+/* Slide active */
+.swiper-slide-active .post-card-3d-2{
+  transform: scale(1); /* PAS PLUS, sinon ça coupe */
+  opacity: 1;
+}
+
+/* Slide adjacentes (prev/next) */
+.swiper-slide-prev .post-slide,
+.swiper-slide-next .post-slide {
+  transform: scale(0.92);
+  opacity: 0.8;
+}
+
+/* Arrière-plan, container, etc. */
+.posts-swiper-container  {
+  overflow: visible !important;
+  padding: 20px 0;
+    width: 100%;
+  background-color: rgb(253, 251, 251);
+  margin-bottom: 60px;
+  padding: 0 20px;
+
+}
+
+/* Main layout components */
+.profile-posts-section {
+  padding: 20px 0;
+  background-color: rgb(253, 251, 251);
+  color: var(--spider-text);
+  display: grid;
+  justify-content: center;
+  width: 100%;
+  place-items: center;
+  margin-top: 5em;
+}
+.swiper{
+  min-width:  1000px;
+  height: 600px;
+  padding: 80px 50px;
+}
+.swiper  .slide{
+    width: 1000px;
+  }
+  /* Dans votre fichier CSS */
+.custom-pagination .swiper-pagination-bullet {
+  background-color: #4ECDC4;
+}
+
+.custom-pagination .swiper-pagination-bullet-active {
+  background-color: #FF6B6B;
+}
+@media (max-width:1295px){
+ .swiper {
+  max-width:1050px ;
+  min-width:  600px;
+  }
+  .post-card-3d-2{
+    width: 100%;
+  }
+}
+@media (max-width:1105px){
+ .swiper {
+  max-width:1000px ;
+  min-width:  600px;
+  }
+  .post-card-3d-2{
+    width: 100%;
+  }
+}
+@media (max-width:945px){
+ .swiper {
+  width:600px;
+  min-width:  200px;
+  }
+ .post-card-3d-2{
+    width: 100%;
+  }
+}
+@media (max-width:745px){
+ .swiper {
+  width:370px;
+  min-width:  200px;
+  }
+ .post-card-3d-2{
+    width: 100%;
+  }
+}
+
+@media (max-width:395px){
+ .swiper {
+  width: 350px;
+  min-width:  200px;
+  }
+ .post-card-3d-2{
+    width: 100%;
+  }
+}
+@media (max-width:265px){
+ .swiper {
+  width: 250px;
+  min-width:  200px;
+  }
+ .post-card-3d-2{
+    width: 100%;
+  }
+}
+
+
+/* On supprime scale/opacity directement sur .swiper-slide */
+.swiper-slide {
+  width: 320px !important;
+  height: 400px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* On applique les effets UNIQUEMENT sur la carte 3D */
+.profile-card-3d {
+  width: 100%;
+  height: 100%;
+  transition: all 0.5s ease;
+  transform: scale(0.85);
+  opacity: 0.5;
+}
+
+/* Slide active */
+.swiper-slide-active .profile-card-3d {
+  transform: scale(1); /* PAS PLUS, sinon ça coupe */
+  opacity: 1;
+}
+
+/* Slide adjacentes (prev/next) */
+.swiper-slide-prev .profile-card-3d,
+.swiper-slide-next .profile-card-3d {
+  transform: scale(0.92);
+  opacity: 0.8;
+}
+
+/* Arrière-plan, container, etc. */
+.swiper-container {
+  overflow: visible !important;
+  padding: 20px 0;
+}

@@ -1,0 +1,298 @@
+/* Responsive Design */
+@media (max-width: 768px) {
+  .post-detail-container {
+    padding: 0;
+    padding-top: 4em;
+  }
+  
+  .post-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    padding: 15px 0;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .media-thumbnails {
+    gap: 5px;
+    padding: 8px;
+  }
+  
+  .thumbnail-container {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .media-display {
+    min-height: 300px;
+    padding: 15px;
+  }
+  
+  .post-title-content {
+    font-size: 20px;
+  }
+  
+  .post-text {
+    font-size: 14px;
+  }
+  
+  .back-button {
+    position: relative;
+    top: auto;
+    margin-bottom: 15px;
+  }
+  
+  .share-menu {
+    padding: 20px;
+    margin: 20px;
+  }
+  
+  .ratings-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .post-detail-container {
+    padding: 0;
+    padding-top: 5em;
+  }
+  
+  .post-content {
+    padding: 16px;
+  }
+  
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .media-display {
+    min-height: 250px;
+  }
+  
+  .thumbnail-container {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .media-display {
+    min-height: 250px;
+  }
+  
+  .main-media-image {
+    max-height: 400px;
+  }
+  
+  .main-media-video {
+    height: 450px;
+  }
+  
+  .thumbnail-item {
+    width: 70px;
+    height: 52px;
+  }
+  
+  .fullscreen-header {
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .file-details h3 {
+    font-size: 1rem;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .control-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  
+  .nav-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+  }
+  
+  .nav-btn.prev-btn {
+    left: 1rem;
+  }
+  
+  .nav-btn.next-btn {
+    right: 1rem;
+  }
+  
+  .fullscreen-thumbnails {
+    padding: 0.8rem 1rem;
+    min-height: 80px;
+  }
+  
+  .fullscreen-thumbnail {
+    width: 70px;
+    height: 52px;
+  }
+  
+  .video-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .control-left, .control-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .audio-player {
+    padding: 1.5rem;
+  }
+  
+  .audio-cover {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .audio-icon {
+    font-size: 3rem;
+  }
+  
+  /* WhatsApp responsive */
+  .whatsapp-audio-player {
+    padding: 15px;
+  }
+  
+  .whatsapp-controls {
+    gap: 15px;
+  }
+  
+  .whatsapp-secondary-controls {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .whatsapp-volume-control,
+  .whatsapp-speed-control {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Audiomack responsive */
+  .audiomack-player {
+    padding: 1rem;
+  }
+  
+  .audio-cover {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .audio-cover-icon {
+    font-size: 2rem;
+  }
+  
+  .audio-title {
+    font-size: 1.4rem;
+  }
+  
+  .waveform-container {
+    height: 100px;
+  }
+  
+  .vertical-volume-control {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .vertical-volume-slider {
+    height: 120px;
+  }
+  
+  .audio-controls-panel {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .audio-secondary-controls {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .media-display {
+    min-height: 200px;
+  }
+
+.main-media-image {
+    max-height: 300px;
+  }
+  
+  .main-media-video {
+    height: 450px;
+  }
+  
+  .thumbnail-item {
+    width: 60px;
+    height: 45px;
+  }
+  
+  .fullscreen-controls {
+    gap: 4px;
+  }
+  
+  .control-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  .fullscreen-container{
+    width:100%;
+    padding: 0;
+    margin: 0;
+  }
+    .fullscreen-content{
+    width:100%;
+    padding: 0;
+  }
+  .nav-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.3rem;
+  }
+  .fullscreen-audio-container{
+    padding: 0;
+    width: auto;
+  }
+  
+  .fullscreen-thumbnail {
+    width: 60px;
+    height: 45px;
+  }
+  .main-media-audio{
+    width: 200px;
+    overflow: hidden;
+  }
+  .audio-preview{
+    padding: 0;
+    width: 100%;
+  }
+  
+}

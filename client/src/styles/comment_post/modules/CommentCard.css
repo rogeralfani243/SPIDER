@@ -1,0 +1,92 @@
+/* CommentCard.css */
+.comment {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.comment:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.comment.pinned {
+  border-left: 4px solid #3b82f6;
+  background-color: #f8fafc;
+}
+
+.comment.hidden {
+  opacity: 0.6;
+  background-color: #f3f4f6;
+}
+
+.comment.editing {
+  background-color: #f8f9fa;
+  border: 1px dashed #dee2e6;
+}
+
+/* Badges spéciaux */
+.comment-special-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  margin-bottom: 8px;
+  margin-right: 8px;
+}
+
+.first-comment {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+}
+
+.trending-comment {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+  color: white;
+}
+
+.pinned-comment {
+  background: linear-gradient(135deg, #36D1DC, #5B86E5);
+  color: white;
+}
+
+/* Style pour les commentaires épinglés */
+.comment.pinned {
+  background: #f8fdff;
+  border: 1px solid #d1ecff;
+  border-left: 4px solid #36D1DC;
+}
+
+/* Style pour les commentaires avec beaucoup de likes (trending) */
+.comment.high-engagement {
+  background: #fff9f9;
+  border: 1px solid #ffebee;
+}
+
+/* First comment highlight */
+.first-highlight {
+  background: linear-gradient(to right, #fffaf0, #fff5e6);
+}
+
+/* Trending comment highlight */
+.trending-highlight {
+  background: linear-gradient(to right, #fff5f5, #ffe6e6);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .comment {
+    padding: 12px;
+  }
+  
+  .comment-special-badge {
+    font-size: 0.7em;
+    padding: 3px 8px;
+  }
+}

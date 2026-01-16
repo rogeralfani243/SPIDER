@@ -1,0 +1,353 @@
+/* Style Facebook pour les médias */
+.facebook-media-container {
+  margin-top: 10px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  width: 100%;
+}
+
+
+.facebook-media-container.single-media .media-item {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+
+}
+
+.facebook-media-container.two-media .media-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  height: 100%;
+}
+
+.facebook-media-container.two-media .media-item {
+  height: 100%;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.facebook-media-container.multiple-media .media-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  height: 400px;
+}
+
+.facebook-media-container.multiple-media .media-item.main-item {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.facebook-media-container.multiple-media .media-item.secondary-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+
+}
+
+.facebook-media-container.multiple-media .media-item.top-right {
+  grid-column: 2;
+  grid-row: 1;
+  
+}
+
+.facebook-media-container.multiple-media .media-item.bottom-right {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  
+}
+
+/* Badge avec icône */
+.file-type-icon-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
+}
+
+.media-item.main-item .file-type-icon-badge {
+  width: 48px;
+  height: 48px;
+}
+
+.media-item.main-item .file-type-icon-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Overlay pour le compteur */
+.more-media-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.more-media-overlay:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.overlay-content {
+  text-align: center;
+}
+
+.overlay-content .count {
+  font-size: 32px;
+  font-weight: bold;
+  display: block;
+  line-height: 1;
+}
+
+.overlay-content .text {
+  font-size: 14px;
+  display: block;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+/* Footer */
+.facebook-media-footer {
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #e4e6eb;
+  text-align: center;
+}
+
+.view-all-media-btn {
+  background: #f0f2f5;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  color: #050505;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.view-all-media-btn:hover {
+  background: #e4e6eb;
+}
+
+.view-all-media-btn svg {
+  color: #65676b;
+}
+
+/* Style mobile */
+.mobile-media-preview {
+  margin-top: 10px;
+}
+
+.mobile-media-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  height: 200px;
+}
+
+.mobile-media-item {
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.mobile-media-item.main-item {
+  grid-column: 1;
+}
+
+.mobile-media-item.secondary-item {
+  grid-column: 2;
+  position: relative;
+}
+
+.mobile-file-icon {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: 2px solid white;
+}
+
+.mobile-more-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.mobile-count {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.mobile-view-more-btn {
+  width: 100%;
+  background: #f0f2f5;
+  border: none;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 8px;
+  color: #050505;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+/* Media full display sur mobile */
+.mobile-full-media {
+  margin-top: 10px;
+  border: 1px solid #e4e6eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+}
+
+.mobile-media-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.mobile-media-header h4 {
+  margin: 0;
+  color: #050505;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.mobile-collapse-btn {
+  background: #f0f2f5;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #65676b;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.mobile-media-grid-full {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.mobile-media-grid-full .file-thumbnail {
+  height: 150px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Icônes dans les miniatures */
+.file-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.file-icon-container svg {
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+/* Ajustements pour FileRenderer */
+.media-item .file-renderer {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-item .file-renderer img,
+.media-item .file-renderer video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Effets au survol */
+.media-item:hover,
+.file-thumbnail:hover,
+.mobile-media-item:hover {
+  opacity: 0.95;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .facebook-media-container.multiple-media .media-grid {
+    height: 300px;
+  }
+  
+  .facebook-media-container.two-media .media-grid {
+    height: 200px;
+  }
+  
+  .file-type-icon-badge {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .media-item.main-item .file-type-icon-badge {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .media-item.main-item .file-type-icon-badge svg {
+    width: 24px;
+    height: 24px;
+  }
+}

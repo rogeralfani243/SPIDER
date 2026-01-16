@@ -1,0 +1,31 @@
+/* Header */
+.profile-header {z-index: 100;
+    position: fixed;
+    margin-top: 30em;
+  margin-bottom: 30px;
+}
+
+.profile-dashboard .dashboard-main{
+  top: 0;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+}
+.post-content{
+    word-break: break-all;
+    overflow: hidden;
+}
+.back-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.3s ease;
+}
+
+.back-button:hover {
+  background: #5a6268;
+}

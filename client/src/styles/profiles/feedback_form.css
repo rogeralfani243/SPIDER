@@ -1,0 +1,463 @@
+@import '../modules_colors/var.css';
+
+/* Section d'ajout de feedback */
+.add-feedback-section {
+  margin: 30px 0 40px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.add-feedback-section:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Bouton pour ouvrir le formulaire */
+.add-feedback-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background:var(--secondary-color-bar);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-feedback-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
+}
+
+.add-feedback-btn:hover::before {
+  left: 100%;
+}
+
+.add-feedback-btn:hover {
+  background: var(--primary-color-bar);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(235, 100, 37, 0.3);
+}
+
+.add-feedback-btn:active {
+  transform: translateY(0);
+}
+
+/* Conteneur du formulaire */
+.feedback-form-container {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Header du formulaire */
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-header h4 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  background: var(--primary-color-bar);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Bouton de fermeture */
+.close-form-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.close-form-btn:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.close-form-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Formulaire */
+.feedback-form {
+  padding: 24px;
+}
+
+/* Groupes de formulaire */
+.form-group {
+  margin-bottom: 28px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Instructions pour le rating */
+.rating-instruction {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 12px;
+  font-style: italic;
+}
+
+/* Stars interactives */
+.interactive-stars {
+  margin: 10px 0;
+}
+
+/* Compteur de caractères */
+.char-count {
+  float: right;
+  font-size: 13px;
+  font-weight: normal;
+  color: #6b7280;
+  margin-left: 10px;
+}
+
+/* Textarea */
+.feedback-form textarea {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: inherit;
+  line-height: 1.5;
+  color: #374151;
+  background: white;
+  resize: vertical;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  min-height: 120px;
+}
+
+.feedback-form textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #f8fafc;
+}
+
+.feedback-form textarea:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.feedback-form textarea::placeholder {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.feedback-form textarea.invalid {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.feedback-form textarea.invalid:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Aide pour le commentaire */
+.comment-help {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.validation-message {
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 20px;
+}
+
+.suggestion {
+  font-size: 13px;
+  color: #8b5cf6;
+  background: #f5f3ff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-style: italic;
+}
+
+/* Messages d'erreur */
+.error-message {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  color: #dc2626;
+  font-size: 14px;
+  font-weight: 500;
+  animation: shake 0.5s ease;
+}
+
+/* Actions du formulaire */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Bouton Annuler */
+.cancel-btn {
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Bouton Soumettre */
+.submit-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: 1px solid #059669;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.submit-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-btn:disabled {
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  border-color: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Spinner pour le chargement */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-feedback-section {
+    margin: 20px 0 30px;
+    padding: 16px;
+  }
+  
+  .feedback-form-container {
+    margin: 0 -16px;
+    border-radius: 12px;
+  }
+  
+  .form-header {
+    padding: 16px 20px;
+  }
+  
+  .form-header h4 {
+    font-size: 18px;
+  }
+  
+  .feedback-form {
+    padding: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 22px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+  }
+  
+  .form-actions button {
+    width: 100%;
+  }
+  
+  .feedback-form textarea {
+    padding: 14px;
+    font-size: 14px;
+    min-height: 100px;
+  }
+  
+  .comment-help {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-feedback-btn {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+  
+  .feedback-form {
+    padding: 16px;
+  }
+  
+  .form-header {
+    padding: 14px 16px;
+  }
+  
+  .form-header h4 {
+    font-size: 16px;
+  }
+  
+  .close-form-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Effet de pulse pour le bouton */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.add-feedback-btn:focus {
+  animation: pulse 0.6s ease;
+}

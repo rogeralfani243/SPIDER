@@ -1,0 +1,48 @@
+/* avatar-rating.css */
+
+
+
+/* Rating Styles */
+.profile-rating-3d {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stars-container-3d {
+  display: flex;
+  gap: 2px;
+}
+
+.star-3d {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.star-3d.full {
+  color: var(--gold);
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+.star-3d.half {
+  color: var(--gold);
+  opacity: 0.7;
+}
+
+.star-3d.empty {
+  color: #666;
+}
+
+.rating-value-3d {
+  font-size: 0.9rem;
+  color: var(--spider-subtext);
+  font-weight: 600;
+}
+
+.feedback-count-3d {
+  font-size: 0.85rem;
+  color: var(--spider-subtext);
+  margin: 0 0 15px 0;
+}

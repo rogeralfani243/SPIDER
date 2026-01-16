@@ -1,0 +1,12 @@
+/* src/index.css */
+@import './modules/msg.css';
+@import './modules/animations.css';
+@import './modules/typography.css';
+
+.message-container:hover .message-arrow {
+  opacity: 1 !important;
+}
+
+.message-arrow {
+  transition: opacity 0.2s ease-in-out;
+}

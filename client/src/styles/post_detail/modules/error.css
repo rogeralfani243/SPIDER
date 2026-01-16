@@ -1,0 +1,11 @@
+/* Main Container Layout */
+.post-detail-container {
+  padding-top: 5em;
+  max-width: 800px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.post-detail-wrapper {
+  background: #f8f9fa;
+}

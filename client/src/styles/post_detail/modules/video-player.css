@@ -1,0 +1,666 @@
+/* whatsapp-video-player.css */
+
+.whatsapp-video-player {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  background: #000;
+  border-radius: 8px;
+  user-select: none;
+  display: flex;
+  align-items: auto;
+  align-content: center;
+  justify-content: center;
+    height: 100%;
+}
+
+
+.whatsapp-video-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 90.25%; /* 16:9 Aspect Ratio */
+
+}
+
+.video-wrapper {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.whatsapp-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-height: 800px;
+  background: #000;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.overlay-play-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.overlay-play-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Top controls */
+.video-controls-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.video-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.video-title {
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-time {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.control-btn:hover {
+  background: var(--primary-color-bar);
+  transform: scale(1.1);
+  color: red;
+}
+
+/* Middle controls */
+.video-controls-middle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.video-controls-middle.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.video-big-play-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  pointer-events: all;
+}
+
+.video-big-play-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Bottom controls */
+.video-controls-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px;
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.video-controls-bottom.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+/* WhatsApp waveform pour vidéo */
+.whatsapp-waveform-container {
+  width: 100%;
+  padding: 10px 0 15px;
+  margin-bottom: 15px;
+}
+
+.whatsapp-waveform {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+
+  cursor: pointer;
+  padding: 0 10px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.whatsapp-waveform-bar {
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.whatsapp-waveform-bar.played {
+  background: var(--primary-color-bar) !important;
+}
+
+.whatsapp-waveform-bar.pulse {
+  animation: waveformPulse 1s infinite;
+}
+
+@keyframes waveformPulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Main controls */
+.video-main-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  transition: all 0.3s ease;
+}
+
+.video-controls-left,
+.video-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.play-pause-btn {
+  background: var(--secondary-color-bar);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+}
+
+.play-pause-btn:hover {
+  background: var(--primary-color-bar);
+  transform: scale(1.05);
+}
+
+/* Volume control */
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.volume-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  pointer-events: all;
+}
+
+.volume-btn:hover {
+  background: transparent;
+  color: red;
+}
+
+.volume-slider-container {
+  position: relative;
+  width: 24px;
+  height: 60px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.volume-control:hover .volume-slider-container {
+  opacity: 1;
+}
+
+.volume-slider-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.volume-slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--primary-color-bar);
+  border-radius: 2px;
+  transition: height 0.1s ease;
+}
+
+.volume-percentage {
+  color: white;
+  font-size: 11px;
+  min-width: 35px;
+  opacity: 0.8;
+}
+
+/* Speed control */
+.speed-control {
+  background: transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.speed-select {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.speed-select option {
+  background: #333;
+  color: white;
+}
+
+/* Repeat button */
+.repeat-btn2 {
+  background: rgba(255, 255, 255, 0.795);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display:grid;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+  opacity: 0.7;
+}
+
+.repeat-btn2.active {
+  background: var(--primary-color-bar);
+  opacity: 1;
+  color: white;
+}
+
+.repeat-btn2:hover {
+  opacity: 1;
+  background:var(--secondary-color-bar);
+}
+
+/* Animation pour l'apparition des contrôles */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.video-controls-top.visible,
+.video-controls-bottom.visible {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.video-controls-top.hidden,
+.video-controls-bottom.hidden {
+  animation: fadeOutDown 0.3s ease forwards;
+}
+
+.video-controls-middle.visible {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+.video-controls-middle.hidden {
+  animation: fadeOutDown 0.3s ease forwards;
+}
+
+/* Optimisation pour le touch */
+@media (hover: hover) {
+  .volume-slider-container {
+    opacity: 0;
+  }
+  
+  .volume-control:hover .volume-slider-container {
+    opacity: 1;
+  }
+}
+
+@media (hover: none) {
+  .volume-slider-container {
+    opacity: 1;
+  }
+  
+  .video-controls-top,
+  .video-controls-middle,
+  .video-controls-bottom {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Fullscreen styles */
+:fullscreen .whatsapp-video-player,
+:-webkit-full-screen .whatsapp-video-player,
+:-moz-full-screen .whatsapp-video-player {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+}
+:fullscreen .whatsapp-video-container{
+  padding-bottom: 56%;
+}
+:fullscreen .whatsapp-video-container,
+:-webkit-full-screen .whatsapp-video-container,
+:-moz-full-screen .whatsapp-video-container {
+  height: 100%;
+  padding-bottom: 0;
+
+}
+
+/* Mobile responsive - CHANGEMENTS PRINCIPAUX ICI */
+@media (max-width: 768px) {
+  .video-controls-top {
+    padding: 12px 16px;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.3));
+  }
+  
+  .video-controls-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.6));
+    padding: 15px 20px 25px;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    transform: translateY(0);
+    z-index: 1000;
+  }
+  
+  /* Ajuster le bouton play central pour mobile */
+  .video-controls-middle {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .video-big-play-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.25);
+    display: none;
+  }
+  
+  .video-title {
+    max-width: 150px;
+    font-size: 13px;
+  }
+  
+  .video-time {
+    font-size: 11px;
+  }
+  
+  .video-controls-left,
+  .video-controls-right {
+    gap: 12px;
+  }
+  
+  .play-pause-btn {
+    width: 42px;
+    height: 42px;
+    background: var(--primary-color-bar);
+  }
+  
+  .control-btn {
+    width: 34px;
+    height: 34px;
+  }
+    .fullscreen-btn{
+    display: none;
+  }
+  .whatsapp-waveform {
+    height: 45px;
+    padding: 0 8px;
+  }
+  
+  .whatsapp-waveform-bar {
+    width: 2.5px;
+    margin: 0 0.4px;
+  }
+  
+  .whatsapp-waveform-container {
+    padding: 8px 0 12px;
+    margin-bottom: 10px;
+  }
+  
+  /* Ajustement du volume control pour mobile */
+  .volume-control {
+    padding: 4px 8px;
+    border-radius: 16px;
+  }
+  
+  .volume-slider-container {
+    opacity: 1;
+    height: 50px;
+  }
+  
+  .volume-percentage {
+    font-size: 10px;
+    min-width: 30px;
+  }
+  
+  /* Cacher certains éléments sur mobile si nécessaire */
+  .speed-control,
+  .repeat-btn {
+    display: none; /* Optionnel : cacher pour simplifier l'interface mobile */
+  }
+    .control-btn {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.15); /* Plus visible sur mobile */
+    padding: 6px;
+  }
+/* Si l'enfant est petit */
+.whatsapp-video-player:has(video:not(:fullscreen)):has(video[height]) {
+  align-items: center;
+}
+}
+
+/* Pour les très petits écrans */
+@media (max-width: 368px) {
+  .whatsapp-video-player {
+  
+  display: inline-block;
+  
+   
+}
+  .video-controls-top {
+    padding: 10px 12px;
+  }
+  
+  .video-controls-bottom {
+    padding: 12px 15px 20px;
+  }
+  
+  .video-title {
+    max-width: 120px;
+    font-size: 12px;
+  }
+  
+  .video-time {
+    font-size: 10px;
+  }
+  
+  .video-controls-left,
+  .video-controls-right {
+    gap: 8px;
+  }
+  
+  .play-pause-btn {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .control-btn {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .whatsapp-waveform {
+    height: 40px;
+  }
+  
+  .whatsapp-waveform-bar {
+    width: 2px;
+    margin: 0 0.3px;
+  }
+  
+  .whatsapp-waveform-container {
+    padding: 6px 0 10px;
+    margin-bottom: 8px;
+  }
+  .fullscreen-btn{
+    display: none;
+  }
+  .video-big-play-btn {
+    
+    width: 50px;
+    height: 50px;
+  }
+  
+  .video-main-controls {
+    padding: 0 5px;
+  }
+}
+
+/* Règle spéciale pour les appareils tactiles - toujours montrer les contrôles en bas */
+@media (max-width: 768px) and (hover: none) {
+  .whatsapp-video-player {
+    touch-action: manipulation;
+  }
+  
+  .video-controls-bottom {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+  }
+  
+  .video-controls-bottom.hidden {
+    transform: translateY(0) !important;
+    opacity: 0.3 !important;
+  }
+  
+  /* Assurer que les contrôles sont visibles en mode paysage */
+  @media (orientation: landscape) {
+    .video-controls-bottom {
+      padding: 10px 15px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.7));
+    }
+    
+    .whatsapp-waveform-container {
+      display: none; /* Optionnel : cacher la waveform en mode paysage pour gagner de la place */
+    }
+  }
+}

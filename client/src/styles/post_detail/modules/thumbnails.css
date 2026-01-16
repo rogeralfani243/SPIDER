@@ -1,0 +1,93 @@
+/* Thumbnails */
+.media-thumbnails {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: auto;
+  background: var(--bg-primary, #ffffff);
+}
+
+.thumbnail-item {
+  flex: 0 0 auto;
+  width: 80px;
+  height: 60px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.thumbnail-item:hover {
+  border-color: var(--primary-color, #3b82f6);
+  transform: translateY(-2px);
+}
+
+.thumbnail-item.active {
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 1px var(--primary-color, #3b82f6);
+}
+
+.thumbnail-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-video {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+}
+
+.thumbnail-video-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.play-icon {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.file-thumbnail {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #e2e8f0);
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.file-thumbnail-icon {
+  font-size: 1.2rem;
+  margin-bottom: 2px;
+}
+
+.file-thumbnail-text {
+  font-size: 0.6rem;
+  font-weight: 600;
+}

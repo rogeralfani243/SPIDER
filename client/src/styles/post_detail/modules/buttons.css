@@ -1,0 +1,39 @@
+/* Button Styles */
+.back-button {
+  display: flex;
+  position: fixed;
+  justify-content: left;
+  align-items: center;
+  gap: 8px;
+  background: #303131;
+  color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  top: 800px;
+  transition: background-color 0.2s;
+  padding: 10px 16px;
+  z-index: 10;
+}
+
+.back-button:hover {
+  background: #404141;
+}
+
+.share-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.share-button:hover {
+  background: #0056b3;
+}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social App</title>
+    
+    <!-- FORCER la détection de langue différente -->
+    <meta http-equiv="Content-Language" content="en">
+    
+    <!-- Script Google Translate avec configuration avancée -->
+    <script type="text/javascript">
+        // Fonction pour forcer la traduction
+        function forceTranslation(lang) {
+            if (window.google && window.google.translate && window.google.translate.TranslateElement) {
+                var currentLang = document.documentElement.lang || 'en';
+                if (currentLang !== lang) {
+                    // Changer la langue via Google Translate
+                    var googleLang = getGoogleLangCode(lang);
+                    document.cookie = "googtrans=/en/" + googleLang + "; path=/; max-age=31536000";
+                    location.reload();
+                }
+            }
+        }
+        
+        function getGoogleLangCode(lang) {
+            var mapping = {
+                'en': 'en',
+                'fr': 'fr',
+                'es': 'es',
+                'de': 'de',
+                'it': 'it',
+                'pt': 'pt',
+                'ar': 'ar',
+                'zh': 'zh-CN',
+                'ja': 'ja',
+                'ru': 'ru',
+                'hi': 'hi',
+                'ko': 'ko'
+            };
+            return mapping[lang] || 'en';
+        }
+        
+        // Initialiser Google Translate
+        function initializeGoogleTranslate() {
+            if (window.google && window.google.translate) {
+                new google.translate.TranslateElement({
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,fr,es,de,it,pt,ar,zh-CN,ja,ru,hi,ko',
+                    layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                    autoDisplay: false,
+                    disableAutoTranslation: false,
+                    multilanguagePage: true
+                }, 'google_translate_element');
+                
+                // Masquer l'interface Google par défaut
+                setTimeout(function() {
+                    var banner = document.querySelector('.goog-te-banner-frame');
+                    if (banner) banner.style.display = 'none';
+                    
+                    var gadget = document.querySelector('.goog-te-gadget');
+                    if (gadget) gadget.style.display = 'none';
+                }, 1000);
+            }
+        }
+        
+        // Charger Google Translate
+        window.onload = function() {
+            if (!window.google || !window.google.translate) {
+                var script = document.createElement('script');
+                script.src = 'https://translate.google.com/translate_a/element.js?cb=initializeGoogleTranslate';
+                script.async = true;
+                document.head.appendChild(script);
+            } else {
+                initializeGoogleTranslate();
+            }
+            
+            // Vérifier et appliquer la langue sauvegardée
+            var savedLang = localStorage.getItem('appLanguage');
+            if (savedLang && savedLang !== 'en') {
+                setTimeout(function() {
+                    forceTranslation(savedLang);
+                }, 2000);
+            }
+        };
+    </script>
+    
+    <style>
+        /* Cacher complètement l'interface Google Translate */
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+        .goog-te-gadget {
+            display: none !important;
+        }
+        .goog-te-gadget-simple {
+            display: none !important;
+        }
+        .goog-te-menu-frame {
+            z-index: 999999 !important;
+            max-width: 100% !important;
+        }
+        body {
+            top: 0 !important;
+        }
+        /* Notre widget de langue */
+        #language-selector-widget {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="google_translate_element"></div>
+    
+    <script>
+        // Intercepter les changements de langue Google
+        setInterval(function() {
+            var iframe = document.querySelector('.goog-te-menu-frame');
+            if (iframe) {
+                try {
+                    var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    var select = iframeDoc.querySelector('.goog-te-combo');
+                    if (select) {
+                        select.addEventListener('change', function(e) {
+                            var lang = e.target.value;
+                            localStorage.setItem('googleTransLang', lang);
+                            
+                            // Mettre à jour notre état
+                            var event = new CustomEvent('languageChanged', { detail: { lang: lang } });
+                            window.dispatchEvent(event);
+                        });
+                    }
+                } catch (e) {
+                    // Cross-origin error, c'est normal
+                }
+            }
+        }, 1000);
+        
+        // Écouter nos propres événements de changement de langue
+        window.addEventListener('appLanguageChange', function(e) {
+            var lang = e.detail.lang;
+            forceTranslation(lang);
+        });
+    </script>
+</body>
+</html>

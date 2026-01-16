@@ -1,0 +1,372 @@
+/* src/components/posts/PostCard.css */
+
+.post-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+  animation-delay: calc(var(--animation-order) * 0.1s);
+}
+
+.post-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-light);
+}
+
+/* En-tête */
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.username {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  font-size: 16px;
+}
+
+.post-time {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Catégorie */
+.post-category {
+  padding: 0 20px;
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+.category-badge {
+  background: var(--primary-light);
+  color: var(--primary-color);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Corps du post */
+.post-body {
+  padding: 0 20px 20px;
+}
+
+.post-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+}
+
+.post-content {
+  margin-bottom: 20px;
+}
+
+.post-content p {
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 15px;
+}
+
+.btn-read-more {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.2s ease;
+}
+
+.btn-read-more:hover {
+  color: var(--primary-dark);
+}
+
+/* Lien */
+.post-link {
+  margin: 15px 0;
+}
+
+.link-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.link-preview:hover {
+  background: var(--border-color);
+  text-decoration: none;
+}
+
+.link-preview i {
+  color: var(--primary-color);
+  font-size: 14px;
+}
+
+.link-preview span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* Images */
+.post-media {
+  margin: 0;
+}
+
+.post-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Fichiers attachés */
+.post-attachments {
+  padding: 0 20px 20px;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.attachment-item i {
+  color: var(--primary-color);
+  font-size: 18px;
+}
+
+.attachment-item span {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.btn-download {
+  background: var(--primary-color);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  background: var(--primary-dark);
+  transform: scale(1.05);
+}
+
+/* Tags */
+.post-tags {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+/* Pied de post */
+.post-footer {
+  padding: 15px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.post-stats {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 15px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.stat-item i {
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+.stat-item span {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-item small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.post-actions {
+  display: flex;
+  gap: 1px;
+  background: var(--bg-secondary);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.btn-action {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+  background: var(--border-color);
+  color: var(--primary-color);
+}
+
+.btn-action i {
+  font-size: 16px;
+}
+
+/* Actions dropdown */
+.post-actions-dropdown {
+  position: relative;
+}
+
+.btn-more {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-more:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .post-header,
+  .post-body,
+  .post-attachments,
+  .post-tags,
+  .post-footer {
+    padding: 15px;
+  }
+  
+  .post-title {
+    font-size: 18px;
+  }
+  
+  .post-actions {
+    flex-direction: column;
+  }
+  
+  .btn-action {
+    justify-content: flex-start;
+    padding: 10px 15px;
+  }
+}

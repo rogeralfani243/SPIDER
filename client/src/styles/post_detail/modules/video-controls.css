@@ -1,0 +1,262 @@
+/* whatsapp-video-controls.css */
+
+/* All control elements and UI components for the video player */
+
+/* Top controls bar */
+.video-controls-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Video title and time information */
+.video-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.video-title {
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.video-time {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* General control button hover effect */
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Middle controls (big play button) */
+.video-controls-middle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+}
+
+.video-controls-middle.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Large play button in the center */
+.video-big-play-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  pointer-events: all;
+}
+
+.video-big-play-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Bottom controls bar */
+.video-controls-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px;
+  z-index: 20;
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.video-controls-bottom.hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+
+/* Main controls layout */
+.video-main-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  transition: all 0.3s ease;
+}
+
+.video-controls-left,
+.video-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Play/Pause button */
+.play-pause-btn {
+  background: var(--secondary-color-bar);
+  border: none;
+  color: white;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+}
+
+.play-pause-btn:hover {
+  background: var(--primary-color-bar);
+  transform: scale(1.05);
+}
+
+/* Volume control section */
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.volume-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  pointer-events: all;
+}
+
+.volume-btn:hover {
+  background: transparent;
+  color: red;
+}
+
+/* Vertical volume slider */
+.volume-slider-container {
+  position: relative;
+  width: 24px;
+  height: 60px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.volume-control:hover .volume-slider-container {
+  opacity: 1;
+}
+
+.volume-slider-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.volume-slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--primary-color-bar);
+  border-radius: 2px;
+  transition: height 0.1s ease;
+}
+
+.volume-percentage {
+  color: white;
+  font-size: 11px;
+  min-width: 35px;
+  opacity: 0.8;
+}
+
+/* Playback speed control */
+.speed-control {
+  background: rgba(212, 195, 195, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.speed-select {
+  background: transparent;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: all;
+}
+
+.speed-select option {
+  background: #333;
+  color: white;
+}
+
+/* Repeat button */
+.repeat-btn {
+  background: rgba(255, 255, 255, 0.795);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  pointer-events: all;
+  opacity: 0.7;
+}
+
+.repeat-btn.active {
+  background: var(--primary-color-bar);
+  opacity: 1;
+}
+
+.repeat-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.2);
+}

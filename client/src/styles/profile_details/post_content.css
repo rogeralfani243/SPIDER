@@ -1,0 +1,66 @@
+/* PostContent.css */
+.post-content {
+  margin-bottom: 1.25rem;
+}
+
+.post-title {
+  margin: 0 0 0.75rem 0;
+  color: #1a1a1a;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.post-text-content {
+  color: #3c4043;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+height: 2px;
+}
+
+.post-text-content.expanded {
+  max-height: none;
+  overflow: visible;
+}
+
+.see-more-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+
+.see-more-btn:hover {
+  text-decoration: underline;
+}
+
+.read-more-text {
+  color: #272829;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.read-more-text:hover {
+  text-decoration: underline;
+}
+
+/* Responsive for PostContent */
+@media (max-width: 480px) {
+  .post-content {
+    margin-bottom: 1rem;
+  }
+  
+  .post-title {
+    font-size: 1.1rem;
+  }
+  
+  .post-text-content {
+    font-size: 0.9rem;
+  }
+}

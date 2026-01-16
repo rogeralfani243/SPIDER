@@ -1,0 +1,15 @@
+/* Main Profile Section */
+.profile-main-section {
+  display: grid;
+  gap: 40px;
+  margin-bottom: 50px;
+}
+
+/* Responsive Layout */
+@media (max-width: 768px) {
+  .profile-main-section {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+

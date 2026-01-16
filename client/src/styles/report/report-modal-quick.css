@@ -1,0 +1,440 @@
+/* src/styles/report/report-modal-quick.css */
+
+/* QuickReportModal Styles avec thème gradient */
+.quick-report-modal-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(5px) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 1050 !important;
+}
+
+.quick-report-modal-content {
+  background: linear-gradient(
+    135deg,
+    rgba(10, 10, 10, 0.95),
+    rgba(60, 10, 10, 0.95),
+    rgba(180, 20, 20, 0.95),
+    rgba(255, 0, 80, 0.95)
+  ) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 10px 40px rgba(255, 0, 80, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.quick-report-modal-content::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  border-radius: 16px !important;
+  padding: 2px !important;
+  background: linear-gradient(
+    135deg,
+    rgb(10, 10, 10),
+    rgb(60, 10, 10),
+    rgb(180, 20, 20),
+    rgb(255, 0, 80)
+  ) !important;
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0) !important;
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0) !important;
+  -webkit-mask-composite: xor !important;
+  mask-composite: exclude !important;
+  pointer-events: none !important;
+}
+
+/* Header */
+.quick-report-modal-header {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.quick-report-modal-title {
+  color: white !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 1.1rem !important;
+  margin: 0 !important;
+}
+
+.quick-report-modal-title .bi-flag-fill {
+  color: #ff0050 !important;
+  filter: drop-shadow(0 0 8px rgba(255, 0, 80, 0.5)) !important;
+  font-size: 1.2rem !important;
+  margin-right: 0.5rem !important;
+}
+
+.quick-report-modal-close {
+  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat !important;
+  opacity: 0.7 !important;
+  transition: all 0.3s ease !important;
+  border: none !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  padding: 0.25rem !important;
+  border-radius: 0.25rem !important;
+}
+
+.quick-report-modal-close:hover {
+  opacity: 1 !important;
+  transform: rotate(90deg) !important;
+  background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ff0050'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat !important;
+}
+
+.quick-report-modal-close:disabled {
+  opacity: 0.3 !important;
+}
+
+/* Body */
+.quick-report-modal-body {
+  padding: 0 !important;
+}
+
+.quick-report-modal-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.5 !important;
+  font-size: 0.9rem !important;
+  padding: 0 1.5rem !important;
+  padding-top: 1rem !important;
+}
+
+/* Options list */
+.quick-report-options-list {
+  background: transparent !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  padding: 0 1.5rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.quick-report-option {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 2px solid transparent !important;
+  margin-bottom: 8px !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(5px) !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  text-align: left !important;
+  border-left: 4px solid transparent !important;
+}
+
+.quick-report-option:hover:not(.active):not(:disabled) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 0, 80, 0.3) !important;
+  transform: translateX(4px) !important;
+}
+
+.quick-report-option.active {
+  background: rgba(255, 0, 80, 0.15) !important;
+  border-color: #ff0050 !important;
+  border-left-color: #ff0050 !important;
+  color: white !important;
+  animation: quick-report-select-pulse 0.5s ease !important;
+}
+
+@keyframes quick-report-select-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.quick-report-option:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Option icon */
+.quick-report-option-icon {
+  width: 32px !important;
+  height: 32px !important;
+  flex-shrink: 0 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-right: 12px !important;
+  border-radius: 50% !important;
+}
+
+.quick-report-option:not(.active) .quick-report-option-icon {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.quick-report-option.active .quick-report-option-icon {
+  background: linear-gradient(135deg, #ff0050, #b41414) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 0, 80, 0.3) !important;
+}
+
+.quick-report-option-icon i {
+  font-size: 0.9rem !important;
+}
+
+/* Option content */
+.quick-report-option-content {
+  flex-grow: 1 !important;
+  text-align: left !important;
+}
+
+.quick-report-option-title {
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 4px !important;
+  color: white;
+}
+
+.quick-report-option-description {
+  font-size: 0.8rem !important;
+  line-height: 1.4 !important;
+  display: block !important;
+}
+
+.quick-report-option:not(.active) .quick-report-option-description {
+  color: rgba(196, 191, 191, 0.6) !important;
+}
+
+.quick-report-option.active .quick-report-option-description {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.quick-report-check-icon {
+  color: #ff0050 !important;
+  animation: quick-report-check-appear 0.3s ease !important;
+}
+
+@keyframes quick-report-check-appear {
+  from {
+    opacity: 0 !important;
+    transform: scale(0) !important;
+  }
+  to {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+  }
+}
+
+/* More details link */
+.quick-report-more-details {
+  padding: 0.75rem 1.5rem !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.quick-report-more-details-btn {
+  color: #4fc3f7 !important;
+  text-decoration: none !important;
+  padding: 0 !important;
+  background: none !important;
+  border: none !important;
+  font-size: 0.9rem !important;
+  transition: all 0.3s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.quick-report-more-details-btn:hover:not(:disabled) {
+  color: #81d4fa !important;
+  text-decoration: none !important;
+}
+
+.quick-report-more-details-btn:disabled {
+  color: rgb(247, 239, 239) !important;
+  cursor: not-allowed !important;
+}
+
+.quick-report-more-details-btn i {
+  transition: transform 0.3s ease !important;
+  margin-right: 0.25rem !important;
+}
+
+.quick-report-more-details-btn:hover i {
+  transform: rotate(-15deg) !important;
+}
+
+/* Footer */
+.quick-report-modal-footer {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 1rem 1.5rem !important;
+  backdrop-filter: blur(10px) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+/* Buttons */
+.quick-report-cancel-btn {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+  min-width: 80px !important;
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.875rem !important;
+}
+
+.quick-report-cancel-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+}
+
+.quick-report-cancel-btn:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.quick-report-submit-btn {
+  background: linear-gradient(
+    135deg,
+    rgb(10, 10, 10),
+    rgb(60, 10, 10),
+    rgb(180, 20, 20),
+    rgb(255, 0, 80)
+  ) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  min-width: 100px !important;
+  padding: 0.375rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+
+.quick-report-submit-btn:hover:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgb(20, 20, 20),
+    rgb(80, 10, 10),
+    rgb(200, 30, 30),
+    rgb(255, 20, 100)
+  ) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(255, 0, 80, 0.4) !important;
+}
+
+.quick-report-submit-btn:disabled {
+  background: linear-gradient(
+    135deg,
+    rgb(40, 40, 40),
+    rgb(80, 40, 40),
+    rgb(120, 60, 60),
+    rgb(150, 80, 100)
+  ) !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.quick-report-submit-btn::after {
+  content: '' !important;
+  position: absolute !important;
+  top: -50% !important;
+  left: -50% !important;
+  width: 200% !important;
+  height: 200% !important;
+  background: linear-gradient(
+    to right,
+    transparent 20%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 80%
+  ) !important;
+  transform: rotate(30deg) !important;
+  transition: transform 0.6s ease !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+.quick-report-submit-btn:hover::after {
+  opacity: 1 !important;
+  transform: rotate(30deg) translateX(100%) !important;
+}
+
+/* Spinner */
+.quick-report-spinner {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  border-right-color: #ff0050 !important;
+  animation: quick-report-spinner-rotate 0.75s linear infinite !important;
+  vertical-align: middle !important;
+  display: inline-block !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  border-width: 0.15em !important;
+}
+
+@keyframes quick-report-spinner-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar */
+.quick-report-options-list::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.quick-report-options-list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border-radius: 3px !important;
+}
+
+.quick-report-options-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #ff0050, #b41414) !important;
+  border-radius: 3px !important;
+}
+
+.quick-report-options-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #ff3264, #c81e1e) !important;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .quick-report-modal-dialog {
+    margin: 1rem !important;
+  }
+  
+  .quick-report-modal-content {
+    border-radius: 12px !important;
+  }
+  
+  .quick-report-option {
+    padding: 10px 12px !important;
+  }
+  
+  .quick-report-option-icon {
+    width: 28px !important;
+    height: 28px !important;
+    margin-right: 10px !important;
+  }
+}

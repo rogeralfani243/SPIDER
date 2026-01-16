@@ -1,0 +1,303 @@
+/* Rating badge absolute transparent */
+.rating-badge-absolute {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.555);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.rating-badge-absolute .rating-value {
+  color: #FFC107;
+}
+
+.rating-badge-absolute .rating-count {
+  color: #666;
+  font-weight: 500;
+  font-size: 12px;
+}
+
+/* Lien du profil avec photo */
+.profile-link-absolute {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.096);
+  backdrop-filter: blur(10px);
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  align-content: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #2d3748;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  max-width: 180px;
+}
+
+.profile-link-absolute:hover {
+  background: rgba(255, 255, 255, 0.637);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-image {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-placeholder {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.profile-name-post {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 120px;
+    color: white;
+
+}
+
+.div-profile-name{
+  display: flex;
+  align-items: center;
+  align-content: center;
+}
+
+.category-badge .category-icon-image {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: cover;
+  margin-right: 6px;
+}
+
+.category-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f0fe;
+  color: #4285f4;
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+.category-badge svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.category-badge img {
+  flex-shrink: 0;
+}
+
+/* Listen Music Button */
+.listen-music-button-container {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+}
+
+.listen-music-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.listen-music-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.listen-music-button.active {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.listen-music-button.active:hover {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.5);
+}
+
+.listen-music-button svg {
+  stroke: white;
+}
+
+.listen-music-button.now-playing {
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+  animation: glow 2s infinite;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 71, 87, 0.8);
+  }
+}
+/* PostActions overlay - Positionné en bas à droite du média */
+.post-actions-overlay {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none; /* Important pour ne pas bloquer les interactions avec le slider */
+}
+
+/* Si PostActions a son propre conteneur, on permet les interactions */
+.post-actions-overlay > * {
+  pointer-events: auto;
+}
+
+/* Style spécifique pour les boutons d'action en overlay */
+.post-actions-overlay .post-actions {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  border-radius: 25px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.post-actions-overlay .post-actions:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Style des boutons individuels dans l'overlay */
+.post-actions-overlay .action-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.post-actions-overlay .action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.post-actions-overlay .action-btn:active {
+  transform: scale(0.95);
+}
+
+/* Style pour les icônes */
+.post-actions-overlay .action-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+}
+
+/* Badge pour les compteurs (likes, vues, etc.) */
+.post-actions-overlay .action-count {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4757;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.4);
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+  .post-actions-overlay {
+    bottom: 15px;
+    right: 15px;
+  }
+  
+
+  
+  .post-actions-overlay .action-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .post-actions-overlay .action-count {
+    font-size: 10px;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+  }
+}
+
+/* Pour les écrans très petits */
+@media (max-width: 480px) {
+  .post-actions-overlay {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .post-actions-overlay .post-actions {
+    padding: 5px 8px;
+    gap: 8px;
+  }
+}
+

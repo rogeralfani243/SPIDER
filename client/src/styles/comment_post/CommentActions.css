@@ -1,0 +1,120 @@
+/* components/commentPost/CommentActions.css */
+.comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.comment-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid transparent;
+  color: #6b7280;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.comment-action-btn:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.comment-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comment-action-btn:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Bouton Like */
+.comment-action-btn.like-btn.active {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.comment-action-btn.like-btn.active:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.comment-action-btn.like-btn .action-icon {
+  font-size: 1.1rem;
+}
+
+/* Bouton Edit */
+.comment-action-btn.edit-btn:hover {
+  color: #3b82f6;
+  border-color: #bfdbfe;
+}
+
+/* Bouton Delete */
+.comment-action-btn.delete-btn:hover {
+  color: #dc2626;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* Bouton Reply */
+.comment-action-btn.reply-btn:hover {
+  color: #10b981;
+  border-color: #a7f3d0;
+}
+
+/* Icônes et texte */
+.action-icon {
+  font-size: 1rem;
+}
+
+.action-text {
+  font-weight: 500;
+}
+
+.action-count {
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .comment-actions {
+    gap: 6px;
+  }
+  
+  .comment-action-btn {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+  
+  .action-text {
+    display: none;
+  }
+  
+  .action-icon {
+    font-size: 1.2rem;
+  }
+  
+  .action-count {
+    display: inline;
+    margin-left: 4px;
+  }
+}
+
+@media (max-width: 480px) {
+  .comment-actions {
+    gap: 4px;
+  }
+  
+  .comment-action-btn {
+    padding: 4px 6px;
+  }
+}

@@ -1,0 +1,20 @@
+@media(max-width:746px){
+.category-section{
+  margin-top: 3em;
+    width: 100%;
+  max-width: auto;
+}
+
+
+}
+@media(max-width:546px){
+.user-profile-bar{
+  width: 100%;
+  max-width: auto;
+}
+.category-section{
+  width: 100%;
+  max-width: auto;
+}
+
+}

@@ -1,0 +1,224 @@
+/* ChatHeader.css */
+
+/* Container principal du header */
+.chat-header-container {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Partie gauche : info utilisateur */
+.chat-header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0; /* Pour permettre le text overflow */
+}
+
+.chat-header-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background-color: #1976d2 !important;
+  color: white !important;
+  font-weight: 600 !important;
+  flex-shrink: 0;
+}
+
+.chat-header-text-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Pour permettre le text overflow */
+}
+
+.chat-header-username {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-header-status {
+  font-size: 13px !important;
+  color: #666 !important;
+  margin: 0 !important;
+  line-height: 1.2 !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chat-header-message-count {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.chat-header-online-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #4caf50;
+  border-radius: 50%;
+  margin-right: 4px;
+  animation: pulse 2s infinite;
+}
+
+/* Partie droite : actions */
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.chat-header-action-button {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  transition: all 0.2s ease !important;
+}
+
+.chat-header-action-button:hover {
+  background-color: rgba(25, 118, 210, 0.08) !important;
+  transform: scale(1.05);
+}
+
+.chat-header-action-button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.chat-header-action-button:disabled:hover {
+  transform: none;
+  background-color: transparent !important;
+}
+
+.chat-header-refresh-icon {
+  color: #666 !important;
+  transition: transform 0.3s ease !important;
+}
+
+.chat-header-action-button:hover .chat-header-refresh-icon {
+  color: #1976d2 !important;
+}
+
+.chat-header-action-button:disabled .chat-header-refresh-icon {
+  color: #999 !important;
+}
+
+/* Animation de rotation lors du refresh */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.chat-header-refresh-spinning {
+  animation: spin 1s linear infinite !important;
+}
+
+/* Animation du point en ligne */
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .chat-header-container {
+    padding: 12px;
+  }
+  
+  .chat-header-username {
+    font-size: 16px !important;
+  }
+  
+  .chat-header-status {
+    font-size: 12px !important;
+  }
+  
+  .chat-header-action-button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
+  .chat-header-container {
+    background-color: #1e1e1e;
+    border-bottom-color: #333;
+  }
+  
+  .chat-header-username {
+    color: #fff !important;
+  }
+  
+  .chat-header-status {
+    color: #aaa !important;
+  }
+  
+  .chat-header-action-button:hover {
+    background-color: rgba(25, 118, 210, 0.2) !important;
+  }
+  
+  .chat-header-refresh-icon {
+    color: #aaa !important;
+  }
+  
+  .chat-header-action-button:hover .chat-header-refresh-icon {
+    color: #64b5f6 !important;
+  }
+}
+
+/* Variantes d'état */
+.chat-header-container.loading {
+  opacity: 0.9;
+}
+
+.chat-header-avatar.offline {
+  background-color: #757575 !important;
+}
+
+.chat-header-online-dot.offline {
+  background-color: #f44336;
+  animation: none;
+}
+
+/* Tooltip personnalisé */
+.chat-header-tooltip {
+  font-size: 12px !important;
+  background-color: #333 !important;
+  color: white !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+}
+
+.chat-header-tooltip.arrow::before {
+  background-color: #333 !important;
+}

@@ -1,0 +1,4 @@
+/* Main CSS file for PostCreate component */
+@import './modules/create-post-base.css';
+@import './modules//create-post-steps.css';
+@import './modules/create-post-components.css'

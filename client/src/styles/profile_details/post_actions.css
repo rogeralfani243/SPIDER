@@ -1,0 +1,6 @@
+.post-action-card button:focus{
+  border: none;
+}
+.action-button:focus{
+    border: none;
+}

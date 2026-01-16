@@ -1,0 +1,391 @@
+/* PostFilters.css */
+
+.post-filters {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.filter-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background:  #01628f;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+.btn-filter-toggle:hover {
+  background-color: #0273a8;
+}
+.active-filters-indicator {
+  background: #e9ecef;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #495057;
+}
+
+.filter-content {
+  padding: 20px;
+}
+
+.filter-section {
+  margin-bottom: 25px;
+}
+
+.category-section {
+  width: 100%;
+  overflow: visible;
+}
+
+.filter-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.filter-section-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.btn-clear-category,
+.btn-clear-search,
+.btn-clear-sort {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  margin-left: auto;
+}
+.btn-clear-category,
+.btn-clear-search,
+.btn-clear-sort:hover {
+  background-color: red;
+
+}
+
+/* Wrapper pour CategoryList */
+.category-list-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+}
+
+/* Les styles spécifiques pour CategoryList seront gérés dans son propre CSS */
+/* Ici on s'assure juste qu'il a la place de s'afficher */
+
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.filter-input {
+  width: 100;
+  padding: 12px 40px 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.search-input-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.sort-options {
+  width: 100%;
+}
+
+.sort-option-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  width: 100%;
+}
+
+.sort-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sort-option {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sort-option:hover {
+  border-color: #007bff;
+}
+
+.sort-option.selected {
+  border-color: #007bff;
+  background: #f0f7ff;
+}
+
+.sort-radio {
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.sort-label {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.sort-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.sort-description {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 20px;
+  border-top: 1px solid #eaeaea;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.btn-clear-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.btn-clear-all:disabled {
+  background: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+.btn-clear-all:not(:disabled):hover {
+  background: #d30419;
+  color: white;
+  cursor: pointer;
+}
+
+.filter-summary {
+  font-size: 14px;
+  color: #495057;
+  flex: 1;
+  min-width: 200px;
+}
+
+.summary-text {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.summary-item {
+  background: #f8f9fa;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+.current-filters-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #eaeaea;
+}
+
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #e9ecef;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.pill-remove {
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== RESPONSIVE DESIGN POUR PostFilters SEULEMENT ===== */
+
+@media (max-width: 760px) {
+  .post-filters {
+    border-radius: 8px;
+    margin: 0;
+    border: 1px solid #ddd;
+    width: 100%;
+    padding: 0;
+  }
+  
+  .filter-header {
+    padding: 12px 15px;
+  }
+  
+  .btn-filter-toggle {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .filter-content {
+    padding: 0;
+  }
+  
+  .filter-section {
+    margin-bottom: 20px;
+  }
+  
+  /* S'assurer que CategoryList a toute la largeur */
+  .category-list-wrapper {
+    width: 100%;
+    margin-left: -15px;
+    margin-right: -15px;
+    padding: 0 15px;
+  }
+  
+  /* Adapter les options de tri pour mobile */
+  .sort-option-group {
+    grid-template-columns: 1fr;
+  }
+  
+  .sort-option {
+    padding: 10px;
+  }
+  
+  .sort-title {
+    font-size: 13px;
+  }
+  
+  .sort-description {
+    font-size: 12px;
+  }
+  
+  /* Adapter les actions pour mobile */
+  .filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .btn-clear-all {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+  }
+  
+  .filter-summary {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .summary-text {
+    justify-content: center;
+  }
+  
+  .current-filters-pills {
+    padding: 8px 15px;
+  }
+  
+  .filter-pill {
+    font-size: 12px;
+    padding: 5px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-header-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .active-filters-indicator {
+    font-size: 12px;
+  }
+  
+  .filter-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .btn-clear-category,
+  .btn-clear-search,
+  .btn-clear-sort {
+    margin-left: 0;
+    align-self: flex-end;
+  }
+  
+  .summary-item {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -1,0 +1,113 @@
+.post-content {
+  margin: 12px 0;
+  line-height: 1.5;
+  color: #cccccc;
+  overflow: hidden;
+  white-space: pre-wrap;
+  transition: max-height 0.3s ease;
+}
+
+.post-content.expanded {
+  max-height: none;
+}
+
+.see-more-btn {
+  background: none;
+  color: #00aaff;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.post-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Fichiers attachés */
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.file-link {
+  color: #28a745;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.file-link:hover {
+  text-decoration: underline;
+}
+
+/* Section statistiques */
+.post-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  margin-top: 15px;
+}
+
+.stats-info {
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* Actions du post */
+.post-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 6px;
+  color: #666;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.action-button:hover {
+  background: #f8f9fa;
+}
+
+.like-button.liked {
+  color: #e74c3c;
+}
+
+/* Liens de plateforme */
+.platform-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.platform-link:hover {
+  text-decoration: underline;
+}

@@ -1,0 +1,17 @@
+:root{
+    --primary-color-bar: linear-gradient(
+  135deg,
+  rgb(10, 10, 10),
+  rgb(60, 10, 10),
+  rgb(180, 20, 20),
+  rgb(255, 0, 80)
+); 
+--secondary-color-bar: linear-gradient(
+  190deg,
+  rgb(10, 10, 10),
+  rgb(60, 10, 10),
+  rgb(180, 20, 20),
+  rgb(255, 0, 80)
+);
+}
+

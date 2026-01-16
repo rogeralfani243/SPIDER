@@ -1,0 +1,562 @@
+/* Styles pour la nouvelle interface */
+@import '../../../styles/modules_colors/var.css';
+/* Section télécharger tout */
+.download-all-section {
+  padding: 15px 20px;
+  background: var(--primary-color-bar);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.download-all-btn {
+  width: 100%;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+
+.download-all-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.download-all-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.download-all-btn .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+/* Barre de progression */
+.progress-container {
+  margin-top: 12px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #4CAF50;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+.stat-value{
+  color:rgb(80, 1, 1);
+}
+
+/* Info texte */
+.info-text {
+  text-align: center;
+  padding: 12px;
+  background: #f0f7ff;
+  border-radius: 6px;
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 14px;
+  word-break: keep-all;
+  border: 1px solid #d0e3ff;
+}
+.header-content-h3 h3{
+  color:white;
+}
+/* Bouton de téléchargement individuel */
+.single-download-btn {
+  width: 56px;
+  height: 36px;
+  border-radius: 6px;
+  border: none;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.single-download-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  color: white;
+}
+
+.single-download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.single-download-btn.downloading {
+  background: #ff9800;
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Actions des médias */
+.media-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.preview-btn {
+  width: 56px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.preview-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.preview-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Instructions */
+.download-instructions {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.instruction-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.instruction-item:last-child {
+  margin-bottom: 0;
+}
+
+.instruction-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.instruction-text {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.instruction-text strong {
+  color: #667eea;
+  font-weight: 600;
+}
+
+/* Animation pour les boutons individuels */
+@keyframes pulse-green {
+  0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+  70% { box-shadow: 0 0 0 6px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+.single-download-btn:not(:disabled):not(.downloading) {
+  animation: pulse-green 2s infinite;
+}
+
+/* Styles pour les types de fichiers */
+.type-image {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.type-video {
+  background: #fce4ec;
+  color: #c2185b;
+  border: 1px solid #f8bbd0;
+}
+
+.type-audio {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #e1bee7;
+}
+
+.type-document {
+  background: #e8f5e9;
+  color: #388e3c;
+  border: 1px solid #c8e6c9;
+}
+
+.type-other {
+  background: #fff3e0;
+  color: #ef6c00;
+  border: 1px solid #ffe0b2;
+}
+
+.media-type {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Media item amélioré */
+.media-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s;
+  max-height: 100px;
+}
+
+.media-item:hover {
+  background: #f8f9fa;
+}
+
+.media-info {
+  flex: 1;
+  margin-left: 2em;
+  min-width: 0;
+}
+
+.media-name {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.media-size {
+  font-weight: 500;
+}
+
+.media-extension {
+  color: #888;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .download-all-btn {
+    font-size: 14px;
+    padding: 12px;
+  }
+  
+  .media-actions {
+    gap: 6px;
+  }
+  
+  .single-download-btn,
+  .preview-btn {
+    width: 52px;
+    height: 32px;
+  }
+  
+  .instruction-item {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .instruction-icon {
+    align-self: center;
+  }
+}
+
+@media (max-width: 368px) {
+  .download-all-btn {
+    font-size: 14px;
+    padding: 12px;
+  }
+  
+
+  .media-actions {
+    gap: 6px;
+  }
+  
+  .single-download-btn,
+  .preview-btn {
+    width: 52px;
+    height: 32px;
+  }
+  
+  .instruction-item {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .instruction-icon {
+    align-self: center;
+  }
+}
+/* Styles pour les miniatures des médias */
+.media-preview-container {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  margin-right: 80px;
+}
+
+.media-preview {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Preview des images */
+.image-preview {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.media-item:hover .preview-image {
+  transform: scale(1.05);
+}
+
+/* Preview des vidéos */
+.video-preview {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  position: relative;
+}
+
+.video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.video-label {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 8px;
+  font-weight: bold;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 1px 4px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+
+/* Preview des fichiers audio */
+.audio-preview {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  flex-direction: column;
+  gap: 4px;
+
+}
+.audio-label {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Preview des documents */
+.document-preview {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  color: white;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.document-extension {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Preview des autres fichiers */
+.other-preview {
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+  color: white;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.other-label {
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Améliorations pour les items média */
+.media-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s;
+}
+
+.media-item:hover {
+  background: #f8f9fa;
+}
+
+.media-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.media-name {
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.media-type {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-image {
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+}
+
+.type-video {
+  background: #fce4ec;
+  color: #c2185b;
+  border: 1px solid #f8bbd0;
+}
+
+.type-audio {
+  background: #f3e5f5;
+  color: #7b1fa2;
+  border: 1px solid #e1bee7;
+}
+
+.type-document {
+  background: #e8f5e9;
+  color: #388e3c;
+  border: 1px solid #c8e6c9;
+}
+
+.type-other {
+  background: #fff3e0;
+  color: #ef6c00;
+  border: 1px solid #ffe0b2;
+}
+
+.media-size {
+  font-weight: 500;
+}
+
+.media-extension {
+  color: #888;
+  font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .media-preview-container {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+  
+.download-info {
+  display: none;
+}
+  .media-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}

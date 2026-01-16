@@ -1,0 +1,198 @@
+/* components/notifications/ToastNotification.css */
+.toast-notification {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  min-width: 300px;
+  background: white;
+  border-left: 4px solid;
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.toast-notification.exiting {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* Types de notifications */
+.toast-success {
+  border-left-color: #10b981;
+  background: linear-gradient(90deg, #f0fdf4 0%, white 20%);
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+  background: linear-gradient(90deg, #fef2f2 0%, white 20%);
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+  background: linear-gradient(90deg, #fffbeb 0%, white 20%);
+}
+
+.toast-info {
+  border-left-color: #3b82f6;
+  background: linear-gradient(90deg, #eff6ff 0%, white 20%);
+}
+
+/* Icône */
+.toast-icon {
+  flex-shrink: 0;
+  margin-right: 12px;
+  margin-top: 2px;
+}
+
+.toast-success .toast-icon {
+  color: #10b981;
+}
+
+.toast-error .toast-icon {
+  color: #ef4444;
+}
+
+.toast-warning .toast-icon {
+  color: #f59e0b;
+}
+
+.toast-info .toast-icon {
+  color: #3b82f6;
+}
+
+/* Contenu */
+.toast-content {
+  flex: 1;
+}
+
+.toast-message {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.toast-time {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Bouton de fermeture */
+.toast-close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px;
+  margin-left: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  color: #9ca3af;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.toast-close:hover {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+/* Barre de progression */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.3;
+  animation: progress linear;
+  transform-origin: left;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+/* components/notifications/NotificationContainer.css */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 0 8px;
+}
+
+.notification-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.notification-clear-all {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.notification-clear-all:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Scrollbar styling */
+.notification-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.notification-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.notification-container::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}

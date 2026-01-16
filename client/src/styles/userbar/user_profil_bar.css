@@ -1,0 +1,42 @@
+/* user_profil_bar.css - Fichier principal */
+@import './modules/reset.css';
+@import './modules/variables.css';
+@import './modules/layout.css';
+@import './modules/header.css';
+@import './modules/buttons.css';
+@import './modules/profile-cards.css';
+@import './modules/avatar-rating.css';
+@import './modules/swiper-components.css';
+@import './modules/states.css';
+@import './modules/responsive.css';
+
+.star-3d {
+  font-size: 1.5rem;
+  display: inline-block;
+  position: relative;
+  color: #ddd; /* Couleur de base (vide) */
+}
+
+.star-3d.full {
+  color: #FFD700;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.star-3d.half {
+  background: linear-gradient(
+    90deg, 
+    #FFD700 0%, 
+    #FFD700 var(--fill-percentage, 50%), 
+    #ddd var(--fill-percentage, 50%), 
+    #ddd 100%
+  );
+  width: 505;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.star-3d.empty {
+  color: #ddd;
+}
+

@@ -1,0 +1,47 @@
+/* Media Section Styles */
+.media-section {
+  margin: 1.5rem 0;
+  border-radius: 10px;
+  
+  overflow: hidden;
+  background: var(--card-bg, #ffffff);
+ 
+  position: relative;
+}
+
+/* Counter */
+.media-counter {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  backdrop-filter: blur(4px);
+}
+
+/* Scrollbar Styling */
+.media-thumbnails::-webkit-scrollbar,
+.fullscreen-thumbnails::-webkit-scrollbar {
+  height: 6px;
+}
+
+.media-thumbnails::-webkit-scrollbar-track,
+.fullscreen-thumbnails::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.media-thumbnails::-webkit-scrollbar-thumb,
+.fullscreen-thumbnails::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.media-thumbnails::-webkit-scrollbar-thumb:hover,
+.fullscreen-thumbnails::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

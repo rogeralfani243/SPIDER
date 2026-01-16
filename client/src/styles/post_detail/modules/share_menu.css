@@ -1,0 +1,31 @@
+@import '../../modules_colors/var.css';
+/* Additional animations */
+/* Action Button */
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--primary-color-bar);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  margin-left: 2em;
+
+}
+
+.action-button:hover {
+  background: var(--secondary-color-bar);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(163, 3, 3, 0.3);
+}
+
+.action-button:active {
+  transform: translateY(0);
+}
+

@@ -1,0 +1,45 @@
+:root {
+  --spider-bg: #0A0A0F;
+  --spider-primary: #00FF88;
+  --spider-secondary: #6C63FF;
+  --spider-text: #EAEAEA;
+  --spider-subtext: #9CA3AF;
+  --spider-danger: #FF4B4B;
+  --spider-success: #00C853;
+}
+
+body {
+  background-color: var(--spider-bg);
+  color: var(--spider-text);
+  font-family: 'Inter', 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.main-div{
+    margin-top: 20em;
+}
+
+a {
+  color: var(--spider-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--spider-secondary);
+}
+
+button {
+  background-color: var(--spider-primary);
+  color: var(--spider-bg);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+button:hover {
+  background-color: var(--spider-secondary);
+  color: white;
+}

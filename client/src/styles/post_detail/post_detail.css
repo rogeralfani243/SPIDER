@@ -1,0 +1,29 @@
+/* PostDetail.css - Main stylesheet that imports all modular styles */
+
+/* Import modular CSS files */
+@import './modules/loading.css';
+@import './modules/error.css';
+@import './modules/layout.css';
+@import './modules/header.css';
+@import './modules/buttons.css';
+@import './modules/share_menu.css';
+@import './modules/user-info.css';
+@import './modules/post_content.css';
+@import './modules/media.css';
+@import './modules/ratings.css';
+@import './modules/responsive.css';
+@import './modules/recent-posts.css';
+/* Main CSS Imports */
+@import './modules/media-display.css';
+@import './modules/thumbnails.css';
+@import './modules/fullscreen-overlay.css';
+@import './modules/fullscreen-media.css';
+@import './modules/video-controls.css';
+@import './modules/audio-player.css';
+@import './modules/fullscreen-thumbnails.css';
+@import './modules/audiomack-player.css';
+@import './modules/audiobar-player.css';
+@import './modules/responsive.css';
+@import './modules/variables.css';
+@import './modules/video-player.css';
+@import './modules//btn-download.css';
