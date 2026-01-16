@@ -1,0 +1,1 @@
+web: gunicorn spider.wsgi --log-file -
