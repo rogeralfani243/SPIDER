@@ -25,8 +25,14 @@ SECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
 
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.herokuapp.com',
+    '.vercel.app',  # Tous les domaines Vercel
+]
 
 # Application definition
 
@@ -250,7 +256,12 @@ DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'  # Email d'envoi
 ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'webm']
 ALLOWED_FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt', 'zip']
-
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://spider-r2ci.vercel.app",
+    "https://*.vercel.app",
+]
+CORS_ALLOW_CREDENTIALS = True
 # Configuration pour Heroku Postgres (si vous l'utilisez)
 #db_from_env = dj_database_url.config(conn_max_age=600)
 #DATABASES['default'].update(db_from_env)
