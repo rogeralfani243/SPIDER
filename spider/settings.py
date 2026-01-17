@@ -112,6 +112,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 
 CORS_ALLOWED_ORIGINS = [
     '*',
+    "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app",
     "https://votre-app.herokuapp.com",    
       "https://www.votre-domaine.com",
       'https://spider-opal-two.vercel.app/',
@@ -132,6 +133,7 @@ CORS_ALLOWED_ORIGINS = [
        "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
 # Si vous utilisez CSRF
 CSRF_TRUSTED_ORIGINS = [
+    "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app/",
      "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
     "https://spider-r2ci.vercel.app",
     "https://*.vercel.app",
