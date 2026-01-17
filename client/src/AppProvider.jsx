@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import ProfilDetail from './components/profile/ProfilDetail.jsx'
-import Main from './components/home.jsx';
 import Login from './components/Login.jsx';
 import DashboardMain from './components/dashboard_main.jsx';
 import UserProfileBar from './components/profile/UserProfilBar.jsx';
@@ -17,7 +16,6 @@ import PostList from './components/posts/main_post/PostList.jsx';
 import AudioPlayerPage from './components/posts/media_section/AudioPlayerPage.jsx';
 import EditPost from './components/posts/EditPost.jsx';
 import SoftwareCategory from './components/posts/main_post/category/SoftwareCategory.jsx'
-import { WebSocketProvider } from './hooks/messaging/webSocketContext.js';
 import GroupExplorePage from './components/messaging/GroupExplorerPage.jsx';
 import GroupDetailPage from './components/messaging/Groups/GroupDetailPage.jsx';
 import GroupCreatePage from './components/messaging/Groups/GroupCreatePage.jsx';
@@ -103,21 +101,21 @@ function AdminRoute({ children }) {
 }
 
 // 🛡️ Composant pour les routes créateur
-function CreatorRoute({ children, resourceCreatorId }) {
-  const { isCreator } = useSecurity();
+//function CreatorRoute({ children, resourceCreatorId }) {
+ // const { isCreator } = useSecurity();
   
-  if (!isCreator(resourceCreatorId)) {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    securityService.logViolation(
-      user.id,
-      window.location.pathname,
-      'Non-creator user attempted to access creator-only resource'
-    );
-    return <Navigate to="/security/violation" replace />;
-  }
+ // if (!isCreator(resourceCreatorId)) {
+  //  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  //  securityService.logViolation(
+   //   user.id,
+  //    window.location.pathname,
+  //    'Non-creator user attempted to access creator-only resource'
+ //   );
+ //   return <Navigate to="/security/violation" replace />;
+ // }
   
-  return children;
-}
+ // return children;
+//}
 
 function ProviderApp() {
   const { user, loading, login, logout, isAuthenticated } = useAuth();

@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import { useAuth } from './hooks/useAuth.js';
 import { NotificationProvider } from './contexts/NotificationContext.jsx';
-import { WebSocketProvider } from './hooks/messaging/webSocketContext.js';
 import SecurityInterceptor from './components/messaging/securtity/SecurityInterceptor.jsx';
 import AppRoutes from './components/app/AppRoutes';
 import AppLayout from './components/app/AppLayout.jsx';

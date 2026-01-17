@@ -27,7 +27,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useWebSocket } from '../hooks/messaging/webSocketContext';
 import { conversationAPI } from '../hooks/messaging/messagingApi';
 import '../styles/messaging/index.css';
-import DashboardMain from '../components/dashboard_main';
 import { useNavigate } from 'react-router-dom';
 
 // Use React.memo for child components

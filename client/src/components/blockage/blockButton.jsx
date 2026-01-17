@@ -19,11 +19,11 @@ import {
 } from '@mui/material';
 import { 
     Block as BlockIcon, 
-    PersonOff, 
+  
     Lock, 
     LockOpen,
     Schedule,
-    Report
+    
 } from '@mui/icons-material';
 import blockService from '../../hooks/messaging/blockService';
 
