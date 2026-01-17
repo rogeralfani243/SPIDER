@@ -111,6 +111,7 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 CORS_ALLOWED_ORIGINS = [
+    '*',
     "https://votre-app.herokuapp.com",    
       "https://www.votre-domaine.com",
       'https://spider-opal-two.vercel.app/',
@@ -149,6 +150,7 @@ CSRF_COOKIE_SECURE = True
 # Headers autorisés
 CORS_ALLOW_HEADERS = [
     'accept',
+    '*',
     'accept-encoding',
     'authorization',
     'content-type',
