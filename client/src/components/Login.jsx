@@ -41,11 +41,7 @@ const Login = ({ onLogin }) => {
     username: '',
     password: ''
   });
-
-axios.defaults.headers.get['Accepts'] = 'application/json';
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
-axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept';
-
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -84,14 +80,11 @@ axios.defaults.headers.common['Access-Control-Allow-Headers'] = 'Origin, X-Reque
           password: loginData.password
         },
         {
-        headers: [
-          {'Content-Type': 'application/json'},
-{          'X-CSRFToken': getCsrfToken()},
-                  { "Access-Control-Allow-Origin": '*' },
-          { "Access-Control-Allow-Headers": 'Origin, X-Requested-With, Content-Type, Accept '},
-          { "Access-Control-Allow-Methods": "POST, GET, PUT, OPTIONS, DELETE" },
-        
-        ]
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+          },
+           withCredentials: true, 
         }
       );
       
