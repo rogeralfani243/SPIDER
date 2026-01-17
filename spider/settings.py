@@ -61,7 +61,7 @@ MIDDLEWARE = [
       'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-  
+   'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -105,7 +105,9 @@ CORS_ALLOWED_ORIGINS = [
       'https://spider-opal-two.vercel.app/',
        "https://spider.vercel.app",
       'https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app'
-
+    "https://spider-r2ci.vercel.app",
+    "https://spider-*.vercel.app",  # Tous les sous-domaines
+    "https://spider-r2ci-*.vercel.app",  # Toutes les branches
 ]
 """CORS_ALLOWED_ORIGINS = [
 
@@ -117,12 +119,47 @@ CORS_ALLOWED_ORIGINS = [
        "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
 # Si vous utilisez CSRF
 CSRF_TRUSTED_ORIGINS = [
+     "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
+    "https://spider-r2ci.vercel.app",
+    "https://*.vercel.app",
+    "https://spider-app-d4d82ba4f1c1.herokuapp.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
      "http://100.64.6.76:3000",
     "https://100.64.6.76:3000",
       "https://*.ngrok-free.dev",
 "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ]
+# Cookies cross-domain
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
+# Headers autorisés
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'access-control-allow-origin',
+]
+# Dans settings.py - POUR TEST SEULEMENT
+CORS_ALLOW_ALL_ORIGINS = True  # DANGEREUX en production
+# Méthodes autorisées
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# P
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
