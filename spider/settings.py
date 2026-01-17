@@ -132,7 +132,7 @@ CORS_ALLOWED_ORIGINS = [
        "https://*.ngrok-free.dev",
        "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
 # Si vous utilisez CSRF
-CSRF_TRUSTED_ORIGINS = [
+CORS_TRUSTED_ORIGINS = [
     "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app/",
      "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
     "https://spider-r2ci.vercel.app",
