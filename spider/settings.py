@@ -114,6 +114,7 @@ CORS_ALLOWED_ORIGINS = [
       "https://www.votre-domaine.com",
       'https://spider-opal-two.vercel.app/',
        "https://spider.vercel.app",
+        "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
       'https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app'
     "https://spider-r2ci.vercel.app",
     "https://spider-*.vercel.app",  # Tous les sous-domaines
