@@ -55,26 +55,19 @@ INSTALLED_APPS = [
     'searchs',
       'whitenoise.runserver_nostatic',
 ]
-
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',  # DOIT ÊTRE EN PREMIER
     'django.middleware.security.SecurityMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware',
-
-    'django.middleware.common.CommonMiddleware',
-
-    'django.contrib.sessions.middleware.SessionMiddleware',
-
     'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
-CORS_ALLOW_ALL_ORIGINS = True
+
 ROOT_URLCONF = 'spider.urls'
 CORS_ALLOW_CREDENTIALS = True
 TEMPLATES = [
@@ -109,20 +102,20 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'authorization',
     'content-type',
 ]
-
+# Liste BLANCHE des domaines autorisés
 CORS_ALLOWED_ORIGINS = [
-    '*',
+    # Vos domaines Vercel
+    "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
     "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app",
-    "https://votre-app.herokuapp.com",    
-      "https://www.votre-domaine.com",
-      'https://spider-opal-two.vercel.app/',
-       "https://spider.vercel.app",
-        "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
-      'https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app'
     "https://spider-r2ci.vercel.app",
-    "https://spider-*.vercel.app",  # Tous les sous-domaines
-    "https://spider-r2ci-*.vercel.app",  # Toutes les branches
+    "https://spider.vercel.app",
+    
+    # Développement local
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
 ]
+
 """CORS_ALLOWED_ORIGINS = [
 
     "http://localhost:3000",
@@ -132,7 +125,7 @@ CORS_ALLOWED_ORIGINS = [
        "https://*.ngrok-free.dev",
        "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
 # Si vous utilisez CSRF
-CORS_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = [
     "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app/",
      "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
     "https://spider-r2ci.vercel.app",
@@ -143,12 +136,17 @@ CORS_TRUSTED_ORIGINS = [
      "http://100.64.6.76:3000",
     "https://100.64.6.76:3000",
       "https://*.ngrok-free.dev",
+         "https://spider-app-d4d82ba4f1c1.herokuapp.com",
 "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ]
 # Cookies cross-domain
-SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False  # ← IMPORTANT : doit être False pour JavaScript
+CSRF_COOKIE_SECURE = True  # True pour HTTPS
+
+# Cookies de session sécurisés
+SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
 # Headers autorisés
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -164,7 +162,7 @@ CORS_ALLOW_HEADERS = [
     'access-control-allow-origin',
 ]
 # Dans settings.py - POUR TEST SEULEMENT
-CORS_ALLOW_ALL_ORIGINS = True  # DANGEREUX en production
+
 # Méthodes autorisées
 CORS_ALLOW_METHODS = [
     'DELETE',
