@@ -27,13 +27,7 @@ DEBUG = False
 
 #ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = [
-    'https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app/',
-    'localhost',
-    '127.0.0.1',
-    '.herokuapp.com',
-    '.vercel.app',  # Tous les domaines Vercel
-]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
