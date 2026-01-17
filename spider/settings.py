@@ -110,6 +110,12 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+from corsheaders.defaults import default_headers
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'authorization',
+    'content-type',
+]
+
 CORS_ALLOWED_ORIGINS = [
     "https://votre-app.herokuapp.com",    
       "https://www.votre-domaine.com",
