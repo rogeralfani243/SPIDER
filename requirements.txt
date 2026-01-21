@@ -1,7 +1,7 @@
 asgiref==3.10.0
 channels==4.3.2
 channels_redis==4.3.0
-decouple==0.0.7
+dj-database-url==3.1.0
 Django==5.2.7
 django-cors-headers==4.9.0
 django-filter==25.2
@@ -15,5 +15,3 @@ redis==7.1.0
 sqlparse==0.5.3
 tzdata==2025.2
 whitenoise==6.11.0
-gunicorn==21.2.0
-dj_database_url==2.3.0
