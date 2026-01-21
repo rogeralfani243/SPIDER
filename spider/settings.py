@@ -56,6 +56,7 @@ INSTALLED_APPS = [
       'whitenoise.runserver_nostatic',
 ]
 MIDDLEWARE = [
+     'spider.middleware.cors.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # DOIT ÊTRE EN PREMIER
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
