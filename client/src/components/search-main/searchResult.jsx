@@ -67,7 +67,7 @@ const SearchResults = ({ onClose }) => {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
-        credentials: 'include'
+ withCredentials: false, 
       });
 
       if (response.ok) {

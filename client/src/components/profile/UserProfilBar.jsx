@@ -96,7 +96,7 @@ const navigate = useNavigate()
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include'
+ withCredentials: false, 
       });
 
       if (!response.ok) {

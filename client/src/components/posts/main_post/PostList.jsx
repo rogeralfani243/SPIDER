@@ -43,7 +43,7 @@ const PostList = () => {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
-        credentials: 'include'
+ withCredentials: false, 
       });
 
       if (response.ok) {
@@ -146,7 +146,7 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
       headers: {
         'Authorization': token ? `Token ${token}` : '',
       },
-      credentials: 'include'
+ withCredentials: false, 
     });
 
     if (!response.ok) {
@@ -340,7 +340,7 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
         method: 'DELETE',
         headers: {
           'Authorization': token ? `Token ${token}` : '',
-        },
+        }, withCredentials: false, 
       });
 
       if (response.ok) {
