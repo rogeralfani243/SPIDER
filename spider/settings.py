@@ -23,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  # Mettez True TEMPORAIREMENT pour debugger CORS
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ # Mettez True TEMPORAIREMENT pour debugger CORS
 
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
@@ -114,7 +115,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app",
     "https://spider-r2ci.vercel.app",
     "https://spider.vercel.app",
-    
+       "https://spider-v5op-git-master-roger-alfanis-projects.vercel.app", 
     # Développement local
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -134,6 +135,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://spider-app-d4d82ba4f1c1.herokuapp.com",
     "https://spider-git-master-roger-alfanis-projects.vercel.app",
     "http://localhost:3000",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://[\w-]+-git-master-roger-alfanis-projects\.vercel\.app$",
+    r"^https://[\w-]+\.vercel\.app$",
 ]
 
 # Cookies cross-domain
