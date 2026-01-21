@@ -1,4 +1,3 @@
-# Utilisez cette version
 asgiref==3.10.0
 channels==4.3.2
 channels-redis==4.3.0
@@ -11,7 +10,7 @@ djangorestframework-simplejwt==5.5.1
 gunicorn==21.2.0
 msgpack==1.1.2
 pillow==12.0.0
-psycopg[binary]==3.1.18
+psycopg-binary==3.2.0
 PyJWT==2.10.1
 python-decouple==3.8
 redis==7.1.0
