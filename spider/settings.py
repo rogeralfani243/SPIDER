@@ -23,11 +23,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True  # Mettez True TEMPORAIREMENT pour debugger CORS
 
-#ALLOWED_HOSTS = ['*']
-
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'spider-app-d4d82ba4f1c1.herokuapp.com',
+    'localhost',
+    '127.0.0.1',
+    '.vercel.app',
+    '.herokuapp.com
+]
 
 # Application definition
 
@@ -127,18 +131,11 @@ CORS_ALLOWED_ORIGINS = [
        "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
 # Si vous utilisez CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app/",
-     "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
-    "https://spider-r2ci.vercel.app",
-    "https://*.vercel.app",
     "https://spider-app-d4d82ba4f1c1.herokuapp.com",
+    "https://spider-git-master-roger-alfanis-projects.vercel.app",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
-     "http://100.64.6.76:3000",
-    "https://100.64.6.76:3000",
-      "https://*.ngrok-free.dev",
-         "https://spider-app-d4d82ba4f1c1.herokuapp.com",
-"https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ]
+]
+
 # Cookies cross-domain
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False  # ← IMPORTANT : doit être False pour JavaScript
@@ -333,3 +330,25 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     print("❌ Les emails ne pourront pas être envoyés.")
     print("❌ Vérifiez votre fichier .env") 
     """
+
+
+# Logging configuration pour debugger CORS
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'corsheaders': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
