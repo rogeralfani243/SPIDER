@@ -97,14 +97,25 @@ WSGI_APPLICATION = 'spider.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 import dj_database_url
-from decouple import config
+import os
+from pathlib import Path
+
+# Configuration pour python-decouple 3.8
+from decouple import AutoConfig
+
+# Initialiser config
+config = AutoConfig()
+
+# OU plus simplement, utilisez os.environ
+DATABASE_URL = os.environ.get('DATABASE_URL', config('DATABASE_URL', default=''))
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL')
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True
     )
 }
-
 """ 
 DATABASES = {
     'default': {
