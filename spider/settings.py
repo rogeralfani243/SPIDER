@@ -142,7 +142,7 @@ CSRF_TRUSTED_ORIGINS = [
 CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_COOKIE_HTTPONLY = False  # ← IMPORTANT : doit être False pour JavaScript
 CSRF_COOKIE_SECURE = True  # True pour HTTPS
-
+CORS_ALLOW_CREDENTIALS = False 
 # Cookies de session sécurisés
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = True
@@ -269,7 +269,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://spider-r2ci.vercel.app",
     "https://*.vercel.app",
 ]
-CORS_ALLOW_CREDENTIALS = True
+
 # Configuration pour Heroku Postgres (si vous l'utilisez)
 #db_from_env = dj_database_url.config(conn_max_age=600)
 #DATABASES['default'].update(db_from_env)
