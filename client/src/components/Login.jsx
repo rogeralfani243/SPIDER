@@ -84,7 +84,7 @@ const Login = ({ onLogin }) => {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfToken(),
           },
-           withCredentials: true, 
+           withCredentials: false, 
         }
       );
       
