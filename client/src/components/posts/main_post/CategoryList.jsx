@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { FaSpinner, FaTimesCircle, FaFilter, FaChevronRight, FaChevronLeft, FaTimes, FaEllipsisH } from 'react-icons/fa';
-
+import API_URL from '../../../hooks/useApiUrl';
 // Configuration API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
   const [categories, setCategories] = useState([]);
@@ -26,7 +25,7 @@ const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
         throw new Error('Authentication required');
       }
       
-      const response = await fetch(`${API_BASE_URL}/post/categories/`, {
+      const response = await fetch(`${API_URL}/post/categories/`, {
         method: 'GET',
         headers: {
           'Authorization': `Token ${token}`,

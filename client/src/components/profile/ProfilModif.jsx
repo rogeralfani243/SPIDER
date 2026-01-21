@@ -65,7 +65,7 @@ import {
   YouTube as YouTubeIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../hooks/useAuth';
-
+import API_URL from '../../hooks/useApiUrl';
 const PLATFORM_OPTIONS = [
   { value: 'website', label: 'Website', icon: <LanguageIcon /> },
   { value: 'github', label: 'GitHub', icon: <GitHubIcon /> },
@@ -179,7 +179,7 @@ const ProfileModif = ({ open, onClose }) => {
   const fetchCategories = async () => {
     try {
       setCategoriesLoading(true);
-      const response = await axios.get('http://localhost:8000/api/categories/');
+      const response = await axios.get(`${API_URL}/api/categories/`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error loading categories:', error);
@@ -192,7 +192,7 @@ const ProfileModif = ({ open, onClose }) => {
   const fetchProfileId = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/my-profile-id/', {
+      const response = await axios.get(`${API_URL}/api/my-profile-id/`, {
         headers: { 'Authorization': `Token ${token}` }
       });
       const profileId = response.data.profile_id;
@@ -207,7 +207,7 @@ const ProfileModif = ({ open, onClose }) => {
   const fetchProfileData = async (profileId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/api/profile/${profileId}/`, {
+      const response = await axios.get(`${API_URL}/api/profile/${profileId}/`, {
         headers: { 'Authorization': `Token ${token}` }
       });
       
@@ -225,7 +225,7 @@ const ProfileModif = ({ open, onClose }) => {
   const fetchUserInfoFromToken = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:8000/api/auth/user/', {
+      const response = await axios.get(`${API_URL}/api/auth/user/`, {
         headers: { 'Authorization': `Token ${token}` }
       });
       return response.data.user;
@@ -557,7 +557,7 @@ const ProfileModif = ({ open, onClose }) => {
         console.log(pair[0] + ': ' + pair[1]);
       }
 
-      const response = await axios.put(`http://localhost:8000/api/profile/${profileId}/update/`, formData, {
+      const response = await axios.put(`${API_URL}/api/profile/${profileId}/update/`, formData, {
         headers: { 
           'Authorization': `Token ${token}`,
           'Content-Type': 'multipart/form-data'
