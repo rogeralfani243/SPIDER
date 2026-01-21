@@ -4,5 +4,21 @@
   "installCommand": "cd client && npm install --legacy-peer-deps",
   "devCommand": "cd client && npm start",
   "framework": "create-react-app",
-  "regions": ["cdg1"]
+  "regions": ["cdg1"],
+   "headers": [
+    {
+      "source": "/manifest.json",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json"
+        }
+      ]
+    }
+  ]
 }
+
