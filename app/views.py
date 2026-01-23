@@ -684,6 +684,11 @@ def update_profile(request, profile_id):
         print(f"📦 Request data keys: {list(request.data.keys())}")
         print(f"📁 Files: {list(request.FILES.keys())}")
         
+        # DEBUG: Afficher toutes les données
+        print(f"📊 All POST data:")
+        for key, value in request.data.items():
+            print(f"   {key}: {value}")
+        
         profile = get_object_or_404(Profile, id=profile_id)
         
         # Check permissions
@@ -740,7 +745,83 @@ def update_profile(request, profile_id):
             updated_fields.append('birth_date')
             print(f"✏️ Updated birth_date: {request.data['birth_date']}")
 
+        # AJOUTEZ CE BLOC POUR LA CATÉGORIE
+        if 'category' in request.data:
+            category_value = request.data['category']
+            print(f"🎯 Processing category value: {category_value} (type: {type(category_value)})")
+            
+            if category_value:  # Si ce n'est pas vide
+                try:
+                    # Essayer de convertir en entier
+                    category_id = int(category_value)
+                    category = Category.objects.get(id=category_id)
+                    profile.category = category
+                    updated_fields.append('category')
+                    print(f"✏️ Updated category to ID: {category_id} (Name: {category.name})")
+                except (ValueError, Category.DoesNotExist) as e:
+                    print(f"⚠️ Could not find category with ID {category_value}: {e}")
+                    # Essayer par nom
+                    try:
+                        category = Category.objects.get(name=category_value)
+                        profile.category = category
+                        updated_fields.append('category')
+                        print(f"✏️ Updated category to Name: {category_value} (ID: {category.id})")
+                    except Category.DoesNotExist:
+                        print(f"❌ Category '{category_value}' not found")
+                        profile.category = None
+                        updated_fields.append('category')
+                        print(f"✏️ Set category to None (not found)")
+            else:
+                # Si category est vide, mettre à None
+                profile.category = None
+                updated_fields.append('category')
+                print(f"✏️ Set category to None (empty value)")
+        
+        # Ajoutez aussi pour 'category_id' au cas où
+        elif 'category_id' in request.data:
+            category_id_value = request.data['category_id']
+            print(f"🎯 Processing category_id value: {category_id_value}")
+            
+            if category_id_value and category_id_value != 'null' and category_id_value != '':
+                try:
+                    category_id = int(category_id_value)
+                    category = Category.objects.get(id=category_id)
+                    profile.category = category
+                    updated_fields.append('category')
+                    print(f"✏️ Updated category via category_id to ID: {category_id}")
+                except (ValueError, Category.DoesNotExist) as e:
+                    print(f"❌ Invalid category_id {category_id_value}: {e}")
+                    profile.category = None
+            else:
+                profile.category = None
+                updated_fields.append('category')
+                print(f"✏️ Set category to None (empty category_id)")
 
+        # Gérer les champs d'adresse si présents
+        if 'address' in request.data:
+            profile.address = request.data['address']
+            updated_fields.append('address')
+            print(f"✏️ Updated address: {request.data['address']}")
+        
+        if 'city' in request.data:
+            profile.city = request.data['city']
+            updated_fields.append('city')
+            print(f"✏️ Updated city: {request.data['city']}")
+        
+        if 'state' in request.data:
+            profile.state = request.data['state']
+            updated_fields.append('state')
+            print(f"✏️ Updated state: {request.data['state']}")
+        
+        if 'zip_code' in request.data:
+            profile.zip_code = request.data['zip_code']
+            updated_fields.append('zip_code')
+            print(f"✏️ Updated zip_code: {request.data['zip_code']}")
+        
+        if 'country' in request.data:
+            profile.country = request.data['country']
+            updated_fields.append('country')
+            print(f"✏️ Updated country: {request.data['country']}")
 
         # Handle image upload
         if 'image' in request.FILES:
@@ -750,11 +831,15 @@ def update_profile(request, profile_id):
 
         print(f"💾 Saving {len(updated_fields)} fields: {updated_fields}")
         
+        # Afficher l'état de la catégorie avant sauvegarde
+        print(f"🔍 Category before save: {profile.category}")
+        
         # Save changes
         profile.user.save()
         profile.save()
         
         print("✅ All changes saved to database")
+        print(f"✅ Category after save: {profile.category}")
 
         # Return updated data
         serializer = ProfileSerializer(profile)
@@ -763,6 +848,15 @@ def update_profile(request, profile_id):
             'updated_fields': updated_fields,
             'message': f'Profile updated successfully. Updated: {", ".join(updated_fields)}'
         }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print(f"💥 Exception in update_profile: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return Response({
+            'error': 'Failed to update profile',
+            'details': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     except Exception as e:
         print(f"💥 Exception in update_profile: {str(e)}")
