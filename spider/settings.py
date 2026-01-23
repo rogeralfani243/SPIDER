@@ -281,7 +281,7 @@ if IS_HEROKU:
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", 'eu-north-1')  # Paris
     AWS_QUERYSTRING_AUTH = False  # URLs publiques
 
-    MEDIA_URL = f"https://amz-spider-app.s3.eu-west-3.amazonaws.com/media/"
+    MEDIA_URL = f"https://amz-spider-app.s3.eu-north-1.amazonaws.com/media/"
 else:
     # === Développement local ===
     MEDIA_URL = "/media/"
