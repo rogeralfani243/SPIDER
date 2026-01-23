@@ -113,7 +113,7 @@ def register_view(request):
             send_mail(
                 subject,
                 message,
-                from_email,
+                settings.EMAIL_HOST_USER,
                 recipient_list,
                 fail_silently=False,
             )
@@ -281,7 +281,8 @@ def verify_email_view(request):
                 send_mail(
                     'Welcome to Our Application!',
                     f'Hello {user.username},\n\nYour account has been successfully verified and activated!\n\nWelcome aboard!\n\nBest regards,\n{site_name} Team',
-                    settings.DEFAULT_FROM_EMAIL,
+                    settings.EMAIL_HOST_USER,
+
                     [user.email],
                     fail_silently=True,
                 )
@@ -387,7 +388,8 @@ def resend_verification_code(request):
             send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+               settings.EMAIL_HOST_USER,
+
                 [email],
                 fail_silently=False,
             )
@@ -479,13 +481,13 @@ def login_view(request):
             })
         else:
             return Response(
-                {'error': 'Compte utilisateur désactivé'}, 
+                {'error': ' User account disabled '}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
     else:
         print(f"❌ Login failed for: {username}")
         return Response(
-            {'error': 'Nom d\'utilisateur ou mot de passe incorrect'}, 
+            {'error': 'Incorrect username or password'}, 
             status=status.HTTP_401_UNAUTHORIZED
         )
 #for user logout
