@@ -18,3 +18,15 @@ class CorsMiddleware:
             response.content = ''
         
         return response
+    
+
+
+[
+    {
+        "AllowedHeaders": ["*"],
+        "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+        "AllowedOrigins": ["*"],
+        "ExposeHeaders": [],
+        "MaxAgeSeconds": 3000
+    }
+]
