@@ -258,6 +258,18 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Détection Heroku
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Whitenoise options
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_ALLOW_ALL_ORIGINS = True
+
+# ----------------------------
+# Media files (uploads utilisateurs)
+# ----------------------------
 IS_HEROKU = "DYNO" in os.environ
 
 if IS_HEROKU:
@@ -273,6 +285,7 @@ else:
     # === Développement local ===
     MEDIA_URL = "/media/"
     MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -334,10 +347,6 @@ if ENV_PATH.exists():
                     os.environ[key.strip()] = value.strip().strip('"').strip("'")
 else:
     print("⚠️ Fichier .env non trouvé. Créez-en un avec vos identifiants email.")
-# Whitenoise options
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 
 # ========== CONFIGURATION EMAIL POUR ENVOI RÉEL ==========
