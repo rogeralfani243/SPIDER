@@ -880,6 +880,27 @@ def profile_activity(request):
         # If no activities, add welcome message
         if total_activities == 0:
             activities.append({
+    'id': 'profile_setup_1',
+    'type': 'profile_setup',
+    'title': 'Complete your profile',
+    'description': 'Update your profile and choose a category so other users can easily find you.',
+    'timestamp': now.isoformat(),
+    'user': {
+        'id': user.id,
+        'username': user.username,
+    },
+    'metadata': {
+        'is_profile_setup': True,
+        'suggestions': [
+            'Add a profile picture',
+            'Write a short bio about yourself',
+            'Choose a category that fits you',
+            'Highlight your skills or interests'
+        ]
+    }
+})
+
+            activities.append({
                 'id': 'welcome_1',
                 'type': 'welcome',
                 'title': 'Welcome to your dashboard!',
