@@ -1892,7 +1892,6 @@ def create_zip_response(media_list, post_title):
         # Nettoyer le fichier temporaire
         if os.path.exists(temp_file.name):
             os.remove(temp_file.name)
-
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def get_post_media_list(request, post_id):
@@ -1910,19 +1909,52 @@ def get_post_media_list(request, post_id):
     
     media_list = []
     
-
+    # Détecter si on utilise S3
+    from django.conf import settings
+    USE_S3 = hasattr(settings, 'DEFAULT_FILE_STORAGE') and 's3' in settings.DEFAULT_FILE_STORAGE.lower()
+    
+    # Fonction pour obtenir la taille sécurisée
+    def get_safe_file_size(file_field):
+        """Récupère la taille d'un fichier de manière sécurisée (support S3)"""
+        if not file_field:
+            return 0
+        
+        try:
+            # Essayer d'abord l'attribut size (fonctionne souvent avec S3)
+            if hasattr(file_field, 'size'):
+                return file_field.size
+            
+            # Si S3 et l'attribut size n'existe pas, on ne peut pas récupérer la taille
+            # sans télécharger le fichier (ce qu'on veut éviter)
+            return 0
+            
+        except (FileNotFoundError, OSError, ValueError, AttributeError):
+            # En cas d'erreur, retourner 0
+            return 0
+    
+    # Fonction pour obtenir l'extension sécurisée
+    def get_safe_extension(file_field):
+        """Récupère l'extension du fichier de manière sécurisée"""
+        if not file_field or not file_field.name:
+            return ''
+        
+        try:
+            return file_field.name.split('.')[-1].lower()
+        except (AttributeError, IndexError):
+            return ''
     
     # Images supplémentaires
     post_images = post.post_images.all().order_by('order')
     for i, image in enumerate(post_images):
+        safe_size = get_safe_file_size(image.image)
         media_list.append({
             'id': f"image-{i}",
             'type': 'image',
             'name': f"Image {i+1}",
             'url': request.build_absolute_uri(image.image.url) if image.image else None,
-            'size': format_file_size(image.image.size) if image.image else '0 KB',
-            'bytes': image.image.size if image.image else 0,
-            'extension': image.image.name.split('.')[-1].lower() if image.image else '',
+            'size': format_file_size(safe_size),
+            'bytes': safe_size,
+            'extension': get_safe_extension(image.image),
             'created_at': image.uploaded_at,
             'order': image.order + 1
         })
@@ -1930,14 +1962,15 @@ def get_post_media_list(request, post_id):
     # Fichiers
     post_files = post.post_files.all().order_by('created_at')
     for i, file in enumerate(post_files):
+        safe_size = get_safe_file_size(file.file)
         media_list.append({
             'id': f"file-{i}",
             'type': file.file_type,
-            'name': file.name or file.file.name,
+            'name': file.name or (file.file.name if file.file else ''),
             'url': request.build_absolute_uri(file.file.url) if file.file else None,
-            'size': format_file_size(file.file.size) if file.file else '0 KB',
-            'bytes': file.file.size if file.file else 0,
-            'extension': file.file.name.split('.')[-1].lower() if file.file else '',
+            'size': format_file_size(safe_size),
+            'bytes': safe_size,
+            'extension': get_safe_extension(file.file),
             'created_at': file.created_at,
             'order': 100 + i,  # Les fichiers viennent après les images
             'file_type_display': file.get_file_type_display()
