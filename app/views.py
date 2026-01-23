@@ -1929,7 +1929,8 @@ def change_password(request):
             send_mail(
                 'Password Changed Successfully',
                 f'Your password has been successfully changed. If you did not make this change, please contact support immediately.',
-                settings.DEFAULT_FROM_EMAIL,
+              settings.EMAIL_HOST_USER,
+
                 [user.email],
                 fail_silently=True,
             )
@@ -2043,7 +2044,8 @@ def request_password_reset_code(request):
             send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+            settings.EMAIL_HOST_USER,
+
                 [user.email],
                 fail_silently=False,
             )
@@ -2181,7 +2183,8 @@ def reset_password(request):
             send_mail(
                 'Password Reset Successful',
                 f'Your password has been successfully reset. If you did not make this change, please contact support immediately.',
-                settings.DEFAULT_FROM_EMAIL,
+               settings.EMAIL_HOST_USER,
+
                 [user.email],
                 fail_silently=True,
             )
