@@ -494,7 +494,7 @@ class GroupDetailSerializer(ConversationSerializer):
     current_members_count = serializers.SerializerMethodField()
     is_full = serializers.SerializerMethodField()
     available_spots = serializers.SerializerMethodField()
-
+    tags = serializers.SerializerMethodField()  
     class Meta(ConversationSerializer.Meta):
         fields = ConversationSerializer.Meta.fields + [
             'is_member', 'can_invite', 'can_join', 'has_pending_request',
@@ -590,6 +590,39 @@ class GroupDetailSerializer(ConversationSerializer):
         if obj.max_participants:
             return max(0, obj.max_participants - obj.participants.count())
         return None
+    def get_tags(self, obj):
+        """Retourne les tags sous forme de tableau"""
+        print(f"🔍 DEBUG - Raw tags from model: {obj.tags}")
+        print(f"🔍 DEBUG - Type of tags: {type(obj.tags)}")
+        
+        if obj.tags:
+            # Si c'est déjà un tableau
+            if isinstance(obj.tags, list):
+                print(f"✅ Tags is already a list: {obj.tags}")
+                return obj.tags
+            
+            # Si c'est une chaîne JSON
+            if isinstance(obj.tags, str):
+                try:
+                    import json
+                    parsed = json.loads(obj.tags)
+                    print(f"✅ Parsed JSON tags: {parsed}")
+                    
+                    if isinstance(parsed, list):
+                        return parsed
+                    else:
+                        return [str(parsed)]
+                except (json.JSONDecodeError, TypeError) as e:
+                    print(f"❌ JSON parse error: {e}")
+                    # Si ce n'est pas du JSON valide, retourner comme tableau
+                    return [obj.tags]
+            
+            # Autres types
+            print(f"⚠️ Unknown tags format, converting to string")
+            return [str(obj.tags)]
+        
+        print(f"📭 No tags found")
+        return []
 class PublicGroupSerializer(serializers.ModelSerializer):
     """Serializer pour les groupes publics (vue non-authentifiée)"""
     category = GroupCategorySerializer(read_only=True)
