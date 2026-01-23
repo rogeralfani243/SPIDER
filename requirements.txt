@@ -25,3 +25,4 @@ urllib3==2.6.3
 whitenoise==6.11.0
 psycopg2-binary>=2.9.9
 gunicorn==21.2.0
+Pillow==10.1.0  
