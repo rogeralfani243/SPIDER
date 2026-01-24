@@ -245,17 +245,6 @@ TEMPLATES = [
         },
     },
 ]# Détection d'environnement Heroku
-import os
-from pathlib import Path
-
-# Build paths
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-dev')
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 # Détection Heroku
 STATIC_URL = "/static/"
@@ -273,38 +262,6 @@ WHITENOISE_ALLOW_ALL_ORIGINS = True
 # === MEDIA FILES (S3) ===
 
 # ===== S3 MEDIA STORAGE (FORCED) =====
-# === DÉTECTION ENVIRONNEMENT ===
-IS_HEROKU = "DYNO" in os.environ
-
-# === CONFIGURATION STORAGE ===
-# TOUJOURS utiliser S3 sur Heroku, même en DEBUG
-if IS_HEROKU or os.environ.get('FORCE_S3', 'False') == 'True':
-    # HEROKU ou S3 forcé
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    
-    # Configuration AWS (les valeurs viennent des variables d'environnement)
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "amz-spider-app")
-    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
-    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    
-    # TRÈS IMPORTANT
-    AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
-    
-    # URLs
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    
-    print(f"✅ Configuration S3 activée pour le bucket: {AWS_STORAGE_BUCKET_NAME}")
-    
-else:
-    # LOCAL (développement)
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-    print("✅ Configuration locale (FileSystemStorage)")
 
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
