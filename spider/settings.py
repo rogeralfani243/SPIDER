@@ -270,14 +270,23 @@ WHITENOISE_ALLOW_ALL_ORIGINS = True
 # ----------------------------
 # Media files (uploads utilisateurs)
 # ----------------------------
-IS_HEROKU = "DYNO" in os.environ
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME','amz-spider-app')  # amz-spider-app
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME','eu-north-1')            # eu-north-1
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
-AWS_LOCATION = "media"
+# === MEDIA FILES (S3) ===
+
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME")
+
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+AWS_S3_ADDRESSING_STYLE = "virtual"
+AWS_QUERYSTRING_AUTH = False
+AWS_DEFAULT_ACL = None   # IMPORTANT
+AWS_S3_FILE_OVERWRITE = False
+
+MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
+
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
@@ -285,22 +294,8 @@ AWS_S3_OBJECT_PARAMETERS = {
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 # Disable ACLs
 AWS_DEFAULT_ACL = None 
-MEDIA_ROOT = BASE_DIR / "media"
 
-if IS_HEROKU:
-    # === Production ===
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", 'eu-north-1')  # Paris
-    AWS_QUERYSTRING_AUTH = False  # URLs publiques
 
-    MEDIA_URL = f"https://amz-spider-app.s3.eu-north-1.amazonaws.com/media/"
-else:
-    # === Développement local ===
-    MEDIA_URL = "/media/"
-    MEDIA_ROOT = BASE_DIR / "media"
 
 
 # Default primary key field type
