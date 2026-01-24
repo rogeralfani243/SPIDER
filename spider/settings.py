@@ -271,8 +271,8 @@ WHITENOISE_ALLOW_ALL_ORIGINS = True
 # Media files (uploads utilisateurs)
 # ----------------------------
 IS_HEROKU = "DYNO" in os.environ
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')  # amz-spider-app
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')            # eu-north-1
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME','amz-spider-app')  # amz-spider-app
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME','eu-north-1')            # eu-north-1
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
 AWS_LOCATION = "media"
 
@@ -285,6 +285,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 # Disable ACLs
 AWS_DEFAULT_ACL = None 
+MEDIA_ROOT = BASE_DIR / "media"
 
 if IS_HEROKU:
     # === Production ===
