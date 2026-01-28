@@ -249,7 +249,106 @@ TEMPLATES = [
 # ============== CONFIGURATION S3 UNIFIÉE ==============
 # Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
+# collectstatic_to_s3.py
+import os
+import sys
+import django
+from pathlib import Path
 
+# Configuration forcée S3
+os.environ['DJANGO_SETTINGS_MODULE'] = 'spider.settings'
+os.environ['USE_S3_FOR_COLLECTSTATIC'] = 'true'
+
+# Ajouter le répertoire parent au path
+
+sys.path.insert(0, str(BASE_DIR))
+
+django.setup()
+
+from django.conf import settings
+from django.core.management import call_command
+import boto3
+from boto3.s3.transfer import TransferConfig
+
+print("🔄 COLLECTSTATIC VERS S3 🔄")
+print(f"Bucket: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'Non défini')}")
+print(f"Storage utilisé: {getattr(settings, 'STATICFILES_STORAGE', 'Non défini')}")
+
+# 1. Vérifier la configuration
+if not hasattr(settings, 'AWS_STORAGE_BUCKET_NAME') or not settings.AWS_STORAGE_BUCKET_NAME:
+    print("❌ ERREUR: AWS_STORAGE_BUCKET_NAME non configuré")
+    sys.exit(1)
+
+# 2. Créer un client S3 pour upload manuel
+s3 = boto3.client(
+    's3',
+    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+    region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'eu-west-3')
+)
+
+# 3. Récupérer tous les fichiers statiques
+from django.contrib.staticfiles.finders import get_finders
+
+all_static_files = []
+for finder in get_finders():
+    for path, storage in finder.list([]):
+        if hasattr(storage, 'path'):
+            full_path = storage.path(path)
+            if os.path.exists(full_path):
+                all_static_files.append((path, full_path))
+
+print(f"📁 {len(all_static_files)} fichiers statiques trouvés")
+
+# 4. Uploader chaque fichier sur S3
+uploaded = 0
+for static_path, full_path in all_static_files:
+    s3_key = f'static/{static_path}'
+    
+    try:
+        # Déterminer content-type
+        import mimetypes
+        content_type, _ = mimetypes.guess_type(full_path)
+        if not content_type:
+            content_type = 'application/octet-stream'
+        
+        # Upload vers S3
+        s3.upload_file(
+            full_path,
+            settings.AWS_STORAGE_BUCKET_NAME,
+            s3_key,
+            ExtraArgs={
+                'ContentType': content_type,
+                'CacheControl': 'max-age=86400',
+                # Pas d'ACL si le bucket ne les supporte pas
+            }
+        )
+        uploaded += 1
+        print(f"  ✅ {s3_key}")
+        
+    except Exception as e:
+        print(f"  ❌ {s3_key}: {e}")
+
+print(f"\n🎉 {uploaded}/{len(all_static_files)} fichiers uploadés sur S3")
+
+# 5. Vérifier sur S3
+print("\n📋 Vérification sur S3...")
+try:
+    response = s3.list_objects_v2(
+        Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+        Prefix='static/',
+        MaxKeys=10
+    )
+    
+    if 'Contents' in response:
+        print(f"Fichiers sur S3 ({len(response['Contents'])}):")
+        for obj in response['Contents'][:5]:
+            print(f"  • {obj['Key']} ({obj['Size']} octets)")
+    else:
+        print("⚠️  Aucun fichier trouvé sur S3")
+        
+except Exception as e:
+    print(f"❌ Erreur vérification: {e}")
 # OBLIGATOIRE : Même avec S3, STATIC_ROOT doit être défini
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
