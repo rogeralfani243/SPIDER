@@ -257,61 +257,24 @@ from pathlib import Path
 # ========== CONFIGURATION DE BASE ==========
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# STATIC FILES CONFIGURATION
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'  # Valeur par défaut
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-west-3")
 
-# ========== DÉTECTION ENVIRONNEMENT ==========
-IS_HEROKU = "DYNO" in os.environ
+if AWS_STORAGE_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 
-# ========== VARIABLES S3 ==========
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-north-1')
-
-# ========== LOGGING POUR DÉBUGUER ==========
-# (optionnel, pour voir ce qui se passe)
-import logging
-logger = logging.getLogger(__name__)
-
-if IS_HEROKU:
-    logger.info("🚀 Environnement Heroku détecté")
-    if AWS_STORAGE_BUCKET_NAME:
-        logger.info(f"📦 Bucket S3 configuré: {AWS_STORAGE_BUCKET_NAME}")
-    else:
-        logger.warning("⚠️  Bucket S3 non configuré sur Heroku")
-
-# ========== CONFIGURATION S3 ==========
-# IMPORTANT: Ne pas faire de print() ici, seulement assigner des variables
-
-if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
-    # S3 est configuré sur Heroku
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_DEFAULT_ACL = None  # Pas d'ACL si le bucket ne les supporte pas
     AWS_QUERYSTRING_AUTH = False
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
-    
-    # Utiliser S3 pour tout
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    
-    # URLs S3
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-    
-    logger.info(f"✅ S3 activé - URL: {STATIC_URL}")
-    
-elif IS_HEROKU:
-    # Heroku sans S3 - utiliser WhiteNoise
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    logger.info("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
-    
+    AWS_DEFAULT_ACL = None
+
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
 else:
-    # Développement local
-    logger.info("💻 Mode développement local")
+    STATIC_URL = "/static/"
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
