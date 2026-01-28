@@ -250,27 +250,63 @@ TEMPLATES = [
 # Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
 # settings.py - VERSION CORRIGÉE
+# ============== CONFIGURATION S3 CORRIGÉE ==============
 
+# Détection Heroku (IMPORTANT!)
+IS_HEROKU = "DYNO" in os.environ
 
+# Configuration S3
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-west-3")  # Corrigez selon votre bucket
 
-if AWS_STORAGE_BUCKET_NAME:
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-    AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = None
-
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-
-    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
-
+# STATIC_ROOT est toujours requis
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+# Valeurs par défaut (développement local)
+STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
+
+# Si on est sur Heroku ET que S3 est configuré
+if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
+    print(f"🚀 Production Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    
+    # Configuration S3
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    
+    AWS_QUERYSTRING_AUTH = False
+    AWS_DEFAULT_ACL = None  # Pas d'ACL si le bucket ne les supporte pas
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    
+    # IMPORTANT: Utiliser le bon format pour la région
+    if AWS_S3_REGION_NAME == "us-east-1":
+        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    else:
+        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    
+    # URLs S3
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+    
+    print(f"✅ URLs S3 configurées:")
+    print(f"   - Statique: {STATIC_URL}")
+    print(f"   - Média: {MEDIA_URL}")
+    
+elif IS_HEROKU:
+    # Heroku sans S3 - utiliser WhiteNoise
+    print("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    
+else:
+    # Développement local
+    print("💻 Mode développement local")
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+# ============== FIN CONFIGURATION S3 ==============
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
