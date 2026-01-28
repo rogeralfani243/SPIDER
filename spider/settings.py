@@ -168,14 +168,9 @@ USE_TZ = True
 DEFAULT_CHARSET = 'utf-8'
 
 # ========== CONFIGURATION S3 SIMPLIFIÉE ==========
+# =========== CONFIGURATION FICHIERS ===========
 
-# Configuration de base pour les fichiers
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-
-# Va# Variables S3 depuis l'environnement
+# Variables S3 depuis l'environnement (TOUJOURS LES LIRE)
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
@@ -185,6 +180,8 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 # Si sur Heroku ET S3 configuré
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     print(f"🚀 Activation S3 pour Heroku - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    
+    # =========== CONFIGURATION S3 (PAS DE FICHIERS LOCAUX) ===========
     
     # Configuration S3
     AWS_DEFAULT_ACL = None
@@ -197,18 +194,43 @@ if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     # Domaine S3
     AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
     
-    # URLs
+    # URLs S3
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     
-    # Stockages
-    DEFAULT_FILE_STORAGE = 'spider.storage_backends.MediaStorage'  # <- VOTRE CLASSE
-    STATICFILES_STORAGE = 'spider.storage_backends.StaticStorage'  # <- VOTRE CLASSE
+    # Stockages S3
+    DEFAULT_FILE_STORAGE = 'spider.storage_backends.MediaStorage'
+    STATICFILES_STORAGE = 'spider.storage_backends.StaticStorage'
     
+    # ⚠️ IMPORTANT : NE PAS DÉFINIR STATIC_ROOT et MEDIA_ROOT quand on utilise S3 !
+    # Les laisser non définis ou les définir comme chaînes vides
+    STATIC_ROOT = ''  # OU ne pas le définir du tout
+    MEDIA_ROOT = ''   # OU ne pas le définir du tout
     
-    # Important: Désactive WhiteNoise quand S3 est actif
-    MIDDLEWARE = [m for m in MIDDLEWARE if 'WhiteNoiseMiddleware' not in str(m)]# ========== FIN CONFIGURATION S3 ==========
-
+    # Désactiver WhiteNoise
+    MIDDLEWARE = [m for m in MIDDLEWARE if 'WhiteNoiseMiddleware' not in str(m)]
+    
+    print("✅ Configuration S3 complète - Stockage exclusivement sur S3")
+    
+else:
+    # =========== CONFIGURATION LOCALE (DÉVELOPPEMENT) ===========
+    print("💻 Mode local - Stockage fichiers locaux")
+    
+    # URLs locales
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+    
+    # Stockages locaux
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    
+    # Chemins locaux (UNIQUEMENT en mode local)
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    
+    # WhiteNoise pour Heroku sans S3
+    if IS_HEROKU:
+        STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
