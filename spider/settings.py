@@ -266,10 +266,13 @@ TEMPLATES = [
 IS_HEROKU = "DYNO" in os.environ
 
 # Configuration de base
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Variables S3
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
+
 # ========== TOUT SUR S3 ==========
 
 # WhiteNoise pour les statiques (TOUJOURS sur Heroku)
@@ -286,7 +289,22 @@ AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
-
+    # Configuration S3
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
+AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+if AWS_S3_REGION_NAME == "us-east-1":
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+else:
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+"""  
 # Si sur Heroku ET S3 configuré → médias sur S3
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
     print(f"🚀 Production Heroku - Statiques: WhiteNoise, Médias: S3")
@@ -314,7 +332,7 @@ if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
 else:
     # Pas de S3 → médias locaux
     print("⚠️  Pas de S3 - Médias locaux")
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage" """
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
