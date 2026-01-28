@@ -258,10 +258,11 @@ from pathlib import Path
 IS_HEROKU = "DYNO" in os.environ
 
 # Configuration de base
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATIC_URL = "/static/"
-MEDIA_URL = "/media/"
 
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+MEDIA_URLS ='/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # WhiteNoise pour les statiques (toujours)
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_USE_FINDERS = True
