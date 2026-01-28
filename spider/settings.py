@@ -260,7 +260,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'spider.settings'
 os.environ['USE_S3_FOR_COLLECTSTATIC'] = 'true'
 
 # Ajouter le répertoire parent au path
-
+BASE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(BASE_DIR))
 
 django.setup()
