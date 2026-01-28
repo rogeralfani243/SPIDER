@@ -249,64 +249,55 @@ TEMPLATES = [
 # ============== CONFIGURATION S3 UNIFIÉE ==============
 # Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
-# settings.py - VERSION CORRIGÉE
-# ============== CONFIGURATION S3 CORRIGÉE ==============
+import os
 
-# Détection Heroku (IMPORTANT!)
-IS_HEROKU = "DYNO" in os.environ
+# Variables AWS depuis l'environnement
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-3')
 
-# Configuration S3
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-west-3")  # Corrigez selon votre bucket
+# Vérifiez si S3 est configuré
+S3_ENABLED = all([
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    AWS_STORAGE_BUCKET_NAME
+])
 
-# STATIC_ROOT est toujours requis
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
-# Valeurs par défaut (développement local)
-STATIC_URL = "/static/"
-MEDIA_URL = "/media/"
-
-# Si on est sur Heroku ET que S3 est configuré
-if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
-    print(f"🚀 Production Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+if S3_ENABLED:
+    print(f"✅ Configuration S3 détectée - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    
+    # FORCER S3 pour tous les fichiers
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
     # Configuration S3
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    
-    AWS_QUERYSTRING_AUTH = False
-    AWS_DEFAULT_ACL = None  # Pas d'ACL si le bucket ne les supporte pas
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
     
-    # IMPORTANT: Utiliser le bon format pour la région
-    if AWS_S3_REGION_NAME == "us-east-1":
-        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-    else:
-        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    # URLs
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
     
-    # URLs S3
-    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
-    
-    print(f"✅ URLs S3 configurées:")
-    print(f"   - Statique: {STATIC_URL}")
-    print(f"   - Média: {MEDIA_URL}")
-    
-elif IS_HEROKU:
-    # Heroku sans S3 - utiliser WhiteNoise
-    print("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # IMPORTANT: Désactiver whitenoise pour les statiques
+    # Assurez-vous que 'whitenoise.runserver_nostatic' est dans INSTALLED_APPS
+    # mais le middleware et storage sont gérés par S3
     
 else:
-    # Développement local
-    print("💻 Mode développement local")
+    print("⚠️  Mode développement - Stockage local")
+    # Configuration locale
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    
 # ============== FIN CONFIGURATION S3 ==============
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -348,7 +339,11 @@ CSRF_TRUSTED_ORIGINS = [
 #DATABASES['default'].update(db_from_env)
 
 # settings.py
+import os
+from pathlib import Path
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ========== CHARGEMENT DU .env ==========
 ENV_PATH = BASE_DIR / '.env'
