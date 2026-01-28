@@ -246,67 +246,57 @@ TEMPLATES = [
     },
 ]# Détection d'environnement Heroku
 
-# Détection Heroku
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-# Whitenoise options
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_ALLOW_ALL_ORIGINS = True
-
-# ----------------------------
-# Media files (uploads utilisateurs)
-# ----------------------------
-# === MEDIA FILES (S3) ===
-
-# ===== S3 MEDIA STORAGE (FORCED) =====
+# ============== CONFIGURATION S3 UNIFIÉE ==============
+# Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
 import os
 
-# ... vos autres imports ...
-
-# === CONFIGURATION S3 ===
-# Récupération des variables d'environnement
+# Variables AWS depuis l'environnement
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-3')
 
-# Configuration essentielle
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+# Vérifiez si S3 est configuré
+S3_ENABLED = all([
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    AWS_STORAGE_BUCKET_NAME
+])
 
-# FORCER l'utilisation de S3 quand les variables sont présentes
-if AWS_STORAGE_BUCKET_NAME:  # Si le bucket est défini
-    # Stockage par défaut pour tous les fichiers
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+if S3_ENABLED:
+    print(f"✅ Configuration S3 détectée - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
-    # Stockage pour les fichiers statiques
+    # FORCER S3 pour tous les fichiers
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # Configuration S3
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
     
     # URLs
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
     
-    # Optionnel: Désactiver les permissions publiques si besoin
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_QUERYSTRING_AUTH = False
+    # IMPORTANT: Désactiver whitenoise pour les statiques
+    # Assurez-vous que 'whitenoise.runserver_nostatic' est dans INSTALLED_APPS
+    # mais le middleware et storage sont gérés par S3
     
 else:
-    # Mode développement local
+    print("⚠️  Mode développement - Stockage local")
+    # Configuration locale
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
-
-
-
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    
+# ============== FIN CONFIGURATION S3 ==============
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
