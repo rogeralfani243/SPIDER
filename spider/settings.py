@@ -202,8 +202,9 @@ if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     
     # Stockages
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = 'spider.storage_backends.MediaStorage'  # <- VOTRE CLASSE
+    STATICFILES_STORAGE = 'spider.storage_backends.StaticStorage'  # <- VOTRE CLASSE
+    
     
     # Important: Désactive WhiteNoise quand S3 est actif
     MIDDLEWARE = [m for m in MIDDLEWARE if 'WhiteNoiseMiddleware' not in str(m)]# ========== FIN CONFIGURATION S3 ==========
