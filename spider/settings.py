@@ -249,188 +249,69 @@ TEMPLATES = [
 # ============== CONFIGURATION S3 UNIFIÉE ==============
 # Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
-# collectstatic_to_s3.py
+# settings.py - VERSION CORRIGÉE
+
 import os
-import sys
-import django
 from pathlib import Path
 
-# Configuration forcée S3
-os.environ['DJANGO_SETTINGS_MODULE'] = 'spider.settings'
-os.environ['USE_S3_FOR_COLLECTSTATIC'] = 'true'
+# ========== CONFIGURATION DE BASE ==========
+BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Ajouter le répertoire parent au path
-BASE_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE_DIR))
-
-django.setup()
-
-from django.conf import settings
-from django.core.management import call_command
-import boto3
-from boto3.s3.transfer import TransferConfig
-
-print("🔄 COLLECTSTATIC VERS S3 🔄")
-print(f"Bucket: {getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'Non défini')}")
-print(f"Storage utilisé: {getattr(settings, 'STATICFILES_STORAGE', 'Non défini')}")
-
-# 1. Vérifier la configuration
-if not hasattr(settings, 'AWS_STORAGE_BUCKET_NAME') or not settings.AWS_STORAGE_BUCKET_NAME:
-    print("❌ ERREUR: AWS_STORAGE_BUCKET_NAME non configuré")
-    sys.exit(1)
-
-# 2. Créer un client S3 pour upload manuel
-s3 = boto3.client(
-    's3',
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'eu-west-3')
-)
-
-# 3. Récupérer tous les fichiers statiques
-from django.contrib.staticfiles.finders import get_finders
-
-all_static_files = []
-for finder in get_finders():
-    for path, storage in finder.list([]):
-        if hasattr(storage, 'path'):
-            full_path = storage.path(path)
-            if os.path.exists(full_path):
-                all_static_files.append((path, full_path))
-
-print(f"📁 {len(all_static_files)} fichiers statiques trouvés")
-
-# 4. Uploader chaque fichier sur S3
-uploaded = 0
-for static_path, full_path in all_static_files:
-    s3_key = f'static/{static_path}'
-    
-    try:
-        # Déterminer content-type
-        import mimetypes
-        content_type, _ = mimetypes.guess_type(full_path)
-        if not content_type:
-            content_type = 'application/octet-stream'
-        
-        # Upload vers S3
-        s3.upload_file(
-            full_path,
-            settings.AWS_STORAGE_BUCKET_NAME,
-            s3_key,
-            ExtraArgs={
-                'ContentType': content_type,
-                'CacheControl': 'max-age=86400',
-                # Pas d'ACL si le bucket ne les supporte pas
-            }
-        )
-        uploaded += 1
-        print(f"  ✅ {s3_key}")
-        
-    except Exception as e:
-        print(f"  ❌ {s3_key}: {e}")
-
-print(f"\n🎉 {uploaded}/{len(all_static_files)} fichiers uploadés sur S3")
-
-# 5. Vérifier sur S3
-print("\n📋 Vérification sur S3...")
-try:
-    response = s3.list_objects_v2(
-        Bucket=settings.AWS_STORAGE_BUCKET_NAME,
-        Prefix='static/',
-        MaxKeys=10
-    )
-    
-    if 'Contents' in response:
-        print(f"Fichiers sur S3 ({len(response['Contents'])}):")
-        for obj in response['Contents'][:5]:
-            print(f"  • {obj['Key']} ({obj['Size']} octets)")
-    else:
-        print("⚠️  Aucun fichier trouvé sur S3")
-        
-except Exception as e:
-    print(f"❌ Erreur vérification: {e}")
-# OBLIGATOIRE : Même avec S3, STATIC_ROOT doit être défini
+# STATIC FILES CONFIGURATION
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'  # Valeur par défaut
 
-# ========== CONFIGURATION S3 ==========
+# ========== DÉTECTION ENVIRONNEMENT ==========
+IS_HEROKU = "DYNO" in os.environ
+
+# ========== VARIABLES S3 ==========
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-north-1')
 
-# Détection Heroku
-IS_HEROKU = "DYNO" in os.environ
+# ========== LOGGING POUR DÉBUGUER ==========
+# (optionnel, pour voir ce qui se passe)
+import logging
+logger = logging.getLogger(__name__)
 
-# Vérifiez si S3 est configuré
-S3_ENABLED = all([
-    AWS_ACCESS_KEY_ID,
-    AWS_SECRET_ACCESS_KEY,
-    AWS_STORAGE_BUCKET_NAME
-])
+if IS_HEROKU:
+    logger.info("🚀 Environnement Heroku détecté")
+    if AWS_STORAGE_BUCKET_NAME:
+        logger.info(f"📦 Bucket S3 configuré: {AWS_STORAGE_BUCKET_NAME}")
+    else:
+        logger.warning("⚠️  Bucket S3 non configuré sur Heroku")
 
-if S3_ENABLED and IS_HEROKU:
-    print(f"🚀 Production Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
-    
-    # 1. FORCER S3 pour tous les fichiers
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    
-    # 2. Configuration S3
+# ========== CONFIGURATION S3 ==========
+# IMPORTANT: Ne pas faire de print() ici, seulement assigner des variables
+
+if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
+    # S3 est configuré sur Heroku
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_DEFAULT_ACL = None  # Pas d'ACL si le bucket ne les supporte pas
+    AWS_QUERYSTRING_AUTH = False
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
-
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_FILE_OVERWRITE = False
     
-    # 3. URLs S3
+    # Utiliser S3 pour tout
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # URLs S3
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
     
-    # 4. IMPORTANT: Classes custom pour éviter les conflits
-    # (Ajoutez cette partie si vous avez encore des problèmes)
-    try:
-        from storages.backends.s3boto3 import S3Boto3Storage
-        
-        class StaticS3Storage(S3Boto3Storage):
-            location = 'static'
-
-            
-        class MediaS3Storage(S3Boto3Storage):
-            location = 'media'
-
-            file_overwrite = False
-        
-        # Utiliser les classes custom
-        DEFAULT_FILE_STORAGE = 'spider.settings.MediaS3Storage'
-        STATICFILES_STORAGE = 'spider.settings.StaticS3Storage'
-        
-        print("✅ Classes custom S3 activées")
-        
-    except ImportError:
-        print("⚠️  django-storages non disponible, utilisation des classes par défaut")
-    
-    # 5. Désactiver whitenoise pour le storage (gardez seulement le middleware)
+    logger.info(f"✅ S3 activé - URL: {STATIC_URL}")
     
 elif IS_HEROKU:
-    print("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
-    # Configuration Heroku sans S3
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
+    # Heroku sans S3 - utiliser WhiteNoise
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+    logger.info("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
     
 else:
-    print("💻 Mode développement local")
-    # Configuration locale
-    STATIC_URL = '/static/'
-    MEDIA_URL = '/media/'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-
-# ============== FIN CONFIGURATION S3 ==============
-
+    # Développement local
+    logger.info("💻 Mode développement local")
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
