@@ -247,40 +247,66 @@ TEMPLATES = [
 ]# Détection d'environnement Heroku
 
 # Détection Heroku
-STATIC_URL = "/static/"
+# ========== TOUT SUR S3 ==========
+
+import os
+from pathlib import Path
+
+# Détection Heroku
+IS_HEROKU = "DYNO" in os.environ
+
+# Configuration de base
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_URL = "/static/"  # Valeur par défaut
+MEDIA_URL = "/media/"    # Valeur par défaut
 
-# Whitenoise options
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_ALLOW_ALL_ORIGINS = True
-
-# ----------------------------
-# Media files (uploads utilisateurs)
-# ----------------------------
-# === MEDIA FILES (S3) ===
-
-# ===== S3 MEDIA STORAGE (FORCED) =====
-
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-
-AWS_STORAGE_BUCKET_NAME = "amz-spider-app"
-AWS_S3_REGION_NAME = "eu-north-1"
-
+# Variables S3 depuis l'environnement
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")  # Pas en dur!
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
 
-AWS_DEFAULT_ACL = None
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_FILE_OVERWRITE = False
-
-MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
-
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
-
+# Si sur Heroku ET S3 configuré
+if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
+    print(f"🚀 Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    
+    # TOUT sur S3
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    
+    # Configuration S3
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    
+    # URLs S3
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+    
+    print(f"✅ URLs S3 configurées:")
+    print(f"   - Statiques: {STATIC_URL}")
+    print(f"   - Média: {MEDIA_URL}")
+    
+elif IS_HEROKU:
+    # Heroku sans S3
+    print("⚠️  Heroku sans S3 - WhiteNoise pour statiques")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    
+    # Options WhiteNoise
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_MANIFEST_STRICT = False
+    WHITENOISE_ALLOW_ALL_ORIGINS = True
+    
+else:
+    # Développement local
+    print("💻 Développement local")
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 
 
