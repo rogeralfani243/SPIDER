@@ -12,27 +12,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-# TOUT EN HAUT de settings.py
-import os
 
-# Override par variables d'environnement
-if os.environ.get('DJANGO_DEFAULT_FILE_STORAGE'):
-    DEFAULT_FILE_STORAGE = os.environ['DJANGO_DEFAULT_FILE_STORAGE']
-    STATICFILES_STORAGE = os.environ['DJANGO_STATICFILES_STORAGE']
-    STATIC_URL = os.environ.get('DJANGO_STATIC_URL', '/static/')
-    MEDIA_URL = os.environ.get('DJANGO_MEDIA_URL', '/media/')
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# Quick-start development settings
 SECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
- # Mettez True TEMPORAIREMENT pour debugger CORS
 
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
@@ -43,7 +30,6 @@ ALLOWED_HOSTS = [
 ]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,11 +52,12 @@ INSTALLED_APPS = [
     'report',
     'dashboard_client',
     'searchs',
-      'whitenoise.runserver_nostatic',
-          'storages',
+    'whitenoise.runserver_nostatic',
+    'storages',
 ]
+
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # DOIT ÊTRE EN PREMIER
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -80,175 +67,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-MIDDLEWARE.insert(0, 'corsheaders.middleware.CorsMiddleware')
 
 ROOT_URLCONF = 'spider.urls'
 CORS_ALLOW_CREDENTIALS = True
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
 
-WSGI_APPLICATION = 'spider.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# settings.py
-import os
-import dj_database_url
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Détection environnement Heroku
-IS_HEROKU = os.environ.get("DYNO") is not None  # True si on est sur Heroku
-
-if IS_HEROKU:
-    # Heroku utilise Postgres
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-    if DATABASE_URL:
-        DATABASES = {
-            "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
-        }
-    else:
-        raise ValueError("DATABASE_URL non défini sur Heroku")
-else:
-    # Local = SQLite
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
-
-# --------------------------
-# CORS headers (inchangé)
-from corsheaders.defaults import default_headers
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    'authorization',
-    'content-type',
-]
-
-# Liste BLANCHE des domaines autorisés
-CORS_ALLOWED_ORIGINS = [
-    # Vos domaines Vercel
-    "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
-    "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app",
-    "https://spider-r2ci.vercel.app",
-    "https://spider.vercel.app",
-       "https://spider-v5op-git-master-roger-alfanis-projects.vercel.app", 
-    # Développement local
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:8000",
-]
-
-"""CORS_ALLOWED_ORIGINS = [
-
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-        "http://100.64.6.76:3000",
-    "https://100.64.6.76:3000",
-       "https://*.ngrok-free.dev",
-       "https://brigandishly-metrizable-kenyatta.ngrok-free.dev", ] """
-# Si vous utilisez CSRF
-CSRF_TRUSTED_ORIGINS = [
-    "https://spider-app-d4d82ba4f1c1.herokuapp.com",
-    "https://spider-git-master-roger-alfanis-projects.vercel.app",
-    "http://localhost:3000",
-]
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://[\w-]+-git-master-roger-alfanis-projects\.vercel\.app$",
-    r"^https://[\w-]+\.vercel\.app$",
-]
-
-# Cookies cross-domain
-CSRF_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_HTTPONLY = False  # ← IMPORTANT : doit être False pour JavaScript
-CSRF_COOKIE_SECURE = True  # True pour HTTPS
-CORS_ALLOW_CREDENTIALS = False 
-# Cookies de session sécurisés
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_HTTPONLY = True
-# Headers autorisés
-CORS_ALLOW_HEADERS = [
-    'accept',
-    '*',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'access-control-allow-origin',
-]
-# Dans settings.py - POUR TEST SEULEMENT
-
-# Méthodes autorisées
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
-
-# P
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-AUTH_USER_MODEL = 'accounts.User'
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-DEFAULT_CHARSET = 'utf-8'
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'frontend/build'),  # Pour servir React
+            os.path.join(BASE_DIR, 'frontend/build'),
             os.path.join(BASE_DIR, 'templates'),
         ],
         'APP_DIRS': True,
@@ -261,135 +88,177 @@ TEMPLATES = [
             ],
         },
     },
-]# Détection d'environnement Heroku
+]
 
-# Détection Heroku
-# ========== TOUT SUR S3 ==========
+WSGI_APPLICATION = 'spider.wsgi.application'
 
-# ========== MIXTE: STATIQUES SUR WHITENOISE, MÉDIA SUR S3 ==========
+# Database
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Détection Heroku
-# ========== MIXTE: STATIQUES SUR WHITENOISE, MÉDIA SUR S3 ==========
-# Détection Heroku
+# Détection environnement Heroku
 IS_HEROKU = "DYNO" in os.environ
 
-# Configuration de base
+if IS_HEROKU:
+    DATABASE_URL = os.environ.get("DATABASE_URL")
+    if DATABASE_URL:
+        DATABASES = {
+            "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
+        }
+    else:
+        raise ValueError("DATABASE_URL non défini sur Heroku")
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
-# Variables S3
+# CORS Configuration
+from corsheaders.defaults import default_headers
 
-# ========== TOUT SUR S3 ==========
+CORS_ALLOWED_ORIGINS = [
+    "https://spider-r2ci-iluu03k2p-roger-alfanis-projects.vercel.app",
+    "https://spider-r2ci-git-master-roger-alfanis-projects.vercel.app",
+    "https://spider-r2ci.vercel.app",
+    "https://spider.vercel.app",
+    "https://spider-v5op-git-master-roger-alfanis-projects.vercel.app", 
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8000",
+]
 
-# WhiteNoise pour les statiques (TOUJOURS sur Heroku)
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+CSRF_TRUSTED_ORIGINS = [
+    "https://spider-app-d4d82ba4f1c1.herokuapp.com",
+    "https://spider-git-master-roger-alfanis-projects.vercel.app",
+    "http://localhost:3000",
+]
 
-# Variables S3
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://[\w-]+-git-master-roger-alfanis-projects\.vercel\.app$",
+    r"^https://[\w-]+\.vercel\.app$",
+]
+
+CORS_ALLOW_HEADERS = list(default_headers) + ['authorization', 'content-type']
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SECURE = True
+CORS_ALLOW_CREDENTIALS = False
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+
+# Password validation
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+AUTH_USER_MODEL = 'accounts.User'
+
+# Internationalization
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+DEFAULT_CHARSET = 'utf-8'
+
+# ========== CONFIGURATION S3 SIMPLIFIÉE ==========
+
+# Configuration de base pour les fichiers
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
+# Variables S3 depuis l'environnement
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
-    # Configuration S3
-AWS_DEFAULT_ACL = None
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_FILE_OVERWRITE = False
-AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-"""  
-# Si sur Heroku ET S3 configuré → médias sur S3
-if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
-    print(f"🚀 Production Heroku - Statiques: WhiteNoise, Médias: S3")
-    print(f"   Bucket: {AWS_STORAGE_BUCKET_NAME}")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")  # IMPORTANT: us-east-1 par défaut
+
+print(f"🔧 Configuration S3 - Heroku: {IS_HEROKU}, Bucket: {AWS_STORAGE_BUCKET_NAME}, Région: {AWS_S3_REGION_NAME}")
+
+# Si sur Heroku ET S3 configuré
+if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
+    print(f"🚀 Activation S3 pour Heroku - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
-    # Médias sur S3
+    # Tout sur S3
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     
     # Configuration S3
     AWS_DEFAULT_ACL = None
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
     
-    # URLs S3 pour médias
+    # Domaine S3 (us-east-1 n'a pas de région dans l'URL)
     if AWS_S3_REGION_NAME == "us-east-1":
         AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
     else:
         AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
     
+    # URLs S3
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     
+    print(f"✅ URLs S3 configurées:")
+    print(f"   - Statique: {STATIC_URL}")
+    print(f"   - Média: {MEDIA_URL}")
+    
 else:
-    # Pas de S3 → médias locaux
-    print("⚠️  Pas de S3 - Médias locaux")
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage" """
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+    # Mode local ou S3 non configuré
+    print("⚠️  Mode local ou S3 non configuré")
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# WhiteNoise (uniquement si pas sur S3)
+if IS_HEROKU and not AWS_STORAGE_BUCKET_NAME:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_MANIFEST_STRICT = False
+    WHITENOISE_ALLOW_ALL_ORIGINS = True
 
+# ========== FIN CONFIGURATION S3 ==========
+
+# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-   ],
+    ],
 }
 
-
-# settings.py
+# Email configuration
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-SITE_NAME = 'Spider App'  # ou le nom de votre application
-SITE_URL = 'http://localhost:3000'  # URL de votre frontend
-DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'  # Email d'envoi
-# Types de fichiers autorisés
+SITE_NAME = 'Spider App'
+SITE_URL = 'http://localhost:3000'
+DEFAULT_FROM_EMAIL = 'noreply@yourdomain.com'
+
+# File upload configurations
 ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
 ALLOWED_VIDEO_EXTENSIONS = ['mp4', 'avi', 'mov', 'mkv', 'webm']
 ALLOWED_FILE_EXTENSIONS = ['pdf', 'doc', 'docx', 'txt', 'zip']
+
 # CSRF trusted origins
 CSRF_TRUSTED_ORIGINS = [
     "https://spider-r2ci.vercel.app",
     "https://*.vercel.app",
 ]
-
-# Configuration pour Heroku Postgres (si vous l'utilisez)
-#db_from_env = dj_database_url.config(conn_max_age=600)
-#DATABASES['default'].update(db_from_env)
-
-# settings.py
-import os
-from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# ========== CHARGEMENT DU .env ==========
-ENV_PATH = BASE_DIR / '.env'
-if ENV_PATH.exists():
-    print(f"✅ Fichier .env trouvé : {ENV_PATH}")
-    with open(ENV_PATH, 'r') as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith('#'):
-                if '=' in line:
-                    key, value = line.split('=', 1)
-                    os.environ[key.strip()] = value.strip().strip('"').strip("'")
-else:
-    print("⚠️ Fichier .env non trouvé. Créez-en un avec vos identifiants email.")
-
-
 # ========== CONFIGURATION EMAIL POUR ENVOI RÉEL ==========
 
 # FORCER l'envoi SMTP réel (pas de console en DEBUG)
