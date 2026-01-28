@@ -175,56 +175,38 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# Variables S3 depuis l'environnement
+# Va# Variables S3 depuis l'environnement
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")  # IMPORTANT: us-east-1 par défaut
-
-print(f"🔧 Configuration S3 - Heroku: {IS_HEROKU}, Bucket: {AWS_STORAGE_BUCKET_NAME}, Région: {AWS_S3_REGION_NAME}")
+AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
+AWS_S3_SIGNATURE_VERSION = 's3v4'
 
 # Si sur Heroku ET S3 configuré
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     print(f"🚀 Activation S3 pour Heroku - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
-    # Tout sur S3
-    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    
     # Configuration S3
     AWS_DEFAULT_ACL = None
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
-    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
     
-    # Domaine S3 (us-east-1 n'a pas de région dans l'URL)
-    if AWS_S3_REGION_NAME == "us-east-1":
-        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-    else:
-        AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    # Domaine S3
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
     
-    # URLs S3
+    # URLs
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     
-    print(f"✅ URLs S3 configurées:")
-    print(f"   - Statique: {STATIC_URL}")
-    print(f"   - Média: {MEDIA_URL}")
+    # Stockages
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
-else:
-    # Mode local ou S3 non configuré
-    print("⚠️  Mode local ou S3 non configuré")
-    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
-# WhiteNoise (uniquement si pas sur S3)
-if IS_HEROKU and not AWS_STORAGE_BUCKET_NAME:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_MANIFEST_STRICT = False
-    WHITENOISE_ALLOW_ALL_ORIGINS = True
-
-# ========== FIN CONFIGURATION S3 ==========
+    # Important: Désactive WhiteNoise quand S3 est actif
+    MIDDLEWARE = [m for m in MIDDLEWARE if 'WhiteNoiseMiddleware' not in str(m)]# ========== FIN CONFIGURATION S3 ==========
 
 # REST Framework
 REST_FRAMEWORK = {
@@ -233,7 +215,21 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
+from storages.backends.s3boto3 import S3Boto3Storage
 
+class StaticStorage(S3Boto3Storage):
+    location = 'static'
+    default_acl = None
+
+class MediaStorage(S3Boto3Storage):
+    location = 'media'
+    default_acl = None
+    file_overwrite = False
+
+# Puis configurez :
+if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
+    DEFAULT_FILE_STORAGE = 'spider.storage_backends.MediaStorage'  # À adapter
+    STATICFILES_STORAGE = 'spider.storage_backends.StaticStorage'  # À adapter
 # Email configuration
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
