@@ -6,7 +6,7 @@ class StaticStorage(S3Boto3Storage):
     location = 'static'
     default_acl = None
     file_overwrite = True
-
+    object_parameters = {}
 # RENOMMEZ PublicMediaStorage EN MediaStorage
 class MediaStorage(S3Boto3Storage):  # ← CHANGÉ ICI
     location = 'media'
@@ -19,3 +19,4 @@ class PrivateMediaStorage(S3Boto3Storage):
     default_acl = None
     file_overwrite = False
     custom_domain = False
+    object_parameters = {}
