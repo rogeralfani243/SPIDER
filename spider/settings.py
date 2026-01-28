@@ -257,7 +257,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-3')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-north-1')
 
 # Détection Heroku
 IS_HEROKU = "DYNO" in os.environ
@@ -281,7 +281,7 @@ if S3_ENABLED and IS_HEROKU:
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
     }
-    AWS_DEFAULT_ACL = 'public-read'
+
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
     
@@ -296,11 +296,11 @@ if S3_ENABLED and IS_HEROKU:
         
         class StaticS3Storage(S3Boto3Storage):
             location = 'static'
-            default_acl = 'public-read'
+
             
         class MediaS3Storage(S3Boto3Storage):
             location = 'media'
-            default_acl = 'public-read'
+
             file_overwrite = False
         
         # Utiliser les classes custom
