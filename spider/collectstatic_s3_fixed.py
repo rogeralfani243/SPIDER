@@ -56,7 +56,7 @@ try:
         's3',
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=getattr(settings, 'AWS_S3_REGION_NAME', 'eu-west-3')
+        region_name=settings.AWS_S3_REGION_NAME
     )
     
     # Vérifier que le bucket existe
