@@ -204,7 +204,7 @@ if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     
     # ⚠️ IMPORTANT : NE PAS DÉFINIR STATIC_ROOT et MEDIA_ROOT quand on utilise S3 !
     # Les laisser non définis ou les définir comme chaînes vides
-    STATIC_ROOT = ''  # OU ne pas le définir du tout
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_tmp')# OU ne pas le définir du tout
     MEDIA_ROOT = ''   # OU ne pas le définir du tout
     
     # Désactiver WhiteNoise
