@@ -249,13 +249,18 @@ TEMPLATES = [
 # ============== CONFIGURATION S3 UNIFIÉE ==============
 # Placez ce bloc APRÈS DATABASES mais AVANT TEMPLATES
 
-import os
 
-# Variables AWS depuis l'environnement
+# OBLIGATOIRE : Même avec S3, STATIC_ROOT doit être défini
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# ========== CONFIGURATION S3 ==========
 AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-3')
+
+# Détection Heroku
+IS_HEROKU = "DYNO" in os.environ
 
 # Vérifiez si S3 est configuré
 S3_ENABLED = all([
@@ -264,14 +269,14 @@ S3_ENABLED = all([
     AWS_STORAGE_BUCKET_NAME
 ])
 
-if S3_ENABLED:
-    print(f"✅ Configuration S3 détectée - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+if S3_ENABLED and IS_HEROKU:
+    print(f"🚀 Production Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
-    # FORCER S3 pour tous les fichiers
+    # 1. FORCER S3 pour tous les fichiers
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
     
-    # Configuration S3
+    # 2. Configuration S3
     AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
     AWS_S3_OBJECT_PARAMETERS = {
         'CacheControl': 'max-age=86400',
@@ -280,22 +285,51 @@ if S3_ENABLED:
     AWS_QUERYSTRING_AUTH = False
     AWS_S3_FILE_OVERWRITE = False
     
-    # URLs
+    # 3. URLs S3
     STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
     
-    # IMPORTANT: Désactiver whitenoise pour les statiques
-    # Assurez-vous que 'whitenoise.runserver_nostatic' est dans INSTALLED_APPS
-    # mais le middleware et storage sont gérés par S3
+    # 4. IMPORTANT: Classes custom pour éviter les conflits
+    # (Ajoutez cette partie si vous avez encore des problèmes)
+    try:
+        from storages.backends.s3boto3 import S3Boto3Storage
+        
+        class StaticS3Storage(S3Boto3Storage):
+            location = 'static'
+            default_acl = 'public-read'
+            
+        class MediaS3Storage(S3Boto3Storage):
+            location = 'media'
+            default_acl = 'public-read'
+            file_overwrite = False
+        
+        # Utiliser les classes custom
+        DEFAULT_FILE_STORAGE = 'spider.settings.MediaS3Storage'
+        STATICFILES_STORAGE = 'spider.settings.StaticS3Storage'
+        
+        print("✅ Classes custom S3 activées")
+        
+    except ImportError:
+        print("⚠️  django-storages non disponible, utilisation des classes par défaut")
+    
+    # 5. Désactiver whitenoise pour le storage (gardez seulement le middleware)
+    
+elif IS_HEROKU:
+    print("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
+    # Configuration Heroku sans S3
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
     
 else:
-    print("⚠️  Mode développement - Stockage local")
+    print("💻 Mode développement local")
     # Configuration locale
     STATIC_URL = '/static/'
     MEDIA_URL = '/media/'
     STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
     DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    
+
 # ============== FIN CONFIGURATION S3 ==============
 
 # Default primary key field type
@@ -339,11 +373,7 @@ CSRF_TRUSTED_ORIGINS = [
 #DATABASES['default'].update(db_from_env)
 
 # settings.py
-import os
-from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ========== CHARGEMENT DU .env ==========
 ENV_PATH = BASE_DIR / '.env'
