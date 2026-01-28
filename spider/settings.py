@@ -259,32 +259,41 @@ TEMPLATES = [
 # ========== TOUT SUR S3 ==========
 
 # ========== MIXTE: STATIQUES SUR WHITENOISE, MÉDIA SUR S3 ==========
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# ========== TOUT SUR S3 ==========
-import os
-from pathlib import Path
 
+# Détection Heroku
+# ========== MIXTE: STATIQUES SUR WHITENOISE, MÉDIA SUR S3 ==========
 # Détection Heroku
 IS_HEROKU = "DYNO" in os.environ
 
 # Configuration de base
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'  # Valeur par défaut
-MEDIA_URL = '/media/'    # Valeur par défaut
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# ========== TOUT SUR S3 ==========
 
-# Variables S3 DEPUIS L'ENVIRONNEMENT (pas en dur !)
+# WhiteNoise pour les statiques (TOUJOURS sur Heroku)
+if IS_HEROKU:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    WHITENOISE_USE_FINDERS = True
+    WHITENOISE_MANIFEST_STRICT = False
+    WHITENOISE_ALLOW_ALL_ORIGINS = True
+else:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
+# Variables S3
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "eu-north-1")
 
-# Si sur Heroku ET S3 configuré
+# Si sur Heroku ET S3 configuré → médias sur S3
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
-    print(f"🚀 Production Heroku avec S3 - Bucket: {AWS_STORAGE_BUCKET_NAME}")
+    print(f"🚀 Production Heroku - Statiques: WhiteNoise, Médias: S3")
+    print(f"   Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
-    # TOUT sur S3
+    # Médias sur S3
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     
     # Configuration S3
     AWS_DEFAULT_ACL = None
@@ -294,32 +303,18 @@ if IS_HEROKU and AWS_STORAGE_BUCKET_NAME:
         'CacheControl': 'max-age=86400',
     }
     
-    # URLs S3
+    # URLs S3 pour médias
     if AWS_S3_REGION_NAME == "us-east-1":
         AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
     else:
         AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
     
-    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     
-elif IS_HEROKU:
-    # Heroku sans S3 - utiliser WhiteNoise
-    print("⚠️  Heroku sans S3 - Utilisation de WhiteNoise")
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-    
-    # Options WhiteNoise
-    WHITENOISE_USE_FINDERS = True
-    WHITENOISE_MANIFEST_STRICT = False
-    WHITENOISE_ALLOW_ALL_ORIGINS = True
-    
 else:
-    # Développement local
-    print("💻 Mode développement local")
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-
+    # Pas de S3 → médias locaux
+    print("⚠️  Pas de S3 - Médias locaux")
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
