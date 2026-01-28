@@ -263,20 +263,41 @@ WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 # ===== S3 MEDIA STORAGE (FORCED) =====
 
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
+import os
 
-AWS_STORAGE_BUCKET_NAME = "amz-spider-app"
-AWS_S3_REGION_NAME = "eu-north-1"
+# ... vos autres imports ...
 
-AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+# === CONFIGURATION S3 ===
+# Récupération des variables d'environnement
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'eu-west-3')
 
-AWS_DEFAULT_ACL = None
-AWS_QUERYSTRING_AUTH = False
-AWS_S3_FILE_OVERWRITE = False
+# Configuration essentielle
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 
-MEDIA_URL = f"https://{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com/"
-
+# FORCER l'utilisation de S3 quand les variables sont présentes
+if AWS_STORAGE_BUCKET_NAME:  # Si le bucket est défini
+    # Stockage par défaut pour tous les fichiers
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # Stockage pour les fichiers statiques
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    
+    # URLs
+    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    
+    # Optionnel: Désactiver les permissions publiques si besoin
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_QUERYSTRING_AUTH = False
+    
+else:
+    # Mode développement local
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
