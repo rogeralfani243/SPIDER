@@ -171,10 +171,12 @@ DEFAULT_CHARSET = 'utf-8'
 # =========== CONFIGURATION FICHIERS ===========
 
 # Variables S3 depuis l'environnement (TOUJOURS LES LIRE)
-STATIC_URL = 'static/'
+#STATIC_URL = 'static/'
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles', 'static')
-MEDIA_URLS ='/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_URLS ='/media/'
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+
 
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
