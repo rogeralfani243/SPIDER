@@ -186,11 +186,11 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL =  None
 AWS_S3_VERIFY = True
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Si sur Heroku ET S3 configuré
 
 """   
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     print(f"🚀 Activation S3 pour Heroku - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
