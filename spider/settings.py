@@ -190,6 +190,7 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Si sur Heroku ET S3 configuré
 
 """   
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
     print(f"🚀 Activation S3 pour Heroku - Bucket: {AWS_STORAGE_BUCKET_NAME}")
     
@@ -243,29 +244,17 @@ else:
     # WhiteNoise pour Heroku sans S3
     if IS_HEROKU:
         STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+"""        
 # REST Framework
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 }
-"""
-from storages.backends.s3boto3 import S3Boto3Storage
 
-class StaticStorage(S3Boto3Storage):
-    location = 'static'
-    default_acl = None
-
-class MediaStorage(S3Boto3Storage):
-    location = 'media'
-    default_acl = None
-    file_overwrite = False
-
-# Puis configurez :
-if IS_HEROKU and AWS_STORAGE_BUCKET_NAME and AWS_ACCESS_KEY_ID:
-    DEFAULT_FILE_STORAGE = 'spider.storage_backends.MediaStorage'  # À adapter
-    STATICFILES_STORAGE = 'spider.storage_backends.StaticStorage'  # À adapter
 # Email configuration
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
