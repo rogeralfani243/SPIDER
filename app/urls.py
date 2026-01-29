@@ -65,5 +65,30 @@ urlpatterns = [
     path('account/request-password-reset-code/', views.request_password_reset_code, name='request_password_reset_code'),
     path('account/verify-password-reset-code/', views.verify_password_reset_code, name='verify_password_reset_code'),
     path('account/reset-password/', views.reset_password, name='reset_password'),
-
+     path('profile/<int:profile_id>/opening-hours/', 
+         views.get_opening_hours, name='get_opening_hours'),
+    
+    path('profile/<int:profile_id>/opening-hours/create/', 
+         views.create_opening_hour, name='create_opening_hour'),
+    
+    path('profile/<int:profile_id>/opening-hours/update-all/', 
+         views.update_all_opening_hours, name='update_all_opening_hours'),
+    
+    path('profile/<int:profile_id>/opening-hours/<int:hour_id>/', 
+         views.opening_hour_detail, name='opening_hour_detail'),
+    
+    # Statut d'ouverture
+    path('profile/<int:profile_id>/is-open/', 
+         views.check_if_open, name='check_if_open'),
+    
+    # Gestion du statut business
+    path('profile/<int:profile_id>/toggle-business/', 
+         views.toggle_business_status, name='toggle_business_status'),
+    
+    path('profile/<int:profile_id>/update-business-info/', 
+         views.update_business_info, name='update_business_info'),
+    
+    # Initialisation
+    path('profile/<int:profile_id>/initialize-default-hours/', 
+         views.initialize_default_hours, name='initialize_default_hours'),
 ]

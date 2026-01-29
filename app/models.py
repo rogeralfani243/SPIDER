@@ -54,6 +54,7 @@ class Profile(models.Model):
     social_links = JSONField(default=list, blank=True)
     # ManyToManyField does not support null=True; remove it.
     # followers: users who follow this profile
+    phone = models.CharField(max_length=20, blank=True, null=True)
     followers = models.ManyToManyField(
         'self',
         related_name='following',
@@ -119,6 +120,66 @@ class Profile(models.Model):
         """
         from messaging.block_utils import BlockManager
         return BlockManager.get_block_status(self.user.id, other_user.id)
+    def create_default_opening_hours(self):
+        """Crée des horaires d'ouverture par défaut pour une entreprise"""
+        from .models import OpeningHours
+
+        days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
+        for day in days:
+            OpeningHours.objects.create(
+                profile=self,
+                day=day,
+                open_time='09:00' if day not in ['saturday', 'sunday'] else '10:00',
+                close_time='18:00' if day not in ['saturday', 'sunday'] else '17:00',
+                is_closed=day in ['sunday']  # Fermé le dimanche par défaut
+            )
+            
+    def get_opening_hours_for_day(self, day_name):
+        """Retourne les horaires pour un jour spécifique"""
+        try:
+            return self.opening_hours.get(day=day_name.lower())
+        except OpeningHours.DoesNotExist:
+            return None
+    
+    def is_open_now(self):
+        """Vérifie si l'établissement est ouvert maintenant"""
+        from django.utils import timezone
+        
+        if not self.is_business:
+            return False
+        
+        # Récupérer le jour actuel
+        now = timezone.now()
+        current_day = now.strftime('%A').lower()
+        
+        try:
+            today_hours = self.opening_hours.get(day=current_day)
+            return today_hours.is_open_now()
+        except OpeningHours.DoesNotExist:
+            return False
+    
+    def get_current_opening_hours(self):
+        """Retourne les horaires d'aujourd'hui"""
+        from django.utils import timezone
+        
+        now = timezone.now()
+        current_day = now.strftime('%A').lower()
+        
+        try:
+            return self.opening_hours.get(day=current_day)
+        except OpeningHours.DoesNotExist:
+            return None
+    
+    def get_formatted_opening_hours(self):
+        """Retourne tous les horaires formatés pour l'affichage"""
+        hours = self.opening_hours.all().order_by('day')
+        formatted = []
+        
+        for hour in hours:
+            formatted.append(str(hour))
+        
+        return formatted
 #signal to create automaticly    
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created , **kwargs):
@@ -148,3 +209,72 @@ class PasswordResetCode(models.Model):
     is_used = models.BooleanField(default=False)
     purpose = models.CharField(max_length=50, default='password_reset')  # 'password_reset' ou 'password_change'
 
+
+
+
+# models.py - Ajoutez à votre fichier existant
+
+class OpeningHours(models.Model):
+    DAY_CHOICES = [
+        ('monday', 'Monday'),
+        ('tuesday', 'Tuesday'),
+        ('wednesday', 'Wednesday'),
+        ('thursday', 'Thursday'),
+        ('friday', 'Friday'),
+        ('saturday', 'Saturday'),
+        ('sunday', 'Sunday'),
+    ]
+    
+    DAY_ORDER = {
+        'monday': 1,
+        'tuesday': 2,
+        'wednesday': 3,
+        'thursday': 4,
+        'friday': 5,
+        'saturday': 6,
+        'sunday': 7,
+    }
+    
+    profile = models.ForeignKey(
+        Profile, 
+        on_delete=models.CASCADE, 
+        related_name='opening_hours'
+    )
+    day = models.CharField(max_length=10, choices=DAY_CHOICES)
+    open_time = models.TimeField(blank=True, null=True)
+    close_time = models.TimeField(blank=True, null=True)
+    is_closed = models.BooleanField(default=False)
+    notes = models.CharField(max_length=200, blank=True, null=True)
+    
+    class Meta:
+        ordering = ['day']
+        unique_together = ['profile', 'day']
+        verbose_name = 'Opening Hour'
+        verbose_name_plural = 'Opening Hours'
+    
+    def __str__(self):
+        if self.is_closed:
+            return f"{self.get_day_display()}: Closed"
+        return f"{self.get_day_display()}: {self.open_time.strftime('%H:%M') if self.open_time else ''} - {self.close_time.strftime('%H:%M') if self.close_time else ''}"
+    
+    def get_day_order(self):
+        """Retourne l'ordre numérique du jour pour le tri"""
+        return self.DAY_ORDER.get(self.day, 99)
+    
+    def is_open_now(self):
+        """Vérifie si l'établissement est ouvert maintenant pour ce jour"""
+        from django.utils import timezone
+        import datetime
+        
+        # Vérifier si fermé aujourd'hui
+        if self.is_closed:
+            return False
+        
+        # Vérifier l'heure actuelle
+        now = timezone.now()
+        current_time = now.time()
+        
+        if self.open_time and self.close_time:
+            return self.open_time <= current_time <= self.close_time
+        
+        return False

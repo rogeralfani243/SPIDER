@@ -1,9 +1,29 @@
 from rest_framework import serializers
-from .models import Post, Comment, Category, Tag, Profile
+from .models import Post, Comment, Category, Tag, OpeningHours,Profile
 from accounts.serializers import UserSerializer
 from django.contrib.auth.models import User 
 from django.contrib.auth import authenticate
 from django.utils import timezone 
+
+
+class OpeningHoursSerializer(serializers.ModelSerializer):
+    day_display = serializers.CharField(source='get_day_display', read_only=True)
+    day_order = serializers.IntegerField(source='get_day_order', read_only=True)
+    
+    class Meta:
+        model = OpeningHours
+        fields = [
+            'id',
+            'day',
+            'day_display',
+            'day_order',
+            'open_time',
+            'close_time',
+            'is_closed',
+            'notes'
+        ]
+        read_only_fields = ['id', 'profile']
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -99,6 +119,13 @@ class ProfileSerializer(serializers.ModelSerializer):
          allow_blank=True,
         write_only=True
     )
+    phone = serializers.CharField(
+        allow_blank=True, 
+        required=False,
+        allow_null=True
+    )
+    opening_hours = OpeningHoursSerializer(many=True, read_only=True)
+    is_open_now = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
     class Meta:
         model = Profile
@@ -109,7 +136,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio', 'image', 'image_bio', 'website', 'location',
             'address', 'city', 'state', 'zip_code', 'country',
             'birth_date', 'followers', 'category', 'category_id',
-            'created_at', 'image_url','social_links'
+            'created_at', 'image_url','social_links','phone'
         ]
         read_only_fields = ['id', 'user', 'followers', 'created_at']
     
@@ -318,3 +345,5 @@ class CurrentUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+
