@@ -828,10 +828,10 @@ def update_profile(request, profile_id):
             profile.image = request.FILES['image']
             updated_fields.append('image')
             print(f"🖼️ Updated image: {request.FILES['image'].name}")
-        if 'image_bio' in request.FILES:
-            profile.image = request.FILES['image_bio']
+        if 'image' in request.FILES:
+            profile.image_bio = request.FILES['image']
             updated_fields.append('image_bio')
-            print(f"🖼️ Updated image_bio: {request.FILES['image_bio'].name}")
+            print(f"🖼️ Updated image: {request.FILES['image'].name}")
 
         print(f"💾 Saving {len(updated_fields)} fields: {updated_fields}")
         
