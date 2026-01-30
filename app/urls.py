@@ -81,14 +81,4 @@ urlpatterns = [
     path('profile/<int:profile_id>/is-open/', 
          views.check_if_open, name='check_if_open'),
     
-    # Gestion du statut business
-    path('profile/<int:profile_id>/toggle-business/', 
-         views.toggle_business_status, name='toggle_business_status'),
-    
-    path('profile/<int:profile_id>/update-business-info/', 
-         views.update_business_info, name='update_business_info'),
-    
-    # Initialisation
-    path('profile/<int:profile_id>/initialize-default-hours/', 
-         views.initialize_default_hours, name='initialize_default_hours'),
 ]
