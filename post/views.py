@@ -43,7 +43,7 @@ def post_list_create(request):
     if request.method == 'GET':
         # Récupération et filtrage des posts
         queryset = Post.objects.filter(user__is_active=True)
-        from django.db.models import Count, Avg, Q, F, ExpressionWrapper, FloatField, Case, When, Value
+        from django.db.models import Count, Avg, Q, F, ExpressionWrapper, FloatField, Case, When, Value, Exists, OuterRef
         from django.db.models.functions import Coalesce
         from django.utils import timezone
         
@@ -104,34 +104,33 @@ def post_list_create(request):
                 user_rated_posts[rating['post_id']] = rating['stars']
             
             # Posts commentés par l'utilisateur
-            commented_posts = Comment.objects.filter(
+            commented_posts = PostComment.objects.filter(
                 user=request.user
             ).values_list('post_id', flat=True).distinct()
             
-            # Posts likés par l'utilisateur
-            liked_posts = Post.objects.filter(
-                likes=request.user
-            ).values_list('id', flat=True)
-            
             # 3. Calculer les préférences de l'utilisateur
-            # Catégories préférées (basées sur les likes/ratings)
+            # Catégories préférées (basées sur les ratings)
             user_category_prefs = {}
             user_rated_categories = Rating.objects.filter(
-                user=request.user
+                user=request.user,
+                stars__gte=3  # Seulement les notes positives
             ).values('post__category__id').annotate(
-                avg_rating=Avg('stars')
+                avg_rating=Avg('stars'),
+                rating_count=Count('id')
             )
             
             for pref in user_rated_categories:
                 if pref['post__category__id']:
-                    user_category_prefs[pref['post__category__id']] = pref['avg_rating'] * 10
+                    # Score basé sur la note moyenne et le nombre de notes
+                    user_category_prefs[pref['post__category__id']] = (
+                        pref['avg_rating'] * 10 + pref['rating_count'] * 2
+                    )
             
             # Tags préférés
             user_tag_prefs = {}
             user_tag_interactions = Post.objects.filter(
-                Q(likes=request.user) | 
                 Q(post_comments__user=request.user) |
-                Q(ratings__user=request.user)
+                Q(ratings__user=request.user, ratings__stars__gte=3)
             ).values('tags__id', 'tags__name').annotate(
                 interaction_count=Count('id')
             )
@@ -170,37 +169,49 @@ def post_list_create(request):
                 output_field=FloatField()
             )
             
-            # 7. Score de popularité globale
+            # 7. Score de popularité globale basé sur les ratings
             popularity_score = ExpressionWrapper(
                 Coalesce(Avg('ratings__stars'), Value(0.0)) * 20.0 +
-                Count('likes', distinct=True) * 2.0 +
+                Count('ratings', distinct=True) * 2.0 +
                 Count('post_comments', distinct=True) * 1.0,
                 output_field=FloatField()
             )
             
-            # 8. Score d'interaction négative (déjà vu/noté)
+            # 8. Score d'interaction négative (déjà vu/noté bas)
             interaction_penalty = Case(
-                # Forte pénalité pour les posts notés bas
+                # Forte pénalité pour les posts notés bas (1-2 étoiles)
                 When(id__in=[pid for pid, stars in user_rated_posts.items() if stars < 3], 
-                      then=Value(-100.0)),
-                # Pénalité modérée pour les posts déjà vus
-                When(id__in=viewed_posts, then=Value(-30.0)),
-                # Pénalité légère pour les posts commentés
-                When(id__in=commented_posts, then=Value(-10.0)),
-                # Petit bonus pour les posts likés
-                When(id__in=liked_posts, then=Value(20.0)),
+                      then=Value(-80.0)),
+                # Pénalité modérée pour les posts notés moyens (3 étoiles)
+                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars == 3], 
+                      then=Value(-30.0)),
+                # Bonus pour les posts bien notés (4-5 étoiles)
+                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars >= 4], 
+                      then=Value(40.0)),
+                # Pénalité légère pour les posts déjà vus
+                When(id__in=viewed_posts, then=Value(-25.0)),
+                # Petit bonus pour les posts commentés (engagement)
+                When(id__in=commented_posts, then=Value(15.0)),
                 default=Value(0.0),
                 output_field=FloatField()
             )
             
-            # 9. Score final de recommandation
+            # 9. Score d'activité de l'auteur
+            author_activity_score = Case(
+                When(user__is_active=True, then=Value(10.0)),
+                default=Value(0.0),
+                output_field=FloatField()
+            )
+            
+            # 10. Score final de recommandation
             recommendation_score = (
-                country_score * 1.5 +  # Priorité pays
-                category_similarity_score * 2.0 +  # Catégories préférées
-                tag_similarity_score * 1.2 +  # Tags préférés
-                freshness_score * 0.8 +  # Fraîcheur
-                popularity_score * 1.0 +  # Popularité
-                interaction_penalty  # Interactions utilisateur
+                country_score * 2.0 +  # Priorité forte au pays
+                category_similarity_score * 1.8 +  # Catégories préférées
+                tag_similarity_score * 1.5 +  # Tags préférés
+                freshness_score * 1.2 +  # Fraîcheur
+                popularity_score * 1.0 +  # Popularité globale
+                interaction_penalty * 1.5 +  # Interactions utilisateur
+                author_activity_score * 0.5  # Qualité de l'auteur
             )
             
             # Annoter avec tous les scores
@@ -211,7 +222,37 @@ def post_list_create(request):
                 freshness_score=freshness_score,
                 popularity_score=popularity_score,
                 interaction_penalty=interaction_penalty,
-                recommendation_score=recommendation_score
+                author_activity_score=author_activity_score,
+                recommendation_score=recommendation_score,
+                # Annotations pour les informations utilisateur
+                user_has_rated=Exists(
+                    Rating.objects.filter(
+                        user=request.user,
+                        post=OuterRef('pk')
+                    )
+                ),
+                user_has_viewed=Exists(
+                    PostView.objects.filter(
+                        user=request.user,
+                        post=OuterRef('pk')
+                    )
+                ),
+                user_has_commented=Exists(
+                    PostComment.objects.filter(
+                        user=request.user,
+                        post=OuterRef('pk')
+                    )
+                ),
+                user_rating_value=Coalesce(
+                    Subquery(
+                        Rating.objects.filter(
+                            user=request.user,
+                            post=OuterRef('pk')
+                        ).values('stars')[:1]
+                    ),
+                    Value(0),
+                    output_field=FloatField()
+                )
             )
             
             # Appliquer l'algorithme de tri
@@ -221,16 +262,14 @@ def post_list_create(request):
             
             elif algorithm == 'country_priority':
                 # Priorité absolue aux posts du même pays
-                queryset = queryset.order_by('-country_score', '-created_at')
+                queryset = queryset.order_by('-country_score', '-freshness_score', '-created_at')
             
             elif algorithm == 'fresh_for_you':
                 # Posts récents mais adaptés aux préférences
                 recent_days = 7  # Dernière semaine
                 recent_posts = queryset.filter(
                     created_at__gte=timezone.now() - timezone.timedelta(days=recent_days)
-                ).annotate(
-                    personal_score=category_similarity_score + tag_similarity_score
-                ).order_by('-personal_score', '-created_at')
+                ).order_by('-category_similarity', '-tag_similarity', '-created_at')
                 
                 older_posts = queryset.filter(
                     created_at__lt=timezone.now() - timezone.timedelta(days=recent_days)
@@ -240,20 +279,49 @@ def post_list_create(request):
                 queryset = list(recent_posts) + list(older_posts)
             
             elif algorithm == 'similar_users':
-                # Recommandation basée sur les utilisateurs similaires
+                # Recommandation basée sur les utilisateurs similaires (même pays)
                 similar_users = User.objects.filter(
                     profile__country=user_profile.country
                 ).exclude(id=request.user.id)
                 
+                # Posts populaires parmi les utilisateurs similaires
                 similar_posts = Post.objects.filter(
-                    user__in=similar_users,
-                    ratings__stars__gte=4
+                    user__in=similar_users
                 ).annotate(
-                    similar_users_score=Count('likes') + Count('ratings')
-                ).order_by('-similar_users_score', '-created_at')
+                    similar_users_rating_avg=Coalesce(
+                        Avg(
+                            Case(
+                                When(
+                                    ratings__user__in=similar_users,
+                                    then=F('ratings__stars')
+                                ),
+                                default=Value(None),
+                                output_field=FloatField()
+                            )
+                        ),
+                        Value(0.0),
+                        output_field=FloatField()
+                    ),
+                    similar_users_count=Count(
+                        'ratings',
+                        filter=Q(ratings__user__in=similar_users),
+                        distinct=True
+                    )
+                ).filter(
+                    similar_users_rating_avg__gte=3.5,
+                    similar_users_count__gte=2
+                ).order_by('-similar_users_rating_avg', '-similar_users_count', '-created_at')
                 
                 queryset = similar_posts
-                
+            
+            elif algorithm == 'avoid_seen':
+                # Éviter les posts déjà vus/notés
+                queryset = queryset.exclude(
+                    id__in=viewed_posts
+                ).exclude(
+                    id__in=list(user_rated_posts.keys())
+                ).order_by('-country_score', '-freshness_score', '-created_at')
+            
         else:
             # Pour les utilisateurs non authentifiés ou tri explicite
             sort_by = request.query_params.get('sort', 'newest')
@@ -268,22 +336,25 @@ def post_list_create(request):
                     queryset = queryset.order_by('created_at')
                 elif sort_by == 'popular':
                     queryset = queryset.annotate(
-                        rating_count=Count('ratings', distinct=True)
+                        rating_count=Count('ratings', distinct=True),
+                        avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0))
                     ).filter(
                         rating_count__gt=0
-                    ).order_by('-rating_count', '-created_at')
-                elif sort_by == 'rated':
+                    ).order_by('-rating_count', '-avg_rating', '-created_at')
+                elif sort_by == 'top_rated':
                     queryset = queryset.annotate(
                         rating_count=Count('ratings', distinct=True),
-                        avg_rating=Avg('ratings__stars')
+                        avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0))
                     ).filter(
                         rating_count__gte=3,
-                        avg_rating__isnull=False
-                    ).order_by(
-                        '-rating_count',
-                        '-avg_rating',
-                        '-created_at'
-                    )
+                        avg_rating__gte=4.0
+                    ).order_by('-avg_rating', '-rating_count', '-created_at')
+                elif sort_by == 'most_commented':
+                    queryset = queryset.annotate(
+                        comment_count=Count('post_comments', distinct=True)
+                    ).filter(
+                        comment_count__gt=0
+                    ).order_by('-comment_count', '-created_at')
                 elif sort_by == 'country_priority' and request.user.is_authenticated:
                     # Tri par pays de l'utilisateur
                     user_country = request.user.profile.country
@@ -322,29 +393,47 @@ def post_list_create(request):
         
         # Précharger les relations
         if isinstance(paginated_queryset, list):
-            # Pour les listes, précharger manuellement
+            # Pour les listes, récupérer les objets avec leurs relations
             from django.db.models import Prefetch
             post_ids = [p.id for p in paginated_queryset]
-            optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
-                'category', 'user'
-            ).prefetch_related(
-                'tags', 'mentions', 'post_images', 'post_files'
+            
+            # Créer un queryset ordonné selon les IDs dans la liste
+            from django.db.models import Case, When, IntegerField
+            preserved_order = Case(
+                *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)],
+                output_field=IntegerField()
             )
-            # Préserver l'ordre original
-            order_by_field = f"FIELD(id, {','.join(map(str, post_ids))})" if post_ids else '-created_at'
-            optimized_queryset = optimized_queryset.extra(
-                select={'ordering': order_by_field}
-            ) if post_ids else optimized_queryset
+            
+            optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
+                'category', 'user', 'user__profile'
+            ).prefetch_related(
+                'tags', 'mentions', 'post_images', 'post_files',
+                Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
+            ).order_by(preserved_order)
+            
             paginated_queryset = optimized_queryset
         else:
             paginated_queryset = paginated_queryset.select_related(
-                'category', 'user'
+                'category', 'user', 'user__profile'
             ).prefetch_related(
-                'tags', 'mentions', 'post_images', 'post_files'
+                'tags', 'mentions', 'post_images', 'post_files',
+                Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
             )
         
         from .serializers import PostListSerializer 
         serializer = PostListSerializer(paginated_queryset, many=True, context={'request': request})
+        
+        # Information sur l'algorithme appliqué
+        algorithm_info = {
+            'name': algorithm,
+            'description': {
+                'recommended': 'Algorithmes de recommandation personnalisée',
+                'country_priority': 'Priorité aux posts du même pays',
+                'fresh_for_you': 'Nouveautés adaptées à vos préférences',
+                'similar_users': 'Recommandations basées sur les utilisateurs similaires',
+                'avoid_seen': 'Évite les posts déjà vus/notés',
+            }.get(algorithm, 'Tri standard')
+        }
         
         # Retourner avec des métadonnées
         response_data = {
@@ -364,10 +453,12 @@ def post_list_create(request):
                 'tag': tag,
                 'user': user
             },
-            'recommendation_info': {
-                'user_country': request.user.profile.country if request.user.is_authenticated else None,
-                'algorithm_applied': algorithm
-            } if request.user.is_authenticated else {}
+            'algorithm_info': algorithm_info,
+            'user_context': {
+                'country': request.user.profile.country if request.user.is_authenticated else None,
+                'is_authenticated': request.user.is_authenticated,
+                'preferences_calculated': request.user.is_authenticated and algorithm != 'newest'
+            }
         }
         
         return Response(response_data)
@@ -478,7 +569,8 @@ def post_list_create(request):
                 )
         else:
             print("❌ [POST CREATE] Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_detail_update_delete(request, pk):
     """
