@@ -401,12 +401,21 @@ class PostListSerializer(serializers.ModelSerializer):
     post_files = PostFileSerializer(many=True, read_only=True)
     category_name = serializers.CharField(source='category.name', read_only=True)
     comments_count = serializers.SerializerMethodField()
+    recommendation_score = serializers.FloatField(read_only=True, required=False)
+    user_has_viewed = serializers.SerializerMethodField()
+    user_has_rated = serializers.SerializerMethodField()
+    user_has_liked = serializers.SerializerMethodField()
+    
     class Meta:
         model = Post
         fields = [
             'comments_count',
             # Identifiants
             'id', 'title', 'content', 'user_id',
+            'recommendation_score',
+            'user_has_viewed',
+            'user_has_rated',
+            'user_has_liked',   
             
             # User info
             'user_name', 'user_profile_image', 'user_profile_id',
@@ -565,6 +574,25 @@ class PostListSerializer(serializers.ModelSerializer):
                 files_data.append(file_info)
             return files_data
         return None
+        
+    def get_user_has_viewed(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.post_views.filter(user=request.user).exists()
+        return False
+    
+    def get_user_has_rated(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.ratings.filter(user=request.user).exists()
+        return False
+    
+    def get_user_has_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(id=request.user.id).exists()
+        return False
+
 # Dans serializers.py
 class PostUpdateSerializer(serializers.ModelSerializer):
     """Serializer spécifique pour la mise à jour de posts avec fichiers"""

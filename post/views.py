@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view , permission_classes
 
 # Model 
-from .models import Post, Category, Tag, PostImage, PostFile
+from .models import Post, Category, Tag, PostImage, PostFile, PostView
 from feedback_post.models import Rating
+from comment_post.models import Comment
 
 # django.contrib.auth 
 from django.contrib.auth.models import User
@@ -32,98 +33,271 @@ def is_owner_or_read_only(request, post):
         return True
     return post.user == request.user
 
-
 @api_view(['GET', 'POST'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_list_create(request):
     """
     Liste tous les posts ou crée un nouveau post
+    Avec algorithme de recommandation personnalisé
     """
     if request.method == 'GET':
         # Récupération et filtrage des posts
         queryset = Post.objects.filter(user__is_active=True)
-        from django.db.models import Count
+        from django.db.models import Count, Avg, Q, F, ExpressionWrapper, FloatField, Case, When, Value
+        from django.db.models.functions import Coalesce
+        from django.utils import timezone
         
         # Annoter avec le compte des commentaires
         queryset = queryset.annotate(
             comments_count_annotated=Count('post_comments', distinct=True)
         )
+        
         # Filtrage par catégorie
         category = request.query_params.get('category', None)
         if category and category != '':
             try:
                 category_id = int(category)
                 queryset = queryset.filter(category_id=category_id)
-                print(f"🔍 Filtering by category ID: {category_id}")
             except ValueError:
-                # Si category n'est pas un nombre, essayer de trouver par nom
                 queryset = queryset.filter(category__name__icontains=category)
-                print(f"🔍 Filtering by category name: {category}")
         
         # Filtrage par tag
         tag = request.query_params.get('tag', None)
         if tag and tag != '':
             queryset = queryset.filter(tags__name=tag)
-            print(f"🔍 Filtering by tag: {tag}")
         
-        # Filtrage par recherche - CORRECTION: Doit combiner avec la catégorie
+        # Filtrage par recherche
         search = request.query_params.get('search', None)
         if search and search != '':
-            # IMPORTANT: Combiner avec les filtres existants (catégorie, tag, etc.)
             queryset = queryset.filter(
                 Q(title__icontains=search) | 
                 Q(content__icontains=search)
             )
-            print(f"🔍 Filtering by search: {search}")
         
         # Filtrage par utilisateur
         user = request.query_params.get('user', None)
         if user and user != '':
             queryset = queryset.filter(user__username=user)
-            print(f"🔍 Filtering by user: {user}")
         
-        # Log des filtres appliqués
-        print(f"📊 Applied filters - Category: {category}, Search: {search}, Tag: {tag}, User: {user}")
+        # LOGIQUE AVANCÉE D'ALGORITHME DE RECOMMANDATION
+        algorithm = request.query_params.get('algorithm', 'recommended')
         
-        # AJOUT : Logique de tri avancée
-        sort_by = request.query_params.get('sort', 'newest')
-        ordering = request.query_params.get('ordering', None)
-        
-        # Appliquer le tri selon le paramètre
-        if ordering:
-            # Si ordering est fourni directement, l'utiliser
-            queryset = queryset.order_by(ordering)
+        # Score de recommandation personnalisé (si utilisateur authentifié)
+        if request.user.is_authenticated and algorithm != 'newest':
+            user_profile = request.user.profile
+            
+            # 1. Score de similarité avec le pays de l'utilisateur
+            country_score = Case(
+                When(user__profile__country=user_profile.country, then=Value(50.0)),
+                default=Value(0.0),
+                output_field=FloatField()
+            )
+            
+            # 2. Score d'interaction de l'utilisateur
+            # Posts déjà vus (basés sur PostView)
+            viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
+            
+            # Posts notés par l'utilisateur
+            user_ratings = Rating.objects.filter(user=request.user).values('post_id', 'stars')
+            user_rated_posts = {}
+            for rating in user_ratings:
+                user_rated_posts[rating['post_id']] = rating['stars']
+            
+            # Posts commentés par l'utilisateur
+            commented_posts = Comment.objects.filter(
+                user=request.user
+            ).values_list('post_id', flat=True).distinct()
+            
+            # Posts likés par l'utilisateur
+            liked_posts = Post.objects.filter(
+                likes=request.user
+            ).values_list('id', flat=True)
+            
+            # 3. Calculer les préférences de l'utilisateur
+            # Catégories préférées (basées sur les likes/ratings)
+            user_category_prefs = {}
+            user_rated_categories = Rating.objects.filter(
+                user=request.user
+            ).values('post__category__id').annotate(
+                avg_rating=Avg('stars')
+            )
+            
+            for pref in user_rated_categories:
+                if pref['post__category__id']:
+                    user_category_prefs[pref['post__category__id']] = pref['avg_rating'] * 10
+            
+            # Tags préférés
+            user_tag_prefs = {}
+            user_tag_interactions = Post.objects.filter(
+                Q(likes=request.user) | 
+                Q(post_comments__user=request.user) |
+                Q(ratings__user=request.user)
+            ).values('tags__id', 'tags__name').annotate(
+                interaction_count=Count('id')
+            )
+            
+            for pref in user_tag_interactions:
+                if pref['tags__id']:
+                    user_tag_prefs[pref['tags__id']] = pref['interaction_count']
+            
+            # 4. Score de similarité de catégorie
+            category_similarity_score = Case(
+                *[When(category_id=cat_id, then=Value(score)) 
+                  for cat_id, score in user_category_prefs.items()],
+                default=Value(0.0),
+                output_field=FloatField()
+            )
+            
+            # 5. Score de similarité de tags
+            tag_similarity_score = Coalesce(
+                Avg(
+                    Case(
+                        *[When(tags__id=tag_id, then=Value(score))
+                          for tag_id, score in user_tag_prefs.items()],
+                        default=Value(0.0),
+                        output_field=FloatField()
+                    )
+                ),
+                Value(0.0),
+                output_field=FloatField()
+            )
+            
+            # 6. Score de fraîcheur (les nouveaux posts sont favorisés)
+            freshness_score = ExpressionWrapper(
+                Value(100.0) / (
+                    1.0 + (timezone.now() - F('created_at')).days / 30.0
+                ),
+                output_field=FloatField()
+            )
+            
+            # 7. Score de popularité globale
+            popularity_score = ExpressionWrapper(
+                Coalesce(Avg('ratings__stars'), Value(0.0)) * 20.0 +
+                Count('likes', distinct=True) * 2.0 +
+                Count('post_comments', distinct=True) * 1.0,
+                output_field=FloatField()
+            )
+            
+            # 8. Score d'interaction négative (déjà vu/noté)
+            interaction_penalty = Case(
+                # Forte pénalité pour les posts notés bas
+                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars < 3], 
+                      then=Value(-100.0)),
+                # Pénalité modérée pour les posts déjà vus
+                When(id__in=viewed_posts, then=Value(-30.0)),
+                # Pénalité légère pour les posts commentés
+                When(id__in=commented_posts, then=Value(-10.0)),
+                # Petit bonus pour les posts likés
+                When(id__in=liked_posts, then=Value(20.0)),
+                default=Value(0.0),
+                output_field=FloatField()
+            )
+            
+            # 9. Score final de recommandation
+            recommendation_score = (
+                country_score * 1.5 +  # Priorité pays
+                category_similarity_score * 2.0 +  # Catégories préférées
+                tag_similarity_score * 1.2 +  # Tags préférés
+                freshness_score * 0.8 +  # Fraîcheur
+                popularity_score * 1.0 +  # Popularité
+                interaction_penalty  # Interactions utilisateur
+            )
+            
+            # Annoter avec tous les scores
+            queryset = queryset.annotate(
+                country_score=country_score,
+                category_similarity=category_similarity_score,
+                tag_similarity=tag_similarity_score,
+                freshness_score=freshness_score,
+                popularity_score=popularity_score,
+                interaction_penalty=interaction_penalty,
+                recommendation_score=recommendation_score
+            )
+            
+            # Appliquer l'algorithme de tri
+            if algorithm == 'recommended':
+                # Tri par score de recommandation (posts du pays + préférences + fraîcheur)
+                queryset = queryset.order_by('-recommendation_score', '-created_at')
+            
+            elif algorithm == 'country_priority':
+                # Priorité absolue aux posts du même pays
+                queryset = queryset.order_by('-country_score', '-created_at')
+            
+            elif algorithm == 'fresh_for_you':
+                # Posts récents mais adaptés aux préférences
+                recent_days = 7  # Dernière semaine
+                recent_posts = queryset.filter(
+                    created_at__gte=timezone.now() - timezone.timedelta(days=recent_days)
+                ).annotate(
+                    personal_score=category_similarity_score + tag_similarity_score
+                ).order_by('-personal_score', '-created_at')
+                
+                older_posts = queryset.filter(
+                    created_at__lt=timezone.now() - timezone.timedelta(days=recent_days)
+                ).order_by('-recommendation_score')
+                
+                # Combiner : récents adaptés d'abord, puis recommandations
+                queryset = list(recent_posts) + list(older_posts)
+            
+            elif algorithm == 'similar_users':
+                # Recommandation basée sur les utilisateurs similaires
+                similar_users = User.objects.filter(
+                    profile__country=user_profile.country
+                ).exclude(id=request.user.id)
+                
+                similar_posts = Post.objects.filter(
+                    user__in=similar_users,
+                    ratings__stars__gte=4
+                ).annotate(
+                    similar_users_score=Count('likes') + Count('ratings')
+                ).order_by('-similar_users_score', '-created_at')
+                
+                queryset = similar_posts
+                
         else:
-            # Sinon utiliser le paramètre sort
-            if sort_by == 'newest':
-                queryset = queryset.order_by('-created_at')
-            elif sort_by == 'oldest':
-                queryset = queryset.order_by('created_at')
-            elif sort_by == 'popular':
-                # Tri par popularité = nombre total de ratings
-                queryset = queryset.annotate(
-                    rating_count=Count('ratings', distinct=True)
-                ).filter(
-                    rating_count__gt=0
-                ).order_by('-rating_count', '-created_at')
-            elif sort_by == 'rated':
-                # Tri par meilleure note = d'abord ceux avec plus de notes
-                queryset = queryset.annotate(
-                    rating_count=Count('ratings', distinct=True),
-                    avg_rating=Avg('ratings__stars')
-                ).filter(
-                    rating_count__gte=3,  # Minimum 3 notes
-                    avg_rating__isnull=False
-                ).order_by(
-                    '-rating_count',      # D'abord plus de notes
-                    '-avg_rating',        # Puis meilleure note
-                    '-created_at'         # Puis plus récent
-                )
+            # Pour les utilisateurs non authentifiés ou tri explicite
+            sort_by = request.query_params.get('sort', 'newest')
+            ordering = request.query_params.get('ordering', None)
+            
+            if ordering:
+                queryset = queryset.order_by(ordering)
             else:
-                # Par défaut : plus récents d'abord
-                queryset = queryset.order_by('-created_at')
+                if sort_by == 'newest':
+                    queryset = queryset.order_by('-created_at')
+                elif sort_by == 'oldest':
+                    queryset = queryset.order_by('created_at')
+                elif sort_by == 'popular':
+                    queryset = queryset.annotate(
+                        rating_count=Count('ratings', distinct=True)
+                    ).filter(
+                        rating_count__gt=0
+                    ).order_by('-rating_count', '-created_at')
+                elif sort_by == 'rated':
+                    queryset = queryset.annotate(
+                        rating_count=Count('ratings', distinct=True),
+                        avg_rating=Avg('ratings__stars')
+                    ).filter(
+                        rating_count__gte=3,
+                        avg_rating__isnull=False
+                    ).order_by(
+                        '-rating_count',
+                        '-avg_rating',
+                        '-created_at'
+                    )
+                elif sort_by == 'country_priority' and request.user.is_authenticated:
+                    # Tri par pays de l'utilisateur
+                    user_country = request.user.profile.country
+                    queryset = queryset.annotate(
+                        is_same_country=Case(
+                            When(user__profile__country=user_country, then=Value(1)),
+                            default=Value(0),
+                            output_field=FloatField()
+                        )
+                    ).order_by('-is_same_country', '-created_at')
+                else:
+                    queryset = queryset.order_by('-created_at')
         
-        # AJOUT : Pagination
+        # Pagination
         page = request.query_params.get('page', 1)
         page_size = request.query_params.get('page_size', 20)
         
@@ -134,23 +308,45 @@ def post_list_create(request):
             page = 1
             page_size = 20
         
-        # Calculer le total avant pagination
         total_posts = queryset.count()
         
-        # Appliquer la pagination
         start = (page - 1) * page_size
         end = start + page_size
-        queryset = queryset[start:end]
         
-        # Précharger les relations pour optimiser
-        queryset = queryset.select_related('category', 'user').prefetch_related(
-            'tags', 'mentions', 'post_images', 'post_files'
-        )
+        # Pour les querysets combinés (listes)
+        if isinstance(queryset, list):
+            paginated_queryset = queryset[start:end]
+            total_posts = len(queryset)
+        else:
+            paginated_queryset = queryset[start:end]
+        
+        # Précharger les relations
+        if isinstance(paginated_queryset, list):
+            # Pour les listes, précharger manuellement
+            from django.db.models import Prefetch
+            post_ids = [p.id for p in paginated_queryset]
+            optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
+                'category', 'user'
+            ).prefetch_related(
+                'tags', 'mentions', 'post_images', 'post_files'
+            )
+            # Préserver l'ordre original
+            order_by_field = f"FIELD(id, {','.join(map(str, post_ids))})" if post_ids else '-created_at'
+            optimized_queryset = optimized_queryset.extra(
+                select={'ordering': order_by_field}
+            ) if post_ids else optimized_queryset
+            paginated_queryset = optimized_queryset
+        else:
+            paginated_queryset = paginated_queryset.select_related(
+                'category', 'user'
+            ).prefetch_related(
+                'tags', 'mentions', 'post_images', 'post_files'
+            )
         
         from .serializers import PostListSerializer 
-        serializer = PostListSerializer(queryset, many=True, context={'request': request})
+        serializer = PostListSerializer(paginated_queryset, many=True, context={'request': request})
         
-        # Retourner avec des métadonnées de pagination et de tri
+        # Retourner avec des métadonnées
         response_data = {
             'posts': serializer.data,
             'pagination': {
@@ -162,12 +358,16 @@ def post_list_create(request):
                 'has_previous': page > 1
             },
             'filters': {
-                'sort': sort_by,
+                'algorithm': algorithm,
                 'category': category,
                 'search': search,
                 'tag': tag,
                 'user': user
-            }
+            },
+            'recommendation_info': {
+                'user_country': request.user.profile.country if request.user.is_authenticated else None,
+                'algorithm_applied': algorithm
+            } if request.user.is_authenticated else {}
         }
         
         return Response(response_data)
@@ -179,10 +379,8 @@ def post_list_create(request):
         print("🔍 [POST CREATE] User:", request.user.username)
         print("🔍 [POST CREATE] Content-Type:", request.content_type)
         
-        # ⚠️ CORRECTION: Utiliser PostCreateSerializer pour la création
         from .serializers import PostCreateSerializer
         
-        # DEBUG: Afficher les données reçues
         print("🔍 [POST CREATE] POST data (keys):", list(request.POST.keys()))
         for key in request.POST:
             print(f"  {key}: {request.POST[key]}")
@@ -193,39 +391,28 @@ def post_list_create(request):
             for i, file in enumerate(files):
                 print(f"  {key}[{i}]: {file.name} ({file.size} bytes)")
         
-        # Récupérer toutes les images
         images = request.FILES.getlist('images')
         print(f"🔍 [POST CREATE] Received {len(images)} images with getlist('images')")
         
-        # Si pas d'images dans 'images', vérifier dans 'image'
         if len(images) == 0:
             single_image = request.FILES.get('image')
             if single_image:
                 images = [single_image]
                 print(f"🔍 [POST CREATE] Single image found: {single_image.name}")
         
-        # Récupérer les vidéos
         videos = request.FILES.getlist('videos')
         print(f"🔍 [POST CREATE] Received {len(videos)} videos with getlist('videos')")
         
-        # Récupérer les fichiers audio
         audio_files = request.FILES.getlist('audio')
         print(f"🔍 [POST CREATE] Received {len(audio_files)} audio files with getlist('audio')")
         
-        # Récupérer les documents
         documents = request.FILES.getlist('documents')
         print(f"🔍 [POST CREATE] Received {len(documents)} documents with getlist('documents')")
         
-        # Créer une copie mutable de request.data - MAINTENANT SANS LES FICHIERS
-        # Cette copie ne contient que les données texte pour éviter l'erreur de pickling
         data = {}
         for key in request.POST:
             data[key] = request.POST[key]
         
-        # Si on a des fichiers, les traiter séparément
-        # On va utiliser request.FILES directement dans le serializer
-        
-        # Créer un dictionnaire avec toutes les données
         all_data = {
             **data,
             'images': images,
@@ -234,7 +421,6 @@ def post_list_create(request):
             'documents': documents
         }
         
-        # Compter le total des fichiers
         total_files = len(images) + len(videos) + len(audio_files) + len(documents)
         print(f"🔍 [POST CREATE] Total files to process: {total_files}")
         
@@ -260,7 +446,6 @@ def post_list_create(request):
                 print(f"✅ [POST CREATE] Documents in validated data: {len(serializer.validated_data['documents'])}")
             
             try:
-                # Le serializer gère déjà l'assignation de l'utilisateur
                 post = serializer.save()
                 print(f"✅ [POST CREATE] Post created successfully!")
                 print(f"  - ID: {post.id}")
@@ -268,20 +453,17 @@ def post_list_create(request):
                 print(f"  - Category: {post.category.id if post.category else 'None'}")
                 print(f"  - Main Image: {'Yes' if post.image else 'No'}")
                 
-                # Compter les images associées
+                from .models import PostImage, PostFile
                 post_images_count = PostImage.objects.filter(post=post).count()
                 print(f"  - Post Images count: {post_images_count}")
                 
-                # Compter les autres fichiers
                 post_files_count = PostFile.objects.filter(post=post).count()
                 print(f"  - Post Files count: {post_files_count}")
                 
-                # Détail par type de fichier
                 if post_files_count > 0:
                     file_types = PostFile.objects.filter(post=post).values_list('file_type', flat=True)
                     print(f"  - File types: {list(set(file_types))}")
                 
-                # Retourner le post créé avec le serializer complet
                 from .serializers import PostSerializer
                 return_serializer = PostSerializer(post, context={'request': request})
                 return Response(return_serializer.data, status=status.HTTP_201_CREATED)
@@ -296,8 +478,7 @@ def post_list_create(request):
                 )
         else:
             print("❌ [POST CREATE] Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_detail_update_delete(request, pk):
     """

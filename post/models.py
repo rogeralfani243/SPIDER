@@ -160,3 +160,46 @@ class PostFile(models.Model):
     def __str__(self):
         return f"{self.get_file_type_display()}: {self.name or self.file.name}"
 
+
+
+
+# models.py - Ajoutez ces modèles
+
+class PostView(models.Model):
+    """
+    Suivi des vues des posts par les utilisateurs
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_views')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'post']
+        ordering = ['-viewed_at']
+
+class UserInteraction(models.Model):
+    """
+    Stockage des interactions utilisateur pour l'algorithme
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='interactions')
+    interaction_type = models.CharField(
+        max_length=20,
+        choices=[
+            ('view', 'Vue'),
+            ('user_rating', 'User_rating'),
+            ('comment', 'Commentaire'),
+            ('rating', 'Note'),
+            ('share', 'Partage'),
+            ('save', 'Sauvegarde')
+        ]
+    )
+    value = models.FloatField(null=True, blank=True)  # Pour les notes, durée de vue, etc.
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'interaction_type']),
+            models.Index(fields=['post', 'interaction_type']),
+        ]
