@@ -222,6 +222,7 @@ class PostSerializer(serializers.ModelSerializer):
     category_details = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
     category_hierarchy = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
         fields = [
@@ -403,8 +404,15 @@ class PostListSerializer(serializers.ModelSerializer):
     comments_count = serializers.SerializerMethodField()
     recommendation_score = serializers.FloatField(read_only=True, required=False)
     user_has_viewed = serializers.SerializerMethodField()
-    user_has_rated = serializers.SerializerMethodField()
-    user_has_liked = serializers.SerializerMethodField()
+    user_has_rated = serializers.BooleanField(read_only=True)
+    user_rating_value = serializers.FloatField(read_only=True, required=False)
+    user_has_commented = serializers.BooleanField(read_only=True)
+    
+    # Scores détaillés (optionnel, pour le debug)
+    country_score = serializers.FloatField(read_only=True, required=False)
+    category_similarity = serializers.FloatField(read_only=True, required=False)
+    tag_similarity = serializers.FloatField(read_only=True, required=False)
+    freshness_score = serializers.FloatField(read_only=True, required=False)
     
     class Meta:
         model = Post
@@ -414,9 +422,10 @@ class PostListSerializer(serializers.ModelSerializer):
             'id', 'title', 'content', 'user_id',
             'recommendation_score',
             'user_has_viewed',
-            'user_has_rated',
             'user_has_liked',   
-            
+             'user_has_rated', 'user_rating_value',
+            'user_has_commented', 'country_score', 'category_similarity',
+             'tag_similarity', 'freshness_score'
             # User info
             'user_name', 'user_profile_image', 'user_profile_id',
             

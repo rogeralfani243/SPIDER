@@ -13,7 +13,7 @@ from comment_post.models import Comment
 # django.contrib.auth 
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model  
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count,Subquery
 
 # Importez vos serializers mis à jour
 from .serializers import PostSerializer,PostUpdateSerializer, PostCreateSerializer, PostDetailSerializer,PostListSerializer, RatingSerializer
@@ -104,7 +104,7 @@ def post_list_create(request):
                 user_rated_posts[rating['post_id']] = rating['stars']
             
             # Posts commentés par l'utilisateur
-            commented_posts = PostComment.objects.filter(
+            commented_posts = Comment.objects.filter(
                 user=request.user
             ).values_list('post_id', flat=True).distinct()
             
@@ -238,7 +238,7 @@ def post_list_create(request):
                     )
                 ),
                 user_has_commented=Exists(
-                    PostComment.objects.filter(
+                    Comment.objects.filter(
                         user=request.user,
                         post=OuterRef('pk')
                     )
