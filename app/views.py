@@ -531,6 +531,7 @@ def profile_detail_public(request, profile_id):
             'bio': profile.bio,
             'social_links': profile.social_links,
             'city': profile.city,
+            'phone':profile.phone,
             "zip_code": profile.zip_code,
             'state': profile.state,
             'country': profile.country,
