@@ -124,6 +124,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+    opening_hours = OpeningHoursSerializer(many=True, read_only=True)
     is_open_now = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
     class Meta:
@@ -135,7 +136,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio', 'image', 'image_bio', 'website', 'location',
             'address', 'city', 'state', 'zip_code', 'country',
             'birth_date', 'followers', 'category', 'category_id',
-            'created_at', 'image_url','social_links','phone','is_open_now'
+            'created_at', 'image_url','social_links','phone','is_open_now','opening_hours'
         ]
         read_only_fields = ['id', 'user', 'followers', 'created_at']
     
