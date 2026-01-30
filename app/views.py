@@ -1,11 +1,11 @@
 # rest framework module 
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework.authtoken.models import Token 
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view , permission_classes, authentication_classes
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication,SessionAuthentication
 from rest_framework.views import APIView
 
 #HTTTP module 
@@ -2326,20 +2326,10 @@ def reset_password(request):
 
 # ==================== VIEWS POUR OPENING HOURS ====================
 # views.py - VERSION MODIFIÉE
-# views.py - VERSION AVEC DRF API VIEW
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-import json
-from .models import Profile, OpeningHours
-
-# ==================== API VIEWS POUR OPENING HOURS ====================
+# views.py - CORRECTION DE L'ERREUR strftime
 
 @api_view(['GET'])
-@permission_classes([AllowAny])  # Tout le monde peut voir les horaires
+@permission_classes([AllowAny])
 def get_opening_hours(request, profile_id):
     """
     Récupérer tous les horaires d'ouverture d'un profil
@@ -2352,12 +2342,28 @@ def get_opening_hours(request, profile_id):
     # Transformer les données
     opening_hours_data = []
     for hour in hours:
+        # CORRECTION : Vérifier si c'est un objet time ou déjà une string
+        open_time_str = None
+        close_time_str = None
+        
+        if hour.open_time:
+            if hasattr(hour.open_time, 'strftime'):
+                open_time_str = hour.open_time.strftime('%H:%M')
+            else:
+                open_time_str = str(hour.open_time)
+        
+        if hour.close_time:
+            if hasattr(hour.close_time, 'strftime'):
+                close_time_str = hour.close_time.strftime('%H:%M')
+            else:
+                close_time_str = str(hour.close_time)
+        
         opening_hours_data.append({
             'id': hour.id,
             'day': hour.day,
             'day_display': hour.get_day_display(),
-            'open_time': hour.open_time.strftime('%H:%M') if hour.open_time else None,
-            'close_time': hour.close_time.strftime('%H:%M') if hour.close_time else None,
+            'open_time': open_time_str,
+            'close_time': close_time_str,
             'is_closed': hour.is_closed,
             'notes': hour.notes
         })
@@ -2369,45 +2375,6 @@ def get_opening_hours(request, profile_id):
         'has_hours': len(opening_hours_data) > 0
     })
 
-@api_view(['GET'])
-@permission_classes([AllowAny])  # Public
-def check_if_open(request, profile_id):
-    """
-    Vérifier si le profil a des horaires et s'il est "ouvert"
-    GET /api/profiles/<profile_id>/is-open/
-    """
-    profile = get_object_or_404(Profile, id=profile_id)
-    
-    # Vérifier s'il y a des horaires
-    has_hours = profile.opening_hours.exists()
-    
-    if not has_hours:
-        return Response({
-            'has_opening_hours': False,
-            'is_open': False,
-            'message': 'No opening hours set'
-        })
-    
-    # Vérifier si "ouvert" maintenant
-    is_open = profile.is_open_now() if hasattr(profile, 'is_open_now') else False
-    current_hours = profile.get_current_opening_hours() if hasattr(profile, 'get_current_opening_hours') else None
-    
-    response_data = {
-        'has_opening_hours': True,
-        'is_open': is_open,
-        'current_day': current_hours.get_day_display() if current_hours else None,
-        'today_hours': str(current_hours) if current_hours else None
-    }
-    
-    if current_hours and not current_hours.is_closed:
-        response_data.update({
-            'open_time': current_hours.open_time.strftime('%H:%M') if current_hours.open_time else None,
-            'close_time': current_hours.close_time.strftime('%H:%M') if current_hours.close_time else None,
-            'closes_at': current_hours.close_time.strftime('%H:%M') if current_hours.close_time else None
-        })
-    
-    return Response(response_data)
-
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
 @permission_classes([IsAuthenticated])
@@ -2418,7 +2385,7 @@ def create_opening_hour(request, profile_id):
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Vérifier les permissions - seul le propriétaire peut créer
+    # Vérifier les permissions
     if profile.user != request.user:
         return Response(
             {'error': 'You are not the owner of this profile'},
@@ -2459,12 +2426,28 @@ def create_opening_hour(request, profile_id):
             notes=data.get('notes', '')
         )
         
+        # Formatage sécurisé pour la réponse
+        open_time_response = None
+        close_time_response = None
+        
+        if opening_hour.open_time:
+            if hasattr(opening_hour.open_time, 'strftime'):
+                open_time_response = opening_hour.open_time.strftime('%H:%M')
+            else:
+                open_time_response = str(opening_hour.open_time)
+        
+        if opening_hour.close_time:
+            if hasattr(opening_hour.close_time, 'strftime'):
+                close_time_response = opening_hour.close_time.strftime('%H:%M')
+            else:
+                close_time_response = str(opening_hour.close_time)
+        
         return Response({
             'id': opening_hour.id,
             'day': opening_hour.day,
             'day_display': opening_hour.get_day_display(),
-            'open_time': opening_hour.open_time.strftime('%H:%M') if opening_hour.open_time else None,
-            'close_time': opening_hour.close_time.strftime('%H:%M') if opening_hour.close_time else None,
+            'open_time': open_time_response,
+            'close_time': close_time_response,
             'is_closed': opening_hour.is_closed,
             'notes': opening_hour.notes,
             'message': 'Opening hour created successfully'
@@ -2486,7 +2469,7 @@ def update_all_opening_hours(request, profile_id):
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Vérifier les permissions - seul le propriétaire peut modifier
+    # Vérifier les permissions
     if profile.user != request.user:
         return Response(
             {'error': 'You are not the owner of this profile'},
@@ -2539,12 +2522,28 @@ def update_all_opening_hours(request, profile_id):
                 notes=hour_data.get('notes', '')
             )
             
+            # Formatage sécurisé pour la réponse
+            open_time_response = None
+            close_time_response = None
+            
+            if opening_hour.open_time:
+                if hasattr(opening_hour.open_time, 'strftime'):
+                    open_time_response = opening_hour.open_time.strftime('%H:%M')
+                else:
+                    open_time_response = str(opening_hour.open_time)
+            
+            if opening_hour.close_time:
+                if hasattr(opening_hour.close_time, 'strftime'):
+                    close_time_response = opening_hour.close_time.strftime('%H:%M')
+                else:
+                    close_time_response = str(opening_hour.close_time)
+            
             created_hours.append({
                 'id': opening_hour.id,
                 'day': opening_hour.day,
                 'day_display': opening_hour.get_day_display(),
-                'open_time': opening_hour.open_time.strftime('%H:%M') if opening_hour.open_time else None,
-                'close_time': opening_hour.close_time.strftime('%H:%M') if opening_hour.close_time else None,
+                'open_time': open_time_response,
+                'close_time': close_time_response,
                 'is_closed': opening_hour.is_closed,
                 'notes': opening_hour.notes
             })
@@ -2562,35 +2561,128 @@ def update_all_opening_hours(request, profile_id):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-# ==================== API VIEWS POUR UN HORAIRE SPÉCIFIQUE ====================
+# ==================== HELPER FUNCTION POUR FORMATER LE TEMPS ====================
+
+def format_time_field(time_obj):
+    """
+    Helper function to safely format time fields
+    """
+    if not time_obj:
+        return None
+    
+    if hasattr(time_obj, 'strftime'):
+        # C'est un objet datetime.time
+        return time_obj.strftime('%H:%M')
+    elif isinstance(time_obj, str):
+        # C'est déjà une string
+        # S'assurer que c'est au format HH:MM
+        if ':' in time_obj:
+            parts = time_obj.split(':')
+            if len(parts) >= 2:
+                hours = parts[0].zfill(2)
+                minutes = parts[1][:2]  # Prendre seulement les 2 premières minutes
+                return f"{hours}:{minutes}"
+        return str(time_obj)
+    else:
+        # Autre type, convertir en string
+        return str(time_obj)
+
+# ==================== VERSION SIMPLIFIÉE AVEC HELPER FUNCTION ====================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_opening_hours_simplified(request, profile_id):
+    """
+    Version simplifiée avec helper function
+    """
+    profile = get_object_or_404(Profile, id=profile_id)
+    
+    hours = profile.opening_hours.all().order_by('day')
+    
+    opening_hours_data = []
+    for hour in hours:
+        opening_hours_data.append({
+            'id': hour.id,
+            'day': hour.day,
+            'day_display': hour.get_day_display(),
+            'open_time': format_time_field(hour.open_time),
+            'close_time': format_time_field(hour.close_time),
+            'is_closed': hour.is_closed,
+            'notes': hour.notes
+        })
+    
+    return Response({
+        'profile_id': profile_id,
+        'profile_name': profile.user.username,
+        'opening_hours': opening_hours_data,
+        'has_hours': len(opening_hours_data) > 0
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_if_open(request, profile_id):
+    """
+    Vérifier si le profil a des horaires et s'il est "ouvert"
+    GET /api/profiles/<profile_id>/is-open/
+    """
+    profile = get_object_or_404(Profile, id=profile_id)
+    
+    # Vérifier s'il y a des horaires
+    has_hours = profile.opening_hours.exists()
+    
+    if not has_hours:
+        return Response({
+            'has_opening_hours': False,
+            'is_open': False,
+            'message': 'No opening hours set'
+        })
+    
+    # Vérifier si "ouvert" maintenant
+    is_open = profile.is_open_now() if hasattr(profile, 'is_open_now') else False
+    current_hours = profile.get_current_opening_hours() if hasattr(profile, 'get_current_opening_hours') else None
+    
+    response_data = {
+        'has_opening_hours': True,
+        'is_open': is_open,
+        'current_day': current_hours.get_day_display() if current_hours else None,
+        'today_hours': str(current_hours) if current_hours else None
+    }
+    
+    if current_hours and not current_hours.is_closed:
+        response_data.update({
+            'open_time': format_time_field(current_hours.open_time),
+            'close_time': format_time_field(current_hours.close_time),
+            'closes_at': format_time_field(current_hours.close_time)
+        })
+    
+    return Response(response_data)
+
+# ==================== VUE POUR OUVERTURE HOUR DETAIL ====================
 
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticatedOrReadOnly])  # GET public, autres auth
+@permission_classes([IsAuthenticatedOrReadOnly])
 def opening_hour_detail(request, profile_id, hour_id):
     """
     Gérer un horaire spécifique
-    GET /api/profiles/<profile_id>/opening-hours/<hour_id>/ (public)
-    PUT/PATCH/DELETE /api/profiles/<profile_id>/opening-hours/<hour_id>/ (owner only)
     """
     profile = get_object_or_404(Profile, id=profile_id)
     opening_hour = get_object_or_404(OpeningHours, id=hour_id, profile=profile)
     
     if request.method == 'GET':
-        # Récupérer les détails d'un horaire spécifique (public)
         return Response({
             'id': opening_hour.id,
             'day': opening_hour.day,
             'day_display': opening_hour.get_day_display(),
-            'open_time': opening_hour.open_time.strftime('%H:%M') if opening_hour.open_time else None,
-            'close_time': opening_hour.close_time.strftime('%H:%M') if opening_hour.close_time else None,
+            'open_time': format_time_field(opening_hour.open_time),
+            'close_time': format_time_field(opening_hour.close_time),
             'is_closed': opening_hour.is_closed,
             'notes': opening_hour.notes,
             'profile_id': profile_id,
             'profile_name': profile.user.username
         })
     
-    # Pour PUT, PATCH, DELETE: vérifier que l'utilisateur est authentifié ET propriétaire
+    # Pour PUT, PATCH, DELETE: vérifier l'authentification
     if not request.user.is_authenticated:
         return Response(
             {'error': 'Authentication required'},
@@ -2632,8 +2724,8 @@ def opening_hour_detail(request, profile_id, hour_id):
                 'id': opening_hour.id,
                 'day': opening_hour.day,
                 'day_display': opening_hour.get_day_display(),
-                'open_time': opening_hour.open_time.strftime('%H:%M') if opening_hour.open_time else None,
-                'close_time': opening_hour.close_time.strftime('%H:%M') if opening_hour.close_time else None,
+                'open_time': format_time_field(opening_hour.open_time),
+                'close_time': format_time_field(opening_hour.close_time),
                 'is_closed': opening_hour.is_closed,
                 'notes': opening_hour.notes,
                 'message': 'Opening hour updated successfully'
@@ -2646,14 +2738,13 @@ def opening_hour_detail(request, profile_id, hour_id):
             )
     
     elif request.method == 'DELETE':
-        # Supprimer l'horaire
         opening_hour.delete()
         return Response({
             'message': 'Opening hour deleted successfully',
             'deleted_id': hour_id
         }, status=status.HTTP_200_OK)
 
-# ==================== NOUVELLES API VIEWS ====================
+# ==================== AUTRES VUES ====================
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication, SessionAuthentication])
@@ -2661,11 +2752,9 @@ def opening_hour_detail(request, profile_id, hour_id):
 def initialize_personal_hours(request, profile_id):
     """
     Initialiser les horaires d'ouverture personnels
-    POST /api/profiles/<profile_id>/initialize-personal-hours/
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Vérifier les permissions
     if profile.user != request.user:
         return Response(
             {'error': 'You are not the owner of this profile'},
@@ -2675,7 +2764,6 @@ def initialize_personal_hours(request, profile_id):
     # Supprimer les horaires existants
     profile.opening_hours.all().delete()
     
-    # Créer des horaires par défaut pour particuliers
     default_hours = {
         'monday': {'open': '09:00', 'close': '18:00', 'closed': False},
         'tuesday': {'open': '09:00', 'close': '18:00', 'closed': False},
@@ -2700,8 +2788,8 @@ def initialize_personal_hours(request, profile_id):
             'id': opening_hour.id,
             'day': opening_hour.day,
             'day_display': opening_hour.get_day_display(),
-            'open_time': opening_hour.open_time.strftime('%H:%M') if opening_hour.open_time else None,
-            'close_time': opening_hour.close_time.strftime('%H:%M') if opening_hour.close_time else None,
+            'open_time': format_time_field(opening_hour.open_time),
+            'close_time': format_time_field(opening_hour.close_time),
             'is_closed': opening_hour.is_closed,
             'notes': opening_hour.notes
         })
@@ -2714,11 +2802,10 @@ def initialize_personal_hours(request, profile_id):
     })
 
 @api_view(['GET'])
-@permission_classes([AllowAny])  # Public
+@permission_classes([AllowAny])
 def has_opening_hours(request, profile_id):
     """
     Vérifier si un profil a des horaires d'ouverture
-    GET /api/profiles/<profile_id>/has-opening-hours/
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
@@ -2731,47 +2818,3 @@ def has_opening_hours(request, profile_id):
         'hours_count': hours_count,
         'message': f'Profile has {hours_count} opening hour(s)' if has_hours else 'No opening hours set'
     })
-
-# ==================== VIEWS POUR GÉRER LE STATUT BUSINESS (optionnel) ====================
-
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication, SessionAuthentication])
-@permission_classes([IsAuthenticated])
-def toggle_business_status(request, profile_id):
-    """
-    Activer/désactiver le statut business d'un profil
-    POST /api/profiles/<profile_id>/toggle-business/
-    """
-    profile = get_object_or_404(Profile, id=profile_id)
-    
-    # Vérifier les permissions
-    if profile.user != request.user:
-        return Response(
-            {'error': 'You are not the owner of this profile'},
-            status=status.HTTP_403_FORBIDDEN
-        )
-    
-    try:
-        set_to_business = request.data.get('is_business', not profile.is_business)
-        
-        profile.is_business = set_to_business
-        
-        # Si on active le statut business et qu'il n'y a pas d'horaire, créer des horaires par défaut
-        if set_to_business and not profile.opening_hours.exists():
-            # Appeler la fonction pour créer des horaires par défaut
-            if hasattr(profile, 'create_default_opening_hours'):
-                profile.create_default_opening_hours()
-        
-        profile.save()
-        
-        return Response({
-            'profile_id': profile_id,
-            'is_business': profile.is_business,
-            'message': f'Business status set to: {profile.is_business}'
-        })
-        
-    except Exception as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_400_BAD_REQUEST
-        )
