@@ -81,4 +81,8 @@ urlpatterns = [
     path('profile/<int:profile_id>/is-open/', 
          views.check_if_open, name='check_if_open'),
     
+    # Gestion du statut business
+    path('profile/<int:profile_id>/toggle-business/', 
+         views.toggle_business_status, name='toggle_business_status'),
+    
 ]

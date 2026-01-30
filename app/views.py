@@ -2326,20 +2326,26 @@ def reset_password(request):
 
 # ==================== VIEWS POUR OPENING HOURS ====================
 # views.py - VERSION MODIFIÉE
-@require_GET
+# views.py - VERSION AVEC DRF API VIEW
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+import json
+from .models import Profile, OpeningHours
+
+# ==================== API VIEWS POUR OPENING HOURS ====================
+
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Tout le monde peut voir les horaires
 def get_opening_hours(request, profile_id):
     """
     Récupérer tous les horaires d'ouverture d'un profil
     GET /api/profiles/<profile_id>/opening-hours/
     """
     profile = get_object_or_404(Profile, id=profile_id)
-    
-    # SUPPRIMER la vérification is_business - TOUS les profils peuvent avoir des horaires
-    # if not profile.is_business:
-    #     return JsonResponse({
-    #         'error': 'This profile is not a business',
-    #         'is_business': False
-    #     }, status=400)
     
     hours = profile.opening_hours.all().order_by('day')
     
@@ -2356,14 +2362,15 @@ def get_opening_hours(request, profile_id):
             'notes': hour.notes
         })
     
-    return JsonResponse({
+    return Response({
         'profile_id': profile_id,
-        'profile_name': profile.user.username,  # Utiliser username au lieu de business_name
+        'profile_name': profile.user.username,
         'opening_hours': opening_hours_data,
         'has_hours': len(opening_hours_data) > 0
     })
 
-@require_GET
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Public
 def check_if_open(request, profile_id):
     """
     Vérifier si le profil a des horaires et s'il est "ouvert"
@@ -2371,25 +2378,17 @@ def check_if_open(request, profile_id):
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # SUPPRIMER la vérification is_business
-    # if not profile.is_business:
-    #     return JsonResponse({
-    #         'is_business': False,
-    #         'is_open': False,
-    #         'message': 'This is not a business profile'
-    #     })
-    
     # Vérifier s'il y a des horaires
     has_hours = profile.opening_hours.exists()
     
     if not has_hours:
-        return JsonResponse({
+        return Response({
             'has_opening_hours': False,
             'is_open': False,
             'message': 'No opening hours set'
         })
     
-    # Vérifier si "ouvert" maintenant (même logique mais pour tous)
+    # Vérifier si "ouvert" maintenant
     is_open = profile.is_open_now() if hasattr(profile, 'is_open_now') else False
     current_hours = profile.get_current_opening_hours() if hasattr(profile, 'get_current_opening_hours') else None
     
@@ -2407,11 +2406,11 @@ def check_if_open(request, profile_id):
             'closes_at': current_hours.close_time.strftime('%H:%M') if current_hours.close_time else None
         })
     
-    return JsonResponse(response_data)
+    return Response(response_data)
 
-@csrf_exempt
-@require_POST
-@login_required
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def create_opening_hour(request, profile_id):
     """
     Créer un nouvel horaire d'ouverture
@@ -2419,30 +2418,23 @@ def create_opening_hour(request, profile_id):
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Vérifier les permissions
+    # Vérifier les permissions - seul le propriétaire peut créer
     if profile.user != request.user:
-        return HttpResponseForbidden(
-            json.dumps({'error': 'You are not the owner of this profile'}),
-            content_type='application/json'
+        return Response(
+            {'error': 'You are not the owner of this profile'},
+            status=status.HTTP_403_FORBIDDEN
         )
     
-    # SUPPRIMER la vérification is_business
-    # if not profile.is_business:
-    #     return HttpResponseBadRequest(
-    #         json.dumps({'error': 'Profile is not a business'}),
-    #         content_type='application/json'
-    #     )
-    
     try:
-        data = json.loads(request.body)
+        data = request.data
         
         # Validation des données
         required_fields = ['day', 'open_time', 'close_time', 'is_closed']
         for field in required_fields:
             if field not in data:
-                return HttpResponseBadRequest(
-                    json.dumps({'error': f'Missing field: {field}'}),
-                    content_type='application/json'
+                return Response(
+                    {'error': f'Missing field: {field}'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
         
         # Vérifier si un horaire existe déjà pour ce jour
@@ -2452,9 +2444,9 @@ def create_opening_hour(request, profile_id):
         ).first()
         
         if existing_hour:
-            return HttpResponseBadRequest(
-                json.dumps({'error': f'Opening hours already exist for {data["day"]}'}),
-                content_type='application/json'
+            return Response(
+                {'error': f'Opening hours already exist for {data["day"]}'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         # Créer le nouvel horaire
@@ -2467,7 +2459,7 @@ def create_opening_hour(request, profile_id):
             notes=data.get('notes', '')
         )
         
-        return JsonResponse({
+        return Response({
             'id': opening_hour.id,
             'day': opening_hour.day,
             'day_display': opening_hour.get_day_display(),
@@ -2476,22 +2468,17 @@ def create_opening_hour(request, profile_id):
             'is_closed': opening_hour.is_closed,
             'notes': opening_hour.notes,
             'message': 'Opening hour created successfully'
-        }, status=201)
+        }, status=status.HTTP_201_CREATED)
         
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest(
-            json.dumps({'error': 'Invalid JSON data'}),
-            content_type='application/json'
-        )
     except Exception as e:
-        return HttpResponseBadRequest(
-            json.dumps({'error': str(e)}),
-            content_type='application/json'
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
         )
 
-@csrf_exempt
-@login_required
-@require_http_methods(["PUT", "PATCH"])
+@api_view(['PUT', 'PATCH'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def update_all_opening_hours(request, profile_id):
     """
     Mettre à jour tous les horaires d'ouverture d'un profil
@@ -2499,27 +2486,20 @@ def update_all_opening_hours(request, profile_id):
     """
     profile = get_object_or_404(Profile, id=profile_id)
     
-    # Vérifier les permissions
+    # Vérifier les permissions - seul le propriétaire peut modifier
     if profile.user != request.user:
-        return HttpResponseForbidden(
-            json.dumps({'error': 'You are not the owner of this profile'}),
-            content_type='application/json'
+        return Response(
+            {'error': 'You are not the owner of this profile'},
+            status=status.HTTP_403_FORBIDDEN
         )
     
-    # SUPPRIMER la vérification is_business
-    # if not profile.is_business:
-    #     return HttpResponseBadRequest(
-    #         json.dumps({'error': 'Profile is not a business'}),
-    #         content_type='application/json'
-    #     )
-    
     try:
-        data = json.loads(request.body)
+        data = request.data
         
         if not isinstance(data, list):
-            return HttpResponseBadRequest(
-                json.dumps({'error': 'Data must be a list of opening hours'}),
-                content_type='application/json'
+            return Response(
+                {'error': 'Data must be a list of opening hours'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         
         # Valider toutes les données d'abord
@@ -2529,17 +2509,17 @@ def update_all_opening_hours(request, profile_id):
             required_fields = ['day']
             for field in required_fields:
                 if field not in hour_data:
-                    return HttpResponseBadRequest(
-                        json.dumps({'error': f'Missing field: {field}'}),
-                        content_type='application/json'
+                    return Response(
+                        {'error': f'Missing field: {field}'},
+                        status=status.HTTP_400_BAD_REQUEST
                     )
             
             # Validation du jour
             valid_days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
             if hour_data['day'] not in valid_days:
-                return HttpResponseBadRequest(
-                    json.dumps({'error': f'Invalid day: {hour_data["day"]}'}),
-                    content_type='application/json'
+                return Response(
+                    {'error': f'Invalid day: {hour_data["day"]}'},
+                    status=status.HTTP_400_BAD_REQUEST
                 )
             
             validated_hours.append(hour_data)
@@ -2569,42 +2549,36 @@ def update_all_opening_hours(request, profile_id):
                 'notes': opening_hour.notes
             })
         
-        return JsonResponse({
+        return Response({
             'profile_id': profile_id,
             'profile_name': profile.user.username,
             'opening_hours': created_hours,
             'message': f'{len(created_hours)} opening hours updated successfully'
         })
         
-    except json.JSONDecodeError:
-        return HttpResponseBadRequest(
-            json.dumps({'error': 'Invalid JSON data'}),
-            content_type='application/json'
-        )
     except Exception as e:
-        return HttpResponseBadRequest(
-            json.dumps({'error': str(e)}),
-            content_type='application/json'
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
         )
 
-# ==================== VIEWS POUR UN HORAIRE SPÉCIFIQUE ====================
+# ==================== API VIEWS POUR UN HORAIRE SPÉCIFIQUE ====================
 
-@csrf_exempt
-@login_required
-@require_http_methods(["GET", "PUT", "PATCH", "DELETE"])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticatedOrReadOnly])  # GET public, autres auth
 def opening_hour_detail(request, profile_id, hour_id):
     """
-    Gérer un horaire spécifique (GET, UPDATE, DELETE)
-    GET /api/profiles/<profile_id>/opening-hours/<hour_id>/
-    PUT /api/profiles/<profile_id>/opening-hours/<hour_id>/
-    DELETE /api/profiles/<profile_id>/opening-hours/<hour_id>/
+    Gérer un horaire spécifique
+    GET /api/profiles/<profile_id>/opening-hours/<hour_id>/ (public)
+    PUT/PATCH/DELETE /api/profiles/<profile_id>/opening-hours/<hour_id>/ (owner only)
     """
     profile = get_object_or_404(Profile, id=profile_id)
     opening_hour = get_object_or_404(OpeningHours, id=hour_id, profile=profile)
     
     if request.method == 'GET':
-        # Récupérer les détails d'un horaire spécifique
-        return JsonResponse({
+        # Récupérer les détails d'un horaire spécifique (public)
+        return Response({
             'id': opening_hour.id,
             'day': opening_hour.day,
             'day_display': opening_hour.get_day_display(),
@@ -2616,16 +2590,22 @@ def opening_hour_detail(request, profile_id, hour_id):
             'profile_name': profile.user.username
         })
     
-    # Pour PUT, PATCH, DELETE: vérifier les permissions
+    # Pour PUT, PATCH, DELETE: vérifier que l'utilisateur est authentifié ET propriétaire
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    
     if profile.user != request.user:
-        return HttpResponseForbidden(
-            json.dumps({'error': 'You are not the owner of this profile'}),
-            content_type='application/json'
+        return Response(
+            {'error': 'You are not the owner of this profile'},
+            status=status.HTTP_403_FORBIDDEN
         )
     
     if request.method in ['PUT', 'PATCH']:
         try:
-            data = json.loads(request.body)
+            data = request.data
             
             # Mettre à jour les champs
             if 'day' in data:
@@ -2648,7 +2628,7 @@ def opening_hour_detail(request, profile_id, hour_id):
             
             opening_hour.save()
             
-            return JsonResponse({
+            return Response({
                 'id': opening_hour.id,
                 'day': opening_hour.day,
                 'day_display': opening_hour.get_day_display(),
@@ -2659,30 +2639,25 @@ def opening_hour_detail(request, profile_id, hour_id):
                 'message': 'Opening hour updated successfully'
             })
             
-        except json.JSONDecodeError:
-            return HttpResponseBadRequest(
-                json.dumps({'error': 'Invalid JSON data'}),
-                content_type='application/json'
-            )
         except Exception as e:
-            return HttpResponseBadRequest(
-                json.dumps({'error': str(e)}),
-                content_type='application/json'
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
             )
     
     elif request.method == 'DELETE':
         # Supprimer l'horaire
         opening_hour.delete()
-        return JsonResponse({
+        return Response({
             'message': 'Opening hour deleted successfully',
             'deleted_id': hour_id
-        }, status=200)
+        }, status=status.HTTP_200_OK)
 
-# ==================== NOUVELLE VIEW POUR INITIALISER LES HORAIRES POUR TOUS ====================
+# ==================== NOUVELLES API VIEWS ====================
 
-@csrf_exempt
-@login_required
-@require_POST
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def initialize_personal_hours(request, profile_id):
     """
     Initialiser les horaires d'ouverture personnels
@@ -2692,12 +2667,10 @@ def initialize_personal_hours(request, profile_id):
     
     # Vérifier les permissions
     if profile.user != request.user:
-        return HttpResponseForbidden(
-            json.dumps({'error': 'You are not the owner of this profile'}),
-            content_type='application/json'
+        return Response(
+            {'error': 'You are not the owner of this profile'},
+            status=status.HTTP_403_FORBIDDEN
         )
-    
-    # SUPPRIMER la vérification is_business
     
     # Supprimer les horaires existants
     profile.opening_hours.all().delete()
@@ -2733,16 +2706,15 @@ def initialize_personal_hours(request, profile_id):
             'notes': opening_hour.notes
         })
     
-    return JsonResponse({
+    return Response({
         'profile_id': profile_id,
         'profile_name': profile.user.username,
         'opening_hours': created_hours,
         'message': 'Personal opening hours initialized successfully'
     })
 
-# ==================== VIEW POUR SAVOIR SI UN PROFIL A DES HORAIRES ====================
-
-@require_GET
+@api_view(['GET'])
+@permission_classes([AllowAny])  # Public
 def has_opening_hours(request, profile_id):
     """
     Vérifier si un profil a des horaires d'ouverture
@@ -2753,9 +2725,53 @@ def has_opening_hours(request, profile_id):
     has_hours = profile.opening_hours.exists()
     hours_count = profile.opening_hours.count()
     
-    return JsonResponse({
+    return Response({
         'profile_id': profile_id,
         'has_opening_hours': has_hours,
         'hours_count': hours_count,
         'message': f'Profile has {hours_count} opening hour(s)' if has_hours else 'No opening hours set'
     })
+
+# ==================== VIEWS POUR GÉRER LE STATUT BUSINESS (optionnel) ====================
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def toggle_business_status(request, profile_id):
+    """
+    Activer/désactiver le statut business d'un profil
+    POST /api/profiles/<profile_id>/toggle-business/
+    """
+    profile = get_object_or_404(Profile, id=profile_id)
+    
+    # Vérifier les permissions
+    if profile.user != request.user:
+        return Response(
+            {'error': 'You are not the owner of this profile'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    try:
+        set_to_business = request.data.get('is_business', not profile.is_business)
+        
+        profile.is_business = set_to_business
+        
+        # Si on active le statut business et qu'il n'y a pas d'horaire, créer des horaires par défaut
+        if set_to_business and not profile.opening_hours.exists():
+            # Appeler la fonction pour créer des horaires par défaut
+            if hasattr(profile, 'create_default_opening_hours'):
+                profile.create_default_opening_hours()
+        
+        profile.save()
+        
+        return Response({
+            'profile_id': profile_id,
+            'is_business': profile.is_business,
+            'message': f'Business status set to: {profile.is_business}'
+        })
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
