@@ -14,7 +14,10 @@ from comment_post.models import Comment
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model  
 from django.db.models import Avg, Count,Subquery
+from django.utils import timezone
 
+from django.db.models.functions import Coalesce
+from django.db.models import Count, Avg, Q, F,Prefetch, ExpressionWrapper, FloatField, Case, When, Value, Exists, OuterRef, Subquery
 # Importez vos serializers mis à jour
 from .serializers import PostSerializer,PostUpdateSerializer, PostCreateSerializer, PostDetailSerializer,PostListSerializer, RatingSerializer
 import os 
@@ -43,9 +46,6 @@ def post_list_create(request):
     if request.method == 'GET':
         # Récupération et filtrage des posts
         queryset = Post.objects.filter(user__is_active=True)
-        from django.db.models import Count, Avg, Q, F, ExpressionWrapper, FloatField, Case, When, Value, Exists, OuterRef
-        from django.db.models.functions import Coalesce
-        from django.utils import timezone
         
         # Annoter avec le compte des commentaires
         queryset = queryset.annotate(
@@ -161,11 +161,20 @@ def post_list_create(request):
                 output_field=FloatField()
             )
             
-            # 6. Score de fraîcheur (les nouveaux posts sont favorisés)
+            # 6. Score de fraîcheur - CORRECTION ICI
+            # Calculer l'âge en jours en utilisant ExtractDay
+            from django.db.models.functions import Extract, Now
             freshness_score = ExpressionWrapper(
                 Value(100.0) / (
-                    1.0 + (timezone.now() - F('created_at')).days / 30.0
+                    1.0 + 
+                    (Extract(Now() - F('created_at'), 'epoch') / (60 * 60 * 24 * 30.0))
                 ),
+                output_field=FloatField()
+            )
+            
+            # Alternative plus simple: utiliser un calcul basé sur l'ID (plus récent = ID plus grand)
+            freshness_simple_score = ExpressionWrapper(
+                Value(F('id') / 1000000.0) * 10.0,  # Les posts plus récents ont des IDs plus grands
                 output_field=FloatField()
             )
             
@@ -204,14 +213,15 @@ def post_list_create(request):
             )
             
             # 10. Score final de recommandation
-            recommendation_score = (
+            recommendation_score = ExpressionWrapper(
                 country_score * 2.0 +  # Priorité forte au pays
                 category_similarity_score * 1.8 +  # Catégories préférées
                 tag_similarity_score * 1.5 +  # Tags préférés
-                freshness_score * 1.2 +  # Fraîcheur
+                freshness_simple_score * 1.2 +  # Fraîcheur (version simple)
                 popularity_score * 1.0 +  # Popularité globale
                 interaction_penalty * 1.5 +  # Interactions utilisateur
-                author_activity_score * 0.5  # Qualité de l'auteur
+                author_activity_score * 0.5,  # Qualité de l'auteur
+                output_field=FloatField()
             )
             
             # Annoter avec tous les scores
@@ -219,7 +229,7 @@ def post_list_create(request):
                 country_score=country_score,
                 category_similarity=category_similarity_score,
                 tag_similarity=tag_similarity_score,
-                freshness_score=freshness_score,
+                freshness_score=freshness_simple_score,
                 popularity_score=popularity_score,
                 interaction_penalty=interaction_penalty,
                 author_activity_score=author_activity_score,
@@ -262,7 +272,7 @@ def post_list_create(request):
             
             elif algorithm == 'country_priority':
                 # Priorité absolue aux posts du même pays
-                queryset = queryset.order_by('-country_score', '-freshness_score', '-created_at')
+                queryset = queryset.order_by('-country_score', '-created_at')
             
             elif algorithm == 'fresh_for_you':
                 # Posts récents mais adaptés aux préférences
@@ -320,7 +330,7 @@ def post_list_create(request):
                     id__in=viewed_posts
                 ).exclude(
                     id__in=list(user_rated_posts.keys())
-                ).order_by('-country_score', '-freshness_score', '-created_at')
+                ).order_by('-country_score', '-created_at')
             
         else:
             # Pour les utilisateurs non authentifiés ou tri explicite
@@ -394,24 +404,27 @@ def post_list_create(request):
         # Précharger les relations
         if isinstance(paginated_queryset, list):
             # Pour les listes, récupérer les objets avec leurs relations
-            from django.db.models import Prefetch
+            from django.db.models import Case, When, IntegerField
             post_ids = [p.id for p in paginated_queryset]
             
-            # Créer un queryset ordonné selon les IDs dans la liste
-            from django.db.models import Case, When, IntegerField
-            preserved_order = Case(
-                *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)],
-                output_field=IntegerField()
-            )
-            
-            optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
-                'category', 'user', 'user__profile'
-            ).prefetch_related(
-                'tags', 'mentions', 'post_images', 'post_files',
-                Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
-            ).order_by(preserved_order)
-            
-            paginated_queryset = optimized_queryset
+            if post_ids:
+                # Créer un queryset ordonné selon les IDs dans la liste
+                preserved_order = Case(
+                    *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)],
+                    output_field=IntegerField()
+                )
+                
+                optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
+                    'category', 'user', 'user__profile'
+                ).prefetch_related(
+                    'tags', 'mentions', 'post_images', 'post_files',
+                    Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
+                ).order_by(preserved_order)
+                
+                paginated_queryset = optimized_queryset
+            else:
+                # Si pas de posts, retourner queryset vide
+                paginated_queryset = Post.objects.none()
         else:
             paginated_queryset = paginated_queryset.select_related(
                 'category', 'user', 'user__profile'
@@ -464,6 +477,7 @@ def post_list_create(request):
         return Response(response_data)
     
     elif request.method == 'POST':
+        # ... (le reste de votre code POST reste inchangé) ...
         # ... (le reste de votre code POST reste inchangé) ...
         print("=" * 60)
         print("🔍 [POST CREATE] DEBUG START")
