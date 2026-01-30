@@ -91,7 +91,7 @@ const ReviewerInfo = ({
             zIndex: 10
           }}
           title={profile_id ? `View ${userName}'s profile` : ''}
-        >
+       translate='no' >
           {userName}
         </span>
         

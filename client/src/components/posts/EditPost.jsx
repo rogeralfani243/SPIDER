@@ -235,7 +235,7 @@ const EditPost = () => {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
+     
         signal: abortControllerRef.current.signal
       });
       
@@ -622,7 +622,7 @@ const EditPost = () => {
           'X-CSRFToken': csrfToken,
         },
         body: formDataToSend,
-        credentials: 'include'
+
       });
       
       const responseText = await response.text();

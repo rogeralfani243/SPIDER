@@ -115,7 +115,7 @@ const UserInfo = ({
           onClick={handleProfileClick}
           style={{ cursor: userId ? 'pointer' : 'default' }}
           title={userId ? `View ${userName}'s profile` : 'User profile'}
-        >
+      translate='no'  >
           @{userName || 'Unknown User'}
         </h3>
        

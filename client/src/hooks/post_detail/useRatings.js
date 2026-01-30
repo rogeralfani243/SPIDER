@@ -46,7 +46,7 @@ export const useRating = (postId, post, setPost) => {
               'Content-Type': 'application/json',
               'X-CSRFToken': getCSRFToken(),
             },
-            withCredentials: true
+       
           }
         );
 

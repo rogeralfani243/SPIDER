@@ -14,7 +14,7 @@ const PrivateRoute = ({
   const { userPermissions, isLoading: securityLoading } = useSecurity();
 
   if (authLoading || securityLoading) {
-    return <LoadingScreen message="🔒 Verifying permissions..." />;
+    return <LoadingScreen/>;
   }
 
   if (!isAuthenticated) {
@@ -40,9 +40,10 @@ const LoadingScreen = ({ message = "Loading..." }) => (
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
-    fontSize: '18px'
+    fontSize: '18px',
+  borderColor:'red'
   }}>
-    {message}
+
   </div>
 );
 

@@ -1,12 +1,13 @@
 import axios from 'axios';
-
+import API_URL from '../../hooks/useApiUrl';
 // Configuration axios optimisée
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8000',
+  baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
+
   timeout: 10000,
   // Important: Gérer les connexions persistantes
   httpAgent: { keepAlive: true },

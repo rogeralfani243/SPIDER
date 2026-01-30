@@ -145,7 +145,7 @@ const RatingsSection = ({ post, onRatingUpdate }) => {
       <div className="ratings-content">
         {/* Interactive Star Rating Component */}
         <div className="interactive-rating-section">
-          <h3 className="section-subtitle">Rate this post</h3>
+          <h3 className="section-subtitle">Rate this thread</h3>
           <StarRating
             postId={post.id}
             initialUserRating={post.user_rating}
@@ -158,10 +158,7 @@ const RatingsSection = ({ post, onRatingUpdate }) => {
         {/* Message si pas de ratings */}
         {totalRatings === 0 && (
           <div className="no-ratings-message">
-            <div className="no-ratings-icon">⭐</div>
-            <h3>No Ratings Yet</h3>
-            <p>This post hasn't received any ratings yet.</p>
-            <p>Be the first to share your opinion!</p>
+
           </div>
         )}
       </div>

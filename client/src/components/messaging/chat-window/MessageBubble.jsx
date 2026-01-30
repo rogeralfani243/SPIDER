@@ -327,21 +327,21 @@ const MessageBubble = ({
           e.preventDefault(); // Empêcher le menu contextuel par défaut
           handleContextMenu(e, message);
         }}
-        onMouseDown={handleBubbleMouseDown} // Alternative au clic
+        // Alternative au clic
       >
         {!isOwn && (
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block', color:'#ebe7e7ff' }}>
             {message?.sender?.username || 'User'}
           </Typography>
         )}
-        
+        {renderMediaDirectly(message)}
         {message?.content && (
           <Typography sx={{ wordBreak: 'keep-all', mb: message?.image || message?.file ? 1 : 0 }}>
             {message.content}
           </Typography>
         )}
         
-        {renderMediaDirectly(message)}
+        
         
         <Typography
           variant="caption"

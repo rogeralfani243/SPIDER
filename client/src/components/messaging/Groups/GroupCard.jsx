@@ -12,6 +12,7 @@ import {
   Pending as PendingIcon,
   Visibility as VisibilityIcon,
   GroupAdd as GroupAddIcon,
+  Tag as TagIcon,
 } from '@mui/icons-material';
 import {
   Box,
@@ -24,16 +25,89 @@ import {
   Tooltip,
   alpha,
 } from '@mui/material';
+import { useMemo } from 'react';
+
 export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnter, onMouseLeave }) => {
+  // ⚠️ CORRECTION : useMemo doit être appelé TOUJOURS au début, avant toute condition
+  // Fonction pour parser les tags peu importe le format
+  const parseTags = useMemo(() => {
+    if (!group?.tags) return [];
+    
+    console.log('🔍 GroupCard - Raw tags:', group.tags);
+    console.log('🔍 GroupCard - Type:', typeof group.tags);
+    
+    // Si c'est déjà un tableau
+    if (Array.isArray(group.tags)) {
+      console.log('✅ GroupCard - Tags is array');
+      // Nettoyer le tableau
+      return group.tags
+        .map(tag => {
+          if (tag === null || tag === undefined) return '';
+          
+          // Si un tag est encore une string JSON
+          if (typeof tag === 'string' && tag.trim().startsWith('[')) {
+            try {
+              const parsed = JSON.parse(tag.trim());
+              return Array.isArray(parsed) && parsed.length > 0 
+                ? String(parsed[0]).trim() 
+                : String(parsed).trim();
+            } catch (error) {
+              // Nettoyer manuellement
+              return tag.replace(/[\[\]"]/g, '').trim();
+            }
+          }
+          
+          return String(tag).trim();
+        })
+        .filter(tag => tag !== '');
+    }
+    
+    // Si c'est une string
+    if (typeof group.tags === 'string') {
+      const str = group.tags.trim();
+      
+      // Chaîne vide
+      if (str === '' || str === '[]' || str === 'null' || str === 'undefined') {
+        return [];
+      }
+      
+      // JSON array string
+      if (str.startsWith('[') && str.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(str);
+          if (Array.isArray(parsed)) {
+            return parsed
+              .map(item => String(item).trim())
+              .filter(item => item !== '');
+          }
+          return [String(parsed).trim()];
+        } catch (error) {
+          // Continuer avec extraction manuelle
+        }
+      }
+      
+      // Extraction manuelle
+      return str
+        .replace(/[\[\]"]/g, '') // Enlever crochets et guillemets
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+    }
+    
+    return [];
+  }, [group?.tags]); // Utiliser l'opérateur optionnel pour éviter les erreurs
+
+  // Ensuite, vous pouvez faire vos vérifications conditionnelles
   if (!group) return null;
 
   const averageRating = group.average_rating || 0;
   const totalReviews = group.total_reviews || 0;
-  const membersCount = group.group_members.length || 0;
+  const membersCount = group.group_members?.length || 0;
   const isMember = group.is_member || false;
   const hasPendingRequest = group.has_pending_request || false;
   const canJoin = group.can_join && !isMember && !hasPendingRequest && !group.is_full;
   const requiresApproval = group.requires_approval !== false;
+  const tags = parseTags;
 
   return (
     <Card 
@@ -60,9 +134,12 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
             opacity: 1,
             transform: 'translateY(0)',
           },
+          '& .tags-container': {
+            opacity: 1,
+            transform: 'translateY(0)',
+          },
         },
       }}
-  
     >
       {/* Background Image */}
       <CardMedia
@@ -209,47 +286,79 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
         </Box>
 
         {/* Tags - Appear on Hover */}
-        <Fade in={isHovered}>
-          <Box sx={{
-            mb: 3,
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 0.5,
-          }}>
-            {group.tags && group.tags.slice(0, 3).map((tag, index) => (
+        {tags.length > 0 && (
+          <Box
+            className="tags-container"
+            sx={{
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? 'translateY(0)' : 'translateY(10px)',
+              transition: 'all 0.3s ease',
+              mb: 3,
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 0.5,
+            }}
+          >
+            {tags.slice(0, 3).map((tag, index) => (
               <Chip
                 key={index}
                 label={tag}
                 size="small"
+                icon={<TagIcon sx={{ fontSize: 12, color: alpha('#fff', 0.7) }} />}
                 sx={{
-                  backgroundColor: alpha('#fff', 0.2),
+                  backgroundColor: alpha('#fff', 0.15),
                   color: 'white',
                   fontSize: '0.7rem',
-                  height: 22,
+                  height: 24,
+                  '& .MuiChip-icon': {
+                    marginLeft: '6px',
+                    marginRight: '-4px',
+                  },
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid',
+                  borderColor: alpha('#fff', 0.2),
                 }}
               />
             ))}
-            {group.tags && group.tags.length > 3 && (
+            {tags.length > 3 && (
               <Chip
-                label={`+${group.tags.length - 3}`}
+                label={`+${tags.length - 3}`}
                 size="small"
                 sx={{
-                  backgroundColor: alpha('#fff', 0.2),
-                  color: 'white',
+                  backgroundColor: alpha('#fff', 0.1),
+                  color: alpha('#fff', 0.8),
                   fontSize: '0.7rem',
-                  height: 22,
+                  height: 24,
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid',
+                  borderColor: alpha('#fff', 0.1),
                 }}
               />
             )}
           </Box>
-        </Fade>
+        )}
+
+        {/* Debug info (à retirer en production) */}
+        {process.env.NODE_ENV === 'development' && tags.length === 0 && group.tags && (
+          <Typography 
+            variant="caption" 
+            sx={{ 
+              color: alpha('#ff6b6b', 0.8),
+              mb: 1,
+              fontSize: '0.65rem',
+              fontStyle: 'italic',
+            }}
+          >
+            Debug: Tags exist but couldn't parse: {JSON.stringify(group.tags)}
+          </Typography>
+        )}
 
         {/* Hover Actions - Appear on Hover */}
         <Box
           className="hover-actions"
           sx={{
-            opacity: 0,
-            transform: 'translateY(20px)',
+            opacity: isHovered ? 1 : 0,
+            transform: isHovered ? 'translateY(0)' : 'translateY(20px)',
             transition: 'all 0.3s ease',
             display: 'flex',
             gap: 2,
@@ -267,9 +376,13 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
               flex: 1,
               backgroundColor: alpha('#fff', 0.9),
               color: 'text.primary',
+              fontWeight: 600,
               '&:hover': {
                 backgroundColor: 'white',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
               },
+              transition: 'all 0.2s ease',
             }}
           >
             View Details
@@ -278,14 +391,19 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
           {/* Join/Status Button */}
           {isMember ? (
             <Button
-              variant="contained2"
+              variant="contained"
               startIcon={<CheckCircleIcon />}
               sx={{
                 backgroundColor: alpha('#4caf50', 0.9),
                 color: 'white',
+                fontWeight: 600,
+                minWidth: '120px',
                 '&:hover': {
                   backgroundColor: '#4caf50',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.4)',
                 },
+                transition: 'all 0.2s ease',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -293,14 +411,19 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
             </Button>
           ) : hasPendingRequest ? (
             <Button
-              variant="contained2"
+              variant="contained"
               startIcon={<PendingIcon />}
               sx={{
                 backgroundColor: alpha('#ff9800', 0.9),
                 color: 'white',
+                fontWeight: 600,
+                minWidth: '120px',
                 '&:hover': {
                   backgroundColor: '#ff9800',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(255, 152, 0, 0.4)',
                 },
+                transition: 'all 0.2s ease',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -308,11 +431,12 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
             </Button>
           ) : group.is_full ? (
             <Button
-              variant="contained2"
+              variant="contained"
               color="error"
               disabled
               sx={{
-                backgroundColor: alpha('#f44336', 0.9)
+                backgroundColor: alpha('#f44336', 0.9),
+                minWidth: '120px',
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -325,9 +449,14 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
               sx={{
                 backgroundColor: alpha('#1976d2', 0.9),
                 color: 'white',
+                fontWeight: 600,
+                minWidth: '120px',
                 '&:hover': {
                   backgroundColor: '#1976d2',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.4)',
                 },
+                transition: 'all 0.2s ease',
               }}
               onClick={(e) => {
                 e.stopPropagation();

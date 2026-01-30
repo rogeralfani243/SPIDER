@@ -74,7 +74,7 @@ const PostDetail = () => {
       if (token) {
         const response = await fetch(`${URL}/api/me/`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Token ${token}`
           }
         });
         if (response.ok) {

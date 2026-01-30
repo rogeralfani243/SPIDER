@@ -17,7 +17,7 @@ const LoadingScreen = () => (
     height: '100vh',
     fontSize: '18px'
   }}>
-    🔒 Security check...
+
   </div>
 );
 

@@ -28,7 +28,7 @@ export const useRecentPosts = (userId, excludePostId = null) => {
       console.log(`🔄 Fetching recent posts from: ${apiUrl}`);
       
       const response = await axios.get(apiUrl, { 
-        withCredentials: true,
+        withCredentials: false,
         timeout: 10000
       });
       

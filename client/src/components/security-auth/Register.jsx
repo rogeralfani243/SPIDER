@@ -200,7 +200,7 @@ const checkPasswordStrength = (password) => {
         {
           headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
+    
           }
         }
       );
@@ -348,7 +348,7 @@ const handleVerify = async (e) => {
 
     try {
       await axios.post(
-        `${API_URL}/api/auth/cancel-registration/`,
+        `${API_URL}/accounts/auth/cancel-registration/`,
         {
           email: verificationData.email
         },
@@ -442,13 +442,14 @@ const handleVerify = async (e) => {
         <div className="presentation-content">
           <div className="logo-container">
             <div className="logo-icon">
-              🕸️
+                    <img src="/images/Logo-spider.png" alt="logo" height='100%' width='100%' style={{borderRadius:'50%'}} />
+        
             </div>
             <div className="app-name">Spider</div>
           </div>
           
           <p className="app-tagline">
-            Join thousands of professionals who trust Spider for their digital workspace.
+            Join thousands of people who trust Spider for their digital workspace.
           </p>
           
           <div className="benefits-section">

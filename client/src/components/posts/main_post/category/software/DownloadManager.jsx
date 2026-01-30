@@ -464,7 +464,7 @@ const DownloadMediaModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="download-modal-overlay">
+    <div className="download-modal-overlay"        onClick={(e) => e.stopPropagation()}>
       <div className="download-modal-download">
         {/* Header */}
         <div className="modal-header-download">

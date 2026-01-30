@@ -19,17 +19,7 @@
   line-height: 1.2;
   font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
 }
-.user-avatar-profile{
-  box-shadow: none;
-}
-.user-avatar-profile:hover{
-  box-shadow: none;
-}
-.user-infos-profile{
-  font-size: 10px;
-  font-weight: 500;
-  color: #777;
-}
+
 /* Rating Stats */
 .rating-stats {
   background: #f8f9fa;
@@ -197,4 +187,233 @@
   .detail-section {
     padding: 20px;
   }
+}
+
+
+.map-links {
+  display: flex;
+  gap: 10px;
+}
+
+.open-in-maps,
+.get-directions {
+  color: #4285f4;
+  text-decoration: none;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border: 1px solid #4285f4;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.open-in-maps:hover,
+.get-directions:hover {
+  background: #4285f4;
+  color: white;
+}
+
+/* Styles pour le composant de carte */
+.google-map-container {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
+.map-header {
+  margin-bottom: 15px;
+}
+
+.map-header h4 {
+  margin: 0 0 8px 0;
+  color:#8b1010;
+  font-size: 1.2rem;
+}
+
+.address-info-map {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+.address-info-map small {
+  font-size: 0.9rem;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.coordinates {
+  display: block;
+  color: #888;
+  font-family: monospace;
+  margin-top: 5px;
+}
+
+.map-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+  margin: 20px 0;
+}
+
+.map-placeholder p {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-weight: 500;
+}
+
+.map-placeholder small {
+  color: #888;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.loading-spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4285f4;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.retry-button {
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.retry-button:hover {
+  background: #3367d6;
+}
+
+.address-preview {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid #e0e0e0;
+}
+
+.address-preview strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.address-preview p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.map-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.open-in-maps {
+  color: #4285f4;
+  text-decoration: none;
+  font-weight: 500;
+}
+.location-icon{
+  color: var(--primary-color-bar);
+}
+.open-in-maps:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: #d32f2f !important;
+  font-weight: 500;
+}
+/* Styles pour les icônes */
+.location-icon {
+  color:#990b0b;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.placeholder-icon {
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.error-icon {
+  margin-bottom: 15px;
+  color: #ff6b6b;
+}
+
+.map-links svg {
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.open-in-maps,
+.get-directions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #790a0a;
+  text-decoration: none;
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border: 1px solid #8b1010;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.open-in-maps:hover,
+.get-directions:hover {
+  background: var(--primary-color-bar);
+  color: white;
+}
+
+.open-in-maps:hover svg,
+.get-directions:hover svg {
+  stroke: white;
+}
+
+.retry-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 10px;
+  transition: background 0.3s;
+}
+
+.retry-button:hover {
+  background: #3367d6;
+}
+
+.retry-button svg {
+  stroke: white;
 }

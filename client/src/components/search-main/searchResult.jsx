@@ -105,7 +105,7 @@ const SearchResults = ({ onClose }) => {
         headers: {
           'Authorization': token ? `Token ${token}` : '',
         },
-        credentials: 'include'
+
       });
 
       if (!response.ok) {
@@ -174,7 +174,7 @@ const SearchResults = ({ onClose }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include'
+  
       });
 
       if (!response.ok) {

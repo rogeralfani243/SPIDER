@@ -67,7 +67,43 @@
 .comment-actions {
   position: relative;
 }
+/* Ajoutez ces styles à votre fichier CSS existant */
 
+.comment-avatar-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-avatar-initials {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #4a5568; /* Couleur de fond pour les initiales */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+/* Pour les couleurs d'arrière-plan dynamiques des initiales */
+.comment-avatar-initials.color-0 { background-color: #4299e1; }
+.comment-avatar-initials.color-1 { background-color: #ed8936; }
+.comment-avatar-initials .color-2 { background-color: #48bb78; }
+.comment-avatar-initials.color-3 { background-color: #9f7aea; }
+.comment-avatar-initials.color-4 { background-color: #f56565; }
+.comment-avatar-initials.color-5 { background-color: #38b2ac; }
 /* Responsive */
 @media (max-width: 640px) {
   .comment-avatar {

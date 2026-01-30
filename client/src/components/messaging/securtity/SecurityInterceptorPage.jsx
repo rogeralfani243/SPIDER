@@ -209,7 +209,7 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
                 </Typography>
                 
                 <Chip
-                  label={`SECURITY ALERT: ${violationType.toUpperCase()}`}
+  label={`SECURITY ALERT: ${(violationType || 'security').toUpperCase()}`}
                   color={getSeverityColor(violationType)}
                   icon={<ShieldIcon />}
                   sx={{ fontSize: '0.9rem', fontWeight: 700, py: 1.5, px: 2 }}

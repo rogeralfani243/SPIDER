@@ -10,95 +10,87 @@ import AppLayout from './components/app/AppLayout.jsx';
 import NotificationContainer from './components/notifications/NotificationContainer';
 import { Box } from 'lucide-react';
 import DashboardMain from './components/dashboard_main';
-
+import { appLogger } from './utils/logger';
+import AutoTranslateWrapper from './components/translation/autoTranslation.jsx';
+import useAutoTranslate from './hooks/useTranslations';
+import useTranslations from './hooks/useTranslations';
 function App() {
+  const { translateText, language } = useAutoTranslate(); // Ajoutez ce hook
   const { user, loading, login, logout, isAuthenticated, verifyAndLogin } = useAuth();
-
+  useTranslations();
   useEffect(() => {
     configureCharset();
   }, []);
 
   useEffect(() => {
-    console.log('🔐 Auth state changed:', { isAuthenticated, user: user?.username });
-  }, [isAuthenticated, user]);
+    // Log la langue détectée
+    appLogger.debug(`Langue du navigateur détectée: ${language}`);
+  }, [isAuthenticated, user, language]);
 
   const configureCharset = () => {
     // ... votre code existant ...
+     appLogger.debug('Charset configured');
   };
 
-  // Modifiez cette fonction pour accepter aussi la vérification
   const handleLogin = async (loginData) => {
-    console.log('🔐 Login attempt with data:', loginData);
-    
     if (loginData.token) {
-      // C'est une vérification d'email, pas un login normal
-      console.log('✅ Email verification success, token received');
+      // Traduire le message de succès
+      const successMessage = await translateText('Email verification success');
+      appLogger.success(successMessage);
       
-      // Stocker le token et les infos utilisateur
       if (loginData.user) {
         localStorage.setItem('user', JSON.stringify(loginData.user));
       }
       
-      // Mettre à jour l'état d'authentification
       if (verifyAndLogin) {
         return await verifyAndLogin(loginData.token, loginData.user);
       }
       
       return { success: true, user: loginData.user };
     } else {
-      // C'est un login normal
       return await login(loginData.username, loginData.password);
     }
   };
 
   const handleLogout = () => {
-    console.log('🛡️ User logout:', user?.username);
+    appLogger.info('User logout', user?.username);
     logout();
   };
 
   if (loading) {
+    appLogger.debug('App loading...');
     return <AppLayout.LoadingScreen />;
   }
+  
+  appLogger.debug('App rendering', { isAuthenticated, user: user?.username });
 
   return (
     <NotificationProvider>
       <Router>
         <SecurityInterceptor>
-          <div className="App">
-            {isAuthenticated && (
-              <div className='profile-dashboard'>
-                <DashboardMain className='dashboard-main' />
-              </div>
-            )}
-            
-            <AppRoutes 
-              isAuthenticated={isAuthenticated}
-              user={user}
-              onLogin={handleLogin}
-              onLogout={handleLogout}
-            />
-            
-            <NotificationContainer />
-          </div>
+          {/* Enveloppez votre application avec le traducteur automatique */}
+          <AutoTranslateWrapper>
+            <div className="App">
+              {isAuthenticated && (
+                <div className='profile-dashboard'>
+                  <DashboardMain className='dashboard-main' />
+                </div>
+              )}
+              
+              <AppRoutes 
+                isAuthenticated={isAuthenticated}
+                user={user}
+                onLogin={handleLogin}
+                onLogout={handleLogout}
+              />
+              
+              <NotificationContainer />
+            </div>
+          </AutoTranslateWrapper>
         </SecurityInterceptor>
       </Router>
     </NotificationProvider>
   );
 }
-
-
-
-const SecurityBadge = () => (
-  <div style={{
-    position: 'fixed',
-    bottom: '10px',
-    right: '10px',
-    fontSize: '10px',
-    opacity: 0.7,
-    zIndex: 1000,
-  }}>
-    🛡️ Security System Active
-  </div>
-);
 
 export default App;

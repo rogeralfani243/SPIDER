@@ -187,7 +187,7 @@ const renderLogin = () => (
       <div className="presentation-content">
         <div className="logo-container">
           <div className="logo-icon">
-            🕷️
+            <img src="/images/Logo-spider.png" alt="logo" height='100%' width='100%' style={{borderRadius:'50%'}} />
           </div>
           <div className="app-name">Spider</div>
         </div>
@@ -334,7 +334,7 @@ const renderLogin = () => (
           
           {error && (
             <div className="alert error-message" role="alert">
-              <svg className="alert-icon" viewBox="0 0 24 24" fill="currentColor">
+              <svg className="alert-icon-login" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
               </svg>
               <div className="alert-content">

@@ -13,11 +13,21 @@ const useGroupTabsStyles = () => {
     },
     tabs: {
       borderBottom: 1,
-      borderColor: 'divider'
+      borderColor: 'divider',
+      
+    },
+     tab: {
+    
+     '&:hover': {
+              color:'#fff'
+            },
     },
     tabLabel: {
       display: 'flex',
-      alignItems: 'center'
+      alignItems: 'center',
+     '&:hover': {
+              color:'#fff'
+            },
     },
     tabIcon: {
       mr: 1,

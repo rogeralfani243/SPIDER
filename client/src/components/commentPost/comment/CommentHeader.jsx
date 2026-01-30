@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaEllipsisH, FaEdit, FaTrash, FaThumbtack, FaFlag } from 'react-icons/fa';
 import ReportButton from '../../reports/ReportButton';
+
 const CommentHeader = ({
   comment,
   localCurrentUser,
@@ -21,6 +22,40 @@ const CommentHeader = ({
   handlePin,
   handleReport
 }) => {
+  
+  // Fonction pour générer les initiales du nom d'utilisateur
+  const getUserInitials = (user) => {
+    if (!user) return '?';
+    
+    const displayName = getDisplayName(user);
+    if (!displayName || displayName.trim() === '') return '?';
+    
+    // Prendre la première lettre de chaque mot (max 2 lettres)
+    const words = displayName.trim().split(/\s+/);
+    if (words.length === 1) {
+      return words[0].charAt(0).toUpperCase();
+    }
+    
+    return (words[0].charAt(0) + words[words.length - 1].charAt(0)).toUpperCase();
+  };
+
+  // Détermine si on doit afficher l'image ou les initiales
+  const hasProfilePicture = comment.user?.profile_picture;
+  const userInitials = getUserInitials(comment.user);
+// Fonction pour obtenir une couleur basée sur le nom
+const getInitialsColor = (user) => {
+  if (!user) return 0;
+  
+  const displayName = getDisplayName(user);
+  if (!displayName) return 0;
+  
+  // Utilise le premier caractère pour déterminer la couleur
+  const firstChar = displayName.charCodeAt(0) || 0;
+  return firstChar % 6; // 6 couleurs disponibles
+};
+
+// Dans le JSX, ajoutez la classe de couleur :
+
   return (
     <div className="comment-header">
       <div className="comment-user">
@@ -31,17 +66,29 @@ const CommentHeader = ({
           onClick={(e) => {
             window.location.href = getProfileUrl(comment.user);
             e.stopPropagation();
-     
             console.log('Navigating to user profile via avatar:', comment.user);
           }}
           title={`View ${getDisplayName(comment.user)}'s profile`}
         >
-          <img 
-            src={comment.user?.profile_picture || "/default-avatar.png"}
-            onError={(e) => { e.target.src = "/default-avatar.png"; }}
-            alt={`${getDisplayName(comment.user)}'s avatar`}
-            className="comment-avatar"
-          />
+          {hasProfilePicture ? (
+            <img 
+              src={comment.user.profile_picture}
+              onError={(e) => { 
+                e.target.src = "/default-avatar.png";
+                // Si l'image par défaut échoue aussi, afficher les initiales
+                e.target.onerror = null;
+                e.target.style.display = 'none';
+                // Vous pourriez vouloir ajouter un span pour les initiales ici
+                // ou gérer cela via CSS
+              }}
+              alt={`${getDisplayName(comment.user)}'s avatar`}
+              className="comment-avatar" 
+            />
+          ) : (
+<div className={`comment-avatar-initials color-${getInitialsColor(comment.user)}`}>
+  {userInitials}
+</div>
+          )}
         </Link>
 
         <div className="comment-user-info">
@@ -56,7 +103,7 @@ const CommentHeader = ({
             }}
             title={`View ${getDisplayName(comment.user)}'s profile`}
           >
-            <span className="comment-username">
+            <span className="comment-username" translate='no'>
               {getDisplayName(comment.user)}
               {isCurrentUserCommentAuthor && (
                 <span className="comment-author-badge"> You</span>
@@ -99,22 +146,20 @@ const CommentHeader = ({
               )}
               
               {!isCurrentUserCommentAuthor && (
-                         <ReportButton
-                contentType="comment"
-                contentId={comment.id}
-                contentAuthorId={comment.user_id || comment.user?.id}
-                contentObject={comment}
-                buttonVariant="text"
-                showIcon={false}
-                showText={false}
-                className="w-100 text-start p-0 border-0 bg-transparent"
-                onReported={handleReport}
-              >
-                
-                <FaFlag className="menu-icon" />
-                <span>Report</span>
-              </ReportButton>
-
+                <ReportButton
+                  contentType="comment"
+                  contentId={comment.id}
+                  contentAuthorId={comment.user_id || comment.user?.id}
+                  contentObject={comment}
+                  buttonVariant="text"
+                  showIcon={false}
+                  showText={false}
+                  className="w-100 text-start p-0 border-0 bg-transparent"
+                  onReported={handleReport}
+                >
+                  <FaFlag className="menu-icon" />
+                  <span>Report</span>
+                </ReportButton>
               )}
             </div>
           )}

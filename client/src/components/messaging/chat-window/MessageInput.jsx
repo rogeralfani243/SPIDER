@@ -89,7 +89,7 @@ const MessageInput = ({
 
   return (
     <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
-      <Box display="flex" alignItems="center" gap={1} sx={{ '@media (max-width:746px)': { height: '10px' } }}>
+      <Box display="flex" alignItems="center" gap={1} sx={{ '@media (max-width:746px)': { minhHeight: '10px',height:'auto' } }}>
         {/* Hidden file inputs */}
         <input
           type="file"
@@ -231,7 +231,8 @@ const MessageInput = ({
           size="small"
           disabled={uploading || isRecording}
           sx={{'@media(max-width:756px)':{
-            height:'30px',
+            minHeight:'30px',
+            height:'auto',
                
             marginBottom:'10px'
           }}}

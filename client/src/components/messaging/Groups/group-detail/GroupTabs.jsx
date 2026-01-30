@@ -55,8 +55,14 @@ const GroupTabsSection = ({
         scrollButtons="auto"
         sx={styles.tabs}
       >
-        <Tab label="About" />
-        <Tab 
+        <Tab sx={styles.tab} label={
+            <Box sx={styles.tabLabel}>
+             
+              About
+           
+            </Box>
+        } />
+        <Tab  sx={styles.tab}
           label={
             <Box sx={styles.tabLabel}>
               <PeopleIcon sx={styles.tabIcon} />
@@ -70,7 +76,7 @@ const GroupTabsSection = ({
             </Box>
           }
         />
-        <Tab 
+        <Tab sx={styles.tab}
           label={
             <Box sx={styles.tabLabel}>
               <StarIcon sx={styles.tabIcon} />

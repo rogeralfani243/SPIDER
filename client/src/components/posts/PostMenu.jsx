@@ -230,6 +230,8 @@ const PostMenu = ({
   };
 
   return (
+    <>
+    
     <div className="post-menu-container" ref={menuRef}>
       {/* Bouton des trois points */}
       <button 
@@ -429,17 +431,21 @@ const PostMenu = ({
         </div>
       )}
       
-      {/* Download modal */}
-      <DownloadMediaModal
-        isOpen={isOpen}
-        onClose={onClose}
-        post={post}
-        URL={URL}
-        onDownloadSelected={(selectedItems) => {
-          console.log('Downloading selected items:', selectedItems);
-        }}
-      />
+      
     </div>
+      {/* MODAL DOWNLOAD EN DEHORS DU CONTENEUR - C'EST LA CLÉ ! */}
+      {isOpen && (
+        <DownloadMediaModal
+          isOpen={isOpen}
+          onClose={onClose}
+          post={post}
+          URL={URL}
+          onDownloadSelected={(selectedItems) => {
+            console.log('Downloading selected items:', selectedItems);
+          }}
+        />
+      )}
+    </>
   );
 };
 

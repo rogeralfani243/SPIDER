@@ -82,7 +82,7 @@ const ProfileSearchResults = ({ query, loading, error, onProfileClick }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include'
+
       });
 
       if (!response.ok) {

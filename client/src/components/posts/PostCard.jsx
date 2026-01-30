@@ -9,7 +9,7 @@ import '../../styles/main/post-card-main.css';
 import { useNavigate } from 'react-router-dom';
 import { Download, Calendar, User, Eye, MessageCircle, Share2, Image, Video, Music, File, Star, Package, Headphones, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AudioPlayer from './media_section/AudioPlayer';
-
+import DownloadMediaModal from './main_post/category/software/DownloadManager';
 const PostCard = ({ 
   post: initialPost, 
   URL, 
@@ -950,7 +950,7 @@ const PostCard = ({
   const musicCategory = isMusicCategory();
 
   return (
-    <>
+  
       <div className="software-card-post">
         {/* Rating badge */}
         <div className="rating-badge-absolute">
@@ -985,7 +985,8 @@ const PostCard = ({
             </div>
           )}
           <div className=''>
-            <span className="profile-name-post">{userInfo.userName}</span>
+            
+            <span className="profile-name-post"  translate="no">{userInfo.userName}</span>
           </div>
         </a>
         
@@ -1094,7 +1095,7 @@ const PostCard = ({
                   onShare={handleSharePost}
                           isOpen={showDownloadModal}
         onClose={handleCloseDownloadModal}
-     
+
         URL={URL}
         onDownloadSelected={(selectedItems) => {
           console.log('Downloading selected items:', selectedItems);
@@ -1191,7 +1192,7 @@ const PostCard = ({
       </div>
       
   
-    </>
+    
   );
 };
 

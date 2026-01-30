@@ -302,7 +302,7 @@ const navigate = useNavigate()
       <div className="user-profile-bar">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading professionals...</p>
+        
         </div>
       </div>
     );
@@ -469,7 +469,7 @@ const navigate = useNavigate()
                       </div>
                       
                       <div className="profile-content-3d">
-                        <h3 className="profile-name-3d">
+                        <h3 className="profile-name-3d" translate='no'>
                           {profile.first_name && profile.last_name 
                             ? `${profile.first_name} ${profile.last_name}`
                             : profile.username

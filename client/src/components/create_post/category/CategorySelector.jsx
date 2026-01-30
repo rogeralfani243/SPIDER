@@ -54,7 +54,7 @@ const CategorySelector = memo(({
             'Authorization': token ? `Token ${token}` : '',
             'Content-Type': 'application/json',
           },
-          credentials: 'include'
+
         });
 
         if (response.ok) {

@@ -48,7 +48,7 @@ const StarRating = ({ postId, initialUserRating, averageRating, totalRatings, on
             'Content-Type': 'application/json',
             'X-CSRFToken': getCSRFToken(),
           },
-          withCredentials: true
+        
         }
       );
       
@@ -103,7 +103,7 @@ const StarRating = ({ postId, initialUserRating, averageRating, totalRatings, on
           headers: {
             'X-CSRFToken': getCSRFToken(),
           },
-          withCredentials: true
+
         }
       );
       

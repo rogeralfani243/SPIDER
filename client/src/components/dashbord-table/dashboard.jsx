@@ -580,7 +580,7 @@ const getSocialLinksArray = () => {
               },
               color:'white',
               lineHeight: 1.2
-            }}
+            }} translate='no'
           >
             {user.first_name || ''} {user.last_name || ''}
           </Typography>
@@ -1018,7 +1018,7 @@ const getSocialLinksArray = () => {
                               </Typography>
                               <Box display="flex" justifyContent="space-between" mt={0.5}>
                                 <Typography variant="caption" color="text.secondary">
-                                  {post.likes_count || post.likes || 0} likes
+                                  {post.total_ratings  || 0} rates
                                 </Typography>
                                 <Typography variant="caption" color="text.secondary">
                                   {post.comments_count || 0} comments
@@ -1036,7 +1036,7 @@ const getSocialLinksArray = () => {
                   </SectionCard>
 
                   {/* Recent Comments Preview */}
-                  <SectionCard>
+                 {/*  <SectionCard>
                     <CardHeader
                       title={
                         <Typography variant="h6" fontWeight="600">
@@ -1054,7 +1054,7 @@ const getSocialLinksArray = () => {
                       }
                     />
                     <Divider />
-                    <CardContent>
+                  <CardContent>
                       {recentComments.length > 0 ? (
                         <Stack spacing={1}>
                           {recentComments.slice(0, 3).map((comment, index) => (
@@ -1063,7 +1063,7 @@ const getSocialLinksArray = () => {
                                 "{comment.content?.substring(0, 60) || 'No content'}..."
                               </Typography>
                               <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-                                On: {comment.post_title || 'a post'}
+                                On: {comment.post_id || 'a post'}
                               </Typography>
                               <Typography variant="caption" color="text.secondary" display="block">
                                 {comment.created_at ? new Date(comment.created_at).toLocaleDateString() : ''}
@@ -1076,8 +1076,8 @@ const getSocialLinksArray = () => {
                           No comments yet
                         </Typography>
                       )}
-                    </CardContent>
-                  </SectionCard>
+                    </CardContent> 
+                  </SectionCard>*/}
                 </Stack>
               </Grid>
             </Grid>

@@ -345,7 +345,7 @@ export default function DashboardMain() {
           
           <div className="dashboard-logo">
             <Link to="/" className="logo-link" onClick={() => setShowSearchResults(false)}>
-              <span className="logo-text">SPIDER</span>
+              <span className="logo-text" translate='no'>SPIDER</span>
             </Link>
           </div>
         </div>
@@ -367,7 +367,7 @@ export default function DashboardMain() {
                     onClick={() => setShowSearchResults(false)}
                   >
                     <span className="nav-icon">{item.icon}</span>
-                    <span className="nav-label">{item.label}</span>
+                    <span className="nav-label" translate='no'>{item.label}</span>
                     {item.id === 'messages' && unreadMessages > 0 && (
                       <span className="notification-badge">
                         {unreadMessages > 99 ? '99+' : unreadMessages}
@@ -464,7 +464,7 @@ export default function DashboardMain() {
           )}
 
           {/* Profile avatar */}
-          <div className="profile-avatar">
+          <div className="profile-avatar-desk">
             <ProfileIcon link={links.profile} onClick={() => setShowSearchResults(false)} />
           </div>
         </div>
@@ -540,7 +540,7 @@ export default function DashboardMain() {
                       
                     >
                       <span className="mobile-nav-icon">{item.icon}</span>
-                      <span className="mobile-nav-label">{item.label}</span>
+                      <span className="mobile-nav-label" translate='no'>{item.label}</span>
                       {item.id === 'messages' && unreadMessages > 0 && (
                         <span className="mobile-notification-badge">
                           {unreadMessages > 99 ? '99+' : unreadMessages}
@@ -564,10 +564,8 @@ export default function DashboardMain() {
                       navigate('/dashboard/')
                     }}
                   >
-                    <span className="mobile-nav-icon">
-                      <ProfileIcon link={links.profile} small />
-                    </span>
-                    <span className="mobile-nav-label">My Dashboard</span>
+                    
+                    <span className="mobile-nav-label" translate='no'>My Dashboard</span>
                   </Link>
                 </li>
               </ul>

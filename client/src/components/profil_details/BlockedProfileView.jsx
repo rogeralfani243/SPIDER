@@ -190,7 +190,7 @@ const BlockedProfileView = ({ profile, blockData, currentUser, onUnblock, onNavi
           </li>
         </ul>
         <p className="info-note">
-          Note: Block settings can be managed in your account privacy settings.
+          Note: Block settings can be managed in your account messagerie settings.
         </p>
       </div>
     </div>

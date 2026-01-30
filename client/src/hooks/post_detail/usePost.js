@@ -17,7 +17,7 @@ export const usePost = (userId, postId) => {
       
       const response = await axios.get(
         `${URL}/post/posts/user/${userId}/posts/${postId}/`, 
-        { withCredentials: true }
+        { withCredentials: false }
       );
       
       console.log('📥 Post detail response:', response.data);

@@ -331,7 +331,7 @@ const PostCreate = ({ onPostCreated, initialData = null, externalCategories = []
           'X-CSRFToken': csrfToken,
         },
         body: formDataToSend,
-        credentials: 'include'
+       
       });
       
       const responseText = await response.text();
@@ -367,7 +367,7 @@ const PostCreate = ({ onPostCreated, initialData = null, externalCategories = []
       }
       
       console.log('✅ [POST CREATE] Success:', responseData);
-      setSuccess('Post created successfully!');
+      setSuccess('Post created successfully!', window.location.href = '/posts/');
       
       // Reset form
       setFormData({

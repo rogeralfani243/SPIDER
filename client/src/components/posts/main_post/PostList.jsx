@@ -484,7 +484,7 @@ const handleCategorySelect = useCallback((categoryId) => {
         {loading && posts.length === 0 ? (
           <div className="loading-container">
             <div className="spinner"></div>
-            <p>Chargement des posts...</p>
+            <p>loading posts...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="empty-state">
@@ -503,7 +503,7 @@ const handleCategorySelect = useCallback((categoryId) => {
                   <div 
                     key={post.id} 
                     ref={isHighlighted ? highlightedPostRef : null}
-                    className={`post-card-wrapper ${isHighlighted ? 'highlighted' : ''}`}
+                    className={`post-cad-wrapper ${isHighlighted ? 'highlighted' : ''}`}
                     data-post-id={post.id}
                   >
           

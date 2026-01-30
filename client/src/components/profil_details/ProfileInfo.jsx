@@ -24,7 +24,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import LocationCityIcon from '@mui/icons-material/LocationCity';
 import FlagIcon from '@mui/icons-material/Flag';
 import MapIcon from '@mui/icons-material/Map';
-
+import OpeningHoursWidget from './ProfileOpeningHours';
 const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeocoding, currentUserId }) => {
   // ✅ ÉTAT LOCAL pour les counts qui se mettent à jour immédiatement
   const [localProfile, setLocalProfile] = useState(profile);
@@ -165,13 +165,17 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
   };
 
   const hasContactData = localProfile.address || localProfile.city || localProfile.state || localProfile.zip_code || localProfile.country || localProfile.location || localProfile.website;
-  
+    const handleHoursUpdate = (updatedHours) => {
+    // Mettre à jour l'état local si nécessaire
+    console.log('Hours updated:', updatedHours);
+  };
+
   // Récupérer les liens sociaux en tant que tableau sûr
   const socialLinks = getSocialLinksArray();
 
   return (
     <div className="profile-info-section">
-      <h1 className="profile-name-infos">
+      <h1 className="profile-name-infos" translate='no'>
         {localProfile.first_name && localProfile.last_name 
           ? `${localProfile.first_name} ${localProfile.last_name}`
           : localProfile.username
@@ -202,32 +206,22 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
           <div className="detail-section">
             <h3 className="section-titles-bio">
               <LocationOnIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: '1.2rem' }} />
-              Contact & Location
+              Contacts
             </h3>
-            
+                  
+ 
             <div className="contact-info">
-              {(localProfile.address || localProfile.city || localProfile.state || localProfile.zip_code || localProfile.country || localProfile.location) && (
-                <div className="contact-item">
-                  <span className="contact-icon">
-                    <LocationOnIcon sx={{ fontSize: '1.2rem', color: '#666' }} />
-                  </span>
-                  <div className="address-container">
-                    <div className="full-address">
-                      {renderFullAddress(localProfile)}
-                    </div>
-                    {renderAddressDetails(localProfile) && (
-                      <div className="address-details">
-                        {renderAddressDetails(localProfile)}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              
+                                 
+      
               {/* SECTION DES LIENS SOCIAUX - VERSION ICÔNES SEULEMENT */}
-              {(socialLinks.length > 0 || localProfile.website) && (
+              {(socialLinks.length >= 0 || localProfile.website) && (
                 <div className="social-links-icons-section">
                   <div className="social-icons-container">
+     <OpeningHoursWidget 
+          profile={localProfile}
+          currentUserId={currentUserId}
+          onHoursUpdate={handleHoursUpdate}
+        />
                     {/* Afficher les liens sociaux du tableau */}
                     {socialLinks.map((link, index) => {
                       // S'assurer que link est un objet valide
@@ -300,8 +294,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
 
             <div className="location-map-section">
               <div className="map-section-header">
-                <MapIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                <span>Location Map</span>
+               
               </div>
               <LocationMap 
                 profile={localProfile}

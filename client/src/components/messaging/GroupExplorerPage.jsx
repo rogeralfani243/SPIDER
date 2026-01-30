@@ -1,5 +1,5 @@
 // src/components/groups/GroupExplorePage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import {
   Container,
   Box,
@@ -70,9 +70,24 @@ const GroupExplorePage = () => {
   const [searchTrigger, setSearchTrigger] = useState(0);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [myGroupsOnly, setMyGroupsOnly] = useState(false); // Nouvel état
-
+  const containerRef = useRef(null);
   const navigate = useNavigate();
-
+  // Ajoutez cet effet pour empêcher la traduction sur ce composant
+// SOLUTION : Désactiver la traduction pour cette page
+  useEffect(() => {
+    // Empêcher la traduction sur cette page
+    document.documentElement.setAttribute('translate', 'no');
+    
+    // Empêcher la traduction sur le conteneur principal
+    if (containerRef.current) {
+      containerRef.current.setAttribute('translate', 'no');
+    }
+    
+    // Rétablir la traduction quand on quitte la page
+    return () => {
+      document.documentElement.setAttribute('translate', 'yes');
+    };
+  }, []);
   useEffect(() => {
     loadCategories();
   }, []);
