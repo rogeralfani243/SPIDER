@@ -144,7 +144,35 @@ class Conversation(models.Model):
             models.Index(fields=['category']),
             models.Index(fields=['is_visible']),
         ]
+    def is_user_member(self, user):
+        """Vérifier si un utilisateur est membre du groupe"""
+        # Vérifier dans participants
+        if self.participants.filter(id=user.id).exists():
+            return True
+        
+        # Vérifier aussi dans GroupMember si le modèle existe
+        if hasattr(self, 'member_info'):
+            return self.member_info.filter(user=user).exists()
+        
+        return False
+    def can_user_join(self, user):
+        """Vérifie si un utilisateur peut rejoindre le groupe"""
+        if not self.is_group:
+            return False
+        
+        if self.group_type == 'group_private':
+            # Groupe privé: seulement sur invitation
+            return False
+        
+        if self.group_type == 'group_public':
+            # Groupe public: tout le monde peut rejoindre
+            return not self.is_user_member(user)
+        
+        return False
     
+    def get_members_count(self):
+        """Retourne le nombre de membres"""
+        return self.participants.count()
     @property
     def current_members_count(self):
         return self.participants.count()
