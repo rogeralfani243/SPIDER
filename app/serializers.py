@@ -124,7 +124,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
-    opening_hours = OpeningHoursSerializer(many=True, read_only=True)
     is_open_now = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
     class Meta:
