@@ -921,6 +921,22 @@ def profiles_by_category(request, category_id=None):
     try:
         print(f"Profiles by category endpoint hit! Category ID: {category_id}")
         
+        # Récupérer la localisation de l'utilisateur connecté (si authentifié)
+        user_location = None
+        user_city = None
+        user_country = None
+        
+        if request.user.is_authenticated:
+            try:
+                # Essayer de récupérer le profil de l'utilisateur connecté
+                user_profile = Profile.objects.get(user=request.user)
+                user_city = user_profile.city
+                user_country = user_profile.country
+                user_location = user_profile.location
+                print(f"📍 User location: City={user_city}, Country={user_country}, Location={user_location}")
+            except Profile.DoesNotExist:
+                print("ℹ️ User has no profile")
+        
         # Si aucun category_id n'est fourni, retourner toutes les catégories avec leurs profils
         if category_id is None:
             all_categories = Category.objects.all()
@@ -936,6 +952,27 @@ def profiles_by_category(request, category_id=None):
                 category_profiles = []
                 
                 for profile in profiles:
+                    # Vérifier si le profil a la même localisation que l'utilisateur
+                    same_location = False
+                    same_city = False
+                    same_country = False
+                    
+                    if request.user.is_authenticated and user_profile:
+                        # Comparer la ville
+                        if user_city and profile.city and user_city.lower() == profile.city.lower():
+                            same_city = True
+                        
+                        # Comparer le pays
+                        if user_country and profile.country and user_country.lower() == profile.country.lower():
+                            same_country = True
+                        
+                        # Comparer la localisation générale
+                        if user_location and profile.location and user_location.lower() == profile.location.lower():
+                            same_location = True
+                        
+                        # Considérer comme même localisation si ville ou pays correspond
+                        same_location = same_city or same_country or same_location
+                    
                     # MÊME LOGIQUE IMAGES que profile_detail_public
                     image_url = None
                     if profile.image:
@@ -947,7 +984,6 @@ def profiles_by_category(request, category_id=None):
                     
                     # MÊME LOGIQUE FEEDBACKS que profile_detail_public
                     try:
-                        # CORRECTION : Utilisation de profile.id comme dans profile_detail_public
                         avg_rating_result = Feedback.objects.filter(professional=profile.id).aggregate(Avg('rating'))
                         avg_rating = avg_rating_result['rating__avg'] or 0.0
                         feedback_count = Feedback.objects.filter(professional=profile.id).count()
@@ -966,13 +1002,29 @@ def profiles_by_category(request, category_id=None):
                         'bio': profile.bio or '',
                         'avg_rating': float(avg_rating),
                         'feedback_count': feedback_count,
-                        'category_name': category.name
-                    })
+                        'category_name': category.name,
+                        'city': profile.city or '',
+                        'country': profile.country or '',
+                        'location': profile.location or '',
+                        'same_location': same_location,  # Nouveau champ
+                        'same_city': same_city,           # Nouveau champ
+                        'same_country': same_country,     # Nouveau champ
+                        'priority_score': calculate_priority_score(profile, user_city, user_country, user_location),  # Score de priorité
+                    }) 
+                
+                # Trier les profils : d'abord ceux avec même localisation, puis par note décroissante
+                category_profiles.sort(key=lambda x: (-x['priority_score'], -x['avg_rating']))
                 
                 result.append({
                     'category_id': category.id,
                     'category_name': category.name,
-                    'profiles': category_profiles
+                    'profiles': category_profiles,
+                    'user_location_info': {
+                        'has_location': bool(user_location or user_city or user_country),
+                        'city': user_city,
+                        'country': user_country,
+                        'location': user_location,
+                    } if request.user.is_authenticated else None
                 })
             
             return Response(result, status=status.HTTP_200_OK)
@@ -988,6 +1040,33 @@ def profiles_by_category(request, category_id=None):
             profile_data = []
             
             for profile in profiles:
+                # Vérifier si le profil a la même localisation que l'utilisateur
+                same_location = False
+                same_city = False
+                same_country = False
+                
+                if request.user.is_authenticated:
+                    try:
+                        user_profile = Profile.objects.get(user=request.user)
+                        
+                        # Comparer la ville
+                        if user_profile.city and profile.city and user_profile.city.lower() == profile.city.lower():
+                            same_city = True
+                        
+                        # Comparer le pays
+                        if user_profile.country and profile.country and user_profile.country.lower() == profile.country.lower():
+                            same_country = True
+                        
+                        # Comparer la localisation générale
+                        if user_profile.location and profile.location and user_profile.location.lower() == profile.location.lower():
+                            same_location = True
+                        
+                        # Considérer comme même localisation si ville ou pays correspond
+                        same_location = same_city or same_country or same_location
+                        
+                    except Profile.DoesNotExist:
+                        pass
+                
                 # MÊME LOGIQUE IMAGES
                 image_url = None
                 if profile.image:
@@ -999,7 +1078,6 @@ def profiles_by_category(request, category_id=None):
                 
                 # MÊME LOGIQUE FEEDBACKS
                 try:
-                    # CORRECTION : Utilisation de profile.id comme dans profile_detail_public
                     avg_rating_result = Feedback.objects.filter(professional=profile.id).aggregate(Avg('rating'))
                     avg_rating = avg_rating_result['rating__avg'] or 0.0
                     feedback_count = Feedback.objects.filter(professional=profile.id).count()
@@ -1018,13 +1096,29 @@ def profiles_by_category(request, category_id=None):
                     'bio': profile.bio or '',
                     'avg_rating': float(avg_rating),
                     'feedback_count': feedback_count,
-                    'category_name': category.name
+                    'category_name': category.name,
+                    'city': profile.city or '',
+                    'country': profile.country or '',
+                    'location': profile.location or '',
+                    'same_location': same_location,
+                    'same_city': same_city,
+                    'same_country': same_country,
+                    'priority_score': calculate_priority_score(profile, user_city, user_country, user_location),
                 })
+            
+            # Trier les profils
+            profile_data.sort(key=lambda x: (-x['priority_score'], -x['avg_rating']))
             
             return Response({
                 'category_id': int(category_id),
                 'category_name': category.name,
-                'profiles': profile_data
+                'profiles': profile_data,
+                'user_location_info': {
+                    'has_location': bool(user_location or user_city or user_country),
+                    'city': user_city,
+                    'country': user_country,
+                    'location': user_location,
+                } if request.user.is_authenticated else None
             }, status=status.HTTP_200_OK)
             
     except Exception as e:
@@ -1034,6 +1128,30 @@ def profiles_by_category(request, category_id=None):
             'details': str(e)
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+def calculate_priority_score(profile, user_city, user_country, user_location):
+    """
+    Calcule un score de priorité basé sur la localisation
+    Plus le score est élevé, plus le profil est prioritaire
+    """
+    score = 0
+    
+    if not user_city and not user_country and not user_location:
+        return score
+    
+    # Vérification de la ville (score le plus élevé)
+    if user_city and profile.city and user_city.lower() == profile.city.lower():
+        score += 3
+    
+    # Vérification du pays
+    if user_country and profile.country and user_country.lower() == profile.country.lower():
+        score += 2
+    
+    # Vérification de la localisation générale
+    if user_location and profile.location and user_location.lower() == profile.location.lower():
+        score += 1
+    
+    return score
 def profile_feedbacks(request, profile_id):
     """
     Get all feedbacks for a profile
