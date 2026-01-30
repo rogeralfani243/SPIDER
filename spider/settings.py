@@ -16,9 +16,14 @@ import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+from django.core.management.utils import get_random_secret_key
+import os
 
+# Pour la production, utilisez une clé fixe stockée de manière sécurisée
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', get_random_secret_key())
 # Quick-start development settings
-SECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", get_random_secret_key())
+#ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
@@ -54,6 +59,8 @@ INSTALLED_APPS = [
     'searchs',
     'whitenoise.runserver_nostatic',
     'storages',
+    'cryptography',
+        'django_cryptography',
 ]
 
 MIDDLEWARE = [
