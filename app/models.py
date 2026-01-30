@@ -54,7 +54,7 @@ class Profile(models.Model):
     social_links = JSONField(default=list, blank=True)
     # ManyToManyField does not support null=True; remove it.
     # followers: users who follow this profile
-    phone = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True, default='')
     followers = models.ManyToManyField(
         'self',
         related_name='following',
