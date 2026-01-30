@@ -146,9 +146,7 @@ class Profile(models.Model):
         """Vérifie si l'établissement est ouvert maintenant"""
         from django.utils import timezone
         
-        if not self.is_business:
-            return False
-        
+
         # Récupérer le jour actuel
         now = timezone.now()
         current_day = now.strftime('%A').lower()
