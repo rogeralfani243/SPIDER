@@ -425,7 +425,7 @@ class PostListSerializer(serializers.ModelSerializer):
             'user_has_liked',   
              'user_has_rated', 'user_rating_value',
             'user_has_commented', 'country_score', 'category_similarity',
-             'tag_similarity', 'freshness_score'
+             'tag_similarity', 'freshness_score',
             # User info
             'user_name', 'user_profile_image', 'user_profile_id',
             
