@@ -136,7 +136,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio', 'image', 'image_bio', 'website', 'location',
             'address', 'city', 'state', 'zip_code', 'country',
             'birth_date', 'followers', 'category', 'category_id',
-            'created_at', 'image_url','social_links','phone'
+            'created_at', 'image_url','social_links','phone','is_open_now'
         ]
         read_only_fields = ['id', 'user', 'followers', 'created_at']
     
