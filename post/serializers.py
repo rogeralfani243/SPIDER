@@ -421,8 +421,7 @@ class PostListSerializer(serializers.ModelSerializer):
             # Identifiants
             'id', 'title', 'content', 'user_id',
             'recommendation_score',
-            'user_has_viewed',
-            'user_has_liked',   
+            'user_has_viewed',  
              'user_has_rated', 'user_rating_value',
             'user_has_commented', 'country_score', 'category_similarity',
              'tag_similarity', 'freshness_score',
