@@ -194,7 +194,7 @@ class ProfileUpdateSerializer(serializers.ModelSerializer):
         fields = [
             'bio', 'image', 'image_bio', 'website', 'location',
             'address', 'city', 'state', 'zip_code', 'country',
-            'birth_date', 'category_id','social_links'
+            'birth_date', 'category_id','social_links','phone'
         ]
     
     def update(self, instance, validated_data):
