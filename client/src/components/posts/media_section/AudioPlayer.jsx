@@ -402,8 +402,7 @@ const AudioPlayer = ({
           <button 
             className="whatsapp-play-btn"
             onClick={togglePlayPause}
-            disabled={!audioInitialized && process.env.NODE_ENV === 'production'}
-           style={{borderRadius:'50%'}}
+    style={{borderRadius:'50%'}}
          >
             {isPlaying ? <FiPause size={20} /> : <FiPlay size={20} />}
           </button>
