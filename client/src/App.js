@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import { useAuth } from './hooks/useAuth.js';
@@ -14,7 +14,9 @@ import { appLogger } from './utils/logger';
 import AutoTranslateWrapper from './components/translation/autoTranslation.jsx';
 import useAutoTranslate from './hooks/useTranslations';
 import useTranslations from './hooks/useTranslations';
+import usePWAInstall from './utils/usePWAInstall';
 function App() {
+  const { InstallPromptModal } = usePWAInstall();
   const { translateText, language } = useAutoTranslate(); // Ajoutez ce hook
   const { user, loading, login, logout, isAuthenticated, verifyAndLogin } = useAuth();
   useTranslations();
@@ -83,7 +85,7 @@ function App() {
                 onLogin={handleLogin}
                 onLogout={handleLogout}
               />
-              
+              <InstallPromptModal />
               <NotificationContainer />
             </div>
           </AutoTranslateWrapper>

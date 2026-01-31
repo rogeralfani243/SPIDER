@@ -70,38 +70,49 @@ const NewMediaUploader = ({
     }
   ];
 
-  // Fonction spéciale pour mobile - permet de choisir entre enregistrer ou upload
+  // Fonction spéciale pour mobile
   const handleMobileUpload = (type) => {
+    console.log('📱 Mobile upload for:', type, 'isMobile:', isMobile);
+    
     if (!isMobile) {
+      // Sur desktop, utiliser l'input normal
       fileInputRefs[type].current?.click();
       return;
     }
 
-    console.log('📱 Mobile upload for:', type);
+    // Sur mobile, créer un input temporaire pour tous les types
+    const tempInput = document.createElement('input');
+    tempInput.type = 'file';
     
-    // Pour audio sur mobile, on laisse le navigateur décider
-    // Sans attribut 'capture', le mobile proposera de choisir entre enregistrer ou sélectionner
-    if (type === 'audio') {
-      const tempInput = document.createElement('input');
-      tempInput.type = 'file';
-      tempInput.accept = 'audio/*';
-      tempInput.multiple = uploadSections.find(s => s.type === type)?.maxCount > 1;
-      
-      // IMPORTANT: Ne pas utiliser 'capture' ici pour laisser le choix à l'utilisateur
-      // Le navigateur mobile montrera automatiquement les options
-      
-      tempInput.onchange = (e) => {
-        if (e.target.files.length > 0) {
-          handleFileChange({ target: e.target }, type);
-        }
-      };
-      
-      tempInput.click();
-      return;
+    // Définir l'accept et multiple selon le type
+    const section = uploadSections.find(s => s.type === type);
+    if (section) {
+      tempInput.accept = section.accept;
+      tempInput.multiple = section.maxCount > 1;
     }
     
-    // Pour les autres types, utiliser l'input normal
-    fileInputRefs[type].current?.click();
+    console.log('📱 Creating temp input for type:', type, 'accept:', tempInput.accept, 'multiple:', tempInput.multiple);
+    
+    // Ne pas utiliser 'capture' pour les documents et audio (sauf si on veut enregistrer)
+    if (type === 'audio') {
+      // Pour audio, laisser le choix à l'utilisateur
+      // Ne pas mettre capture ici
+    } else if (type === 'images' || type === 'videos') {
+      // Pour images/videos, on peut utiliser capture
+      tempInput.setAttribute('capture', type === 'images' ? 'environment' : 'user');
+    }
+    // Pour documents, ne rien mettre
+    
+    tempInput.onchange = (e) => {
+      console.log('📱 Temp input changed for type:', type, 'files:', e.target.files?.length);
+      if (e.target.files && e.target.files.length > 0) {
+        handleFileChange({ target: e.target }, type);
+      }
+    };
+    
+    // Simuler un clic
+    tempInput.click();
+    console.log('📱 Temp input clicked for type:', type);
   };
 
   const handleFileChange = (e, type) => {
@@ -119,21 +130,12 @@ const NewMediaUploader = ({
       lastModified: f.lastModified
     })));
     
-    // Validation plus permissive pour mobile
+    // Validation
     const validFiles = selectedFiles.filter(file => {
       const fileName = file.name.toLowerCase();
       const mimeType = file.type.toLowerCase();
       
-      console.log(`🔍 Validating file: ${fileName}, type: ${mimeType}`);
-      
-      // Accepter tous les fichiers pour audio sur mobile
-      if (type === 'audio') {
-        // Sur mobile, accepter plus largement
-        const isAudio = mimeType.startsWith('audio/') || 
-                       /\.(mp3|wav|ogg|m4a|flac|aac|wma|m4b|mpga|weba|opus|mid|midi|amr|3gp|aif|aiff|mp4|m4p|m4b)$/i.test(fileName);
-        console.log(`🎵 Audio validation for ${fileName}: ${isAudio}`);
-        return isAudio;
-      }
+      console.log(`🔍 Validating file: ${fileName}, type: ${mimeType}, for section: ${type}`);
       
       switch(type) {
         case 'images':
@@ -145,11 +147,15 @@ const NewMediaUploader = ({
                  /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v|3gp|mpeg|mpg)$/i.test(fileName);
         
         case 'audio':
-          return mimeType.startsWith('audio/') || 
-                 /\.(mp3|wav|ogg|m4a|flac|aac|wma|m4b|mpga|weba|opus|midi?)$/i.test(fileName);
+          const isAudio = mimeType.startsWith('audio/') || 
+                         /\.(mp3|wav|ogg|m4a|flac|aac|wma|m4b|mpga|weba|opus|midi?)$/i.test(fileName);
+          console.log(`🎵 Audio validation for ${fileName}: ${isAudio}`);
+          return isAudio;
         
         case 'documents':
-          return /\.(pdf|doc|docx|txt|zip|rar|pptx|xlsx|csv|rtf|odt)$/i.test(fileName);
+          const isDocument = /\.(pdf|doc|docx|txt|zip|rar|pptx|xlsx|csv|rtf|odt)$/i.test(fileName);
+          console.log(`📄 Document validation for ${fileName}: ${isDocument}, mimeType: ${mimeType}`);
+          return isDocument;
         
         default:
           return false;
@@ -157,11 +163,16 @@ const NewMediaUploader = ({
     });
     
     console.log(`✅ Valid files for ${type}:`, validFiles.length, 'out of', selectedFiles.length);
+    console.log(`✅ Valid file names:`, validFiles.map(f => f.name));
     
     if (validFiles.length === 0) {
-      const errorMsg = isMobile && type === 'audio'
-        ? `No valid audio files selected. Please select MP3, WAV, M4A, or OGG files from your device.`
-        : `No valid files selected. Please make sure the files are in the correct format for ${type}.`;
+      let errorMsg = `No valid files selected. Please make sure the files are in the correct format for ${type}.`;
+      
+      if (type === 'documents') {
+        errorMsg += '\n\nSupported formats: PDF, DOC, DOCX, TXT, ZIP, RAR, PPTX, XLSX, CSV, RTF, ODT';
+      } else if (type === 'audio' && isMobile) {
+        errorMsg = `No valid audio files selected. Please select MP3, WAV, M4A, or OGG files from your device.`;
+      }
       
       alert(errorMsg);
       e.target.value = '';
@@ -186,16 +197,20 @@ const NewMediaUploader = ({
       // Créer une URL blob pour la prévisualisation (sauf pour les très gros fichiers)
       if (file.size < 50 * 1024 * 1024) { // Max 50MB pour les previews
         try {
-          const blobUrl = URL.createObjectURL(file);
-          preview.url = blobUrl;
-          preview.blobUrl = blobUrl;
-          
-          if (type === 'images') {
-            preview.previewType = 'image';
-          } else if (type === 'videos') {
-            preview.previewType = 'video';
-          } else if (type === 'audio') {
-            preview.previewType = 'audio';
+          // Pour les documents, on pourrait créer une URL pour prévisualiser PDF, etc.
+          // Mais pour l'instant, on crée juste l'URL blob
+          if (type !== 'documents') {
+            const blobUrl = URL.createObjectURL(file);
+            preview.url = blobUrl;
+            preview.blobUrl = blobUrl;
+            
+            if (type === 'images') {
+              preview.previewType = 'image';
+            } else if (type === 'videos') {
+              preview.previewType = 'video';
+            } else if (type === 'audio') {
+              preview.previewType = 'audio';
+            }
           }
         } catch (error) {
           console.error('Error creating blob URL:', error);
@@ -208,6 +223,7 @@ const NewMediaUploader = ({
     });
     
     // Appeler la fonction parent
+    console.log(`📤 Calling onFileSelect for ${type} with`, validFiles.length, 'files');
     onFileSelect(type, validFiles, previews);
     
     // Réinitialiser l'input
@@ -411,17 +427,6 @@ const NewMediaUploader = ({
                   ? `Maximum reached (${maxCount})` 
                   : `Add ${title.toLowerCase()}`
                 }
-                {isMobile && type === 'audio' && (
-                  <span style={{
-                    fontSize: '10px', 
-                    display: 'block', 
-                    marginTop: '2px',
-                    fontWeight: 'normal',
-                    opacity: 0.8
-                  }}>
-                    (Tap to choose option)
-                  </span>
-                )}
               </button>
               
               {/* Input caché - utilisé pour desktop */}
@@ -433,7 +438,6 @@ const NewMediaUploader = ({
                 multiple={maxCount > 1}
                 style={{ display: 'none' }}
                 disabled={disabled || isMaxReached}
-                // Important: pas d'attribut capture ici pour audio
               />
               
               {newPreviews[type].length > 0 && (
@@ -459,16 +463,6 @@ const NewMediaUploader = ({
                   <small>
                     <i className="fas fa-info-circle"></i>
                     {getHint()}
-                    {isMobile && type === 'audio' && (
-                      <span style={{
-                        display: 'block', 
-                        marginTop: '4px', 
-                        color: '#666',
-                        fontStyle: 'italic'
-                      }}>
-                        Mobile: Tap "Add audio", then choose "Browse" or "Files" to select existing audio
-                      </span>
-                    )}
                   </small>
                 </div>
               )}
@@ -477,28 +471,24 @@ const NewMediaUploader = ({
         );
       })}
       
-      {/* Conseils spécifiques pour mobile */}
+      {/* Debug info pour mobile */}
       {isMobile && (
-        <div className="mobile-tips" style={{
-          marginTop: '20px',
-          padding: '12px',
-          backgroundColor: '#f0f7ff',
-          borderRadius: '8px',
-          fontSize: '12px',
-          color: '#0066cc',
-          border: '1px solid #cce5ff'
+        <div style={{
+          marginTop: '10px',
+          padding: '8px',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '4px',
+          fontSize: '11px',
+          color: '#666',
+          border: '1px solid #dee2e6'
         }}>
-          <strong><i className="fas fa-mobile-alt"></i> Mobile Tips:</strong>
-          <ul style={{margin: '8px 0 0 20px', padding: 0}}>
-            <li><strong>Audio Upload:</strong> Tap "Add audio" → Choose "Browse" or "Files" → Select your audio file</li>
-            <li><strong>Record Audio:</strong> When selecting audio, you may also see "Record" option</li>
-            <li><strong>File Locations:</strong> Audio files are usually in "Music", "Downloads", or "Files" app</li>
-            <li><strong>Formats:</strong> Supported: MP3, WAV, M4A, OGG, AAC, FLAC</li>
-          </ul>
+          <strong>Debug Mobile Info:</strong> 
+          <div>User Agent: {navigator.userAgent.substring(0, 50)}...</div>
+          <div>Platform: {navigator.platform}</div>
         </div>
       )}
       
-      {/* Styles inline pour les previews audio */}
+      {/* Styles inline */}
       <style jsx>{`
         .audio-preview-container {
           display: flex;
@@ -517,7 +507,7 @@ const NewMediaUploader = ({
           align-items: center;
           gap: 12px;
           flex: 1;
-          min-width: 0; /* Important pour le responsive */
+          min-width: 0;
         }
         
         .audio-icon {
@@ -555,7 +545,6 @@ const NewMediaUploader = ({
           opacity: 0.8;
         }
         
-        /* Améliorations pour mobile */
         @media (max-width: 768px) {
           .audio-preview-container {
             flex-direction: column;
@@ -578,7 +567,6 @@ const NewMediaUploader = ({
           }
         }
         
-        /* Correction pour les contrôles audio sur iOS */
         audio {
           -webkit-appearance: none;
           appearance: none;
