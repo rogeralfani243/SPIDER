@@ -14,7 +14,7 @@ import { appLogger } from './utils/logger';
 import AutoTranslateWrapper from './components/translation/autoTranslation.jsx';
 import useAutoTranslate from './hooks/useTranslations';
 import useTranslations from './hooks/useTranslations';
-import usePWAInstall from './utils/usePWAInstall';
+import usePWAInstall from './utils/useInstall.js';
 function App() {
   const { InstallPromptModal } = usePWAInstall();
   const { translateText, language } = useAutoTranslate(); // Ajoutez ce hook
