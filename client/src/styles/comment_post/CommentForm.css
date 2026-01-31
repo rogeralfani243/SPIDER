@@ -688,6 +688,19 @@
   .emoji-grid {
     grid-template-columns: repeat(6, 1fr);
   }
+  .emoji-sticker{
+    display: none;
+  }
+}
+@media (max-width: 440px) {
+  .emoji-picker {
+    width: 180px;
+    left: 10px;
+  }
+  
+  .emoji-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 /* Chrome specific fixes */
 @media screen and (-webkit-min-device-pixel-ratio:0) {

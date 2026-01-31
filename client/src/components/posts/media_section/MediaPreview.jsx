@@ -99,7 +99,7 @@ const MediaPreview = ({ media,
           <div className="main-media-file">
             <div className="file-preview-main">
               {getFileIcon(media)}
-              <span>{getFileName(media)}</span>
+              <span style={{color:'black'}}>{getFileName(media)}</span>
             </div>
           </div>
         );

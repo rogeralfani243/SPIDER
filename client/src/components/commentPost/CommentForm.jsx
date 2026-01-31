@@ -1135,7 +1135,7 @@ const handleSubmit = async (e) => {
          <div className="emoji-picker-wrapper">
     <button 
       type="button"
-      className={`comment-form-action-btn ${submitting ? 'disabled' : ''} ${showEmojiPicker ? 'active' : ''}`}
+      className={`comment-form-action-btn ${submitting ? 'disabled' : ''} ${showEmojiPicker ? 'active' : ''} emoji-sticker`}
       title="Add emoji"
       onClick={() => setShowEmojiPicker(!showEmojiPicker)}
       disabled={submitting}
