@@ -442,7 +442,7 @@ const handleVerify = async (e) => {
         <div className="presentation-content">
           <div className="logo-container">
             <div className="logo-icon">
-                    <img src="/images/Logo-spider.png" alt="logo" height='100%' width='100%' style={{borderRadius:'50%'}} />
+                    <img src="/Logo-spider.png" alt="logo" height='100%' width='100%' style={{borderRadius:'50%'}} />
         
             </div>
             <div className="app-name">Spider</div>
