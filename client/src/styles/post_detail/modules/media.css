@@ -5,7 +5,7 @@
   
   overflow: hidden;
   background: var(--card-bg, #ffffff);
- 
+
   position: relative;
 }
 

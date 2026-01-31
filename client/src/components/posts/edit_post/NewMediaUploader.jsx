@@ -1,9 +1,6 @@
-// src/components/post/components/NewMediaUploader.jsx
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { FaImage, FaVideo, FaMusic, FaFile, FaTimes } from 'react-icons/fa';
-import VideoPreview from './VideoPreview';
-import AudioPreview from './AudioPreview';
 
 const NewMediaUploader = ({ 
   newFiles, 
@@ -37,7 +34,7 @@ const NewMediaUploader = ({
       title: 'Videos',
       icon: <FaVideo />,
       maxCount: 5,
-      accept: 'video/*,.mp4,.avi,.mov,.wmv,.webm',
+      accept: 'video/*',
       getHint: () => 'You can add up to 5 videos (MP4, AVI, MOV, WMV, WebM)'
     },
     {
@@ -45,8 +42,7 @@ const NewMediaUploader = ({
       title: 'Audio',
       icon: <FaMusic />,
       maxCount: 5,
-      // IMPORTANT: Correction pour mobile - ajout des extensions spécifiques
-      accept: 'audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.wma',
+      accept: 'audio/*,.mp3,.wav,.ogg,.m4a,.flac,.aac,.wma,.m4b,.mpga,.weba',
       getHint: () => 'You can add up to 5 audio files (MP3, WAV, OGG, M4A, FLAC, AAC, WMA)'
     },
     {
@@ -54,7 +50,7 @@ const NewMediaUploader = ({
       title: 'Documents',
       icon: <FaFile />,
       maxCount: 5,
-      accept: '.pdf,.doc,.docx,.txt,.zip,.rar,.pptx,.xlsx,.csv,.rtf',
+      accept: '.pdf,.doc,.docx,.txt,.zip,.rar,.pptx,.xlsx,.csv,.rtf,.odt',
       getHint: () => 'You can add up to 5 documents (PDF, DOC, DOCX, TXT, ZIP, RAR, PPTX, XLSX, CSV, RTF)'
     }
   ];
@@ -66,39 +62,36 @@ const NewMediaUploader = ({
   const handleFileChange = (e, type) => {
     const selectedFiles = Array.from(e.target.files);
     
-    // Validation améliorée pour mobile
+    if (selectedFiles.length === 0) return;
+    
+    // Log pour déboguer
+    console.log(`Selected files for ${type}:`, selectedFiles.map(f => ({
+      name: f.name,
+      type: f.type,
+      size: f.size
+    })));
+    
+    // Validation simple mais efficace
     const validFiles = selectedFiles.filter(file => {
       const fileName = file.name.toLowerCase();
-      const extension = file.name.split('.').pop().toLowerCase();
       const mimeType = file.type;
       
-      // Log pour déboguer
-      console.log(`File selected: ${fileName}, type: ${mimeType}, extension: ${extension}`);
-      
+      // Accepter les fichiers selon leur type MIME
       switch(type) {
         case 'images':
-          return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension) ||
-                 mimeType.startsWith('image/');
+          return mimeType.startsWith('image/') || 
+                 /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(fileName);
         
         case 'videos':
-          return ['mp4', 'avi', 'mov', 'wmv', 'webm', 'm4v', '3gp'].includes(extension) ||
-                 mimeType.startsWith('video/');
+          return mimeType.startsWith('video/') || 
+                 /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v|3gp)$/i.test(fileName);
         
         case 'audio':
-          // Validation plus large pour mobile
-          const audioExtensions = ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'wma', 'm4b', 'mpga', 'weba'];
-          const audioMimeTypes = [
-            'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/mp4', 
-            'audio/flac', 'audio/aac', 'audio/x-ms-wma', 'audio/webm',
-            'audio/x-m4a', 'audio/x-aac'
-          ];
-          
-          return audioExtensions.includes(extension) ||
-                 audioMimeTypes.includes(mimeType) ||
-                 mimeType.startsWith('audio/');
+          return mimeType.startsWith('audio/') || 
+                 /\.(mp3|wav|ogg|m4a|flac|aac|wma|m4b|mpga|weba|opus|midi?)$/i.test(fileName);
         
         case 'documents':
-          return ['pdf', 'doc', 'docx', 'txt', 'zip', 'rar', 'pptx', 'xlsx', 'csv', 'rtf'].includes(extension);
+          return /\.(pdf|doc|docx|txt|zip|rar|pptx|xlsx|csv|rtf|odt)$/i.test(fileName);
         
         default:
           return false;
@@ -108,90 +101,56 @@ const NewMediaUploader = ({
     console.log(`Valid files for ${type}:`, validFiles.length);
     
     if (validFiles.length === 0) {
-      // Afficher une erreur pour les fichiers invalides
-      alert(`Some files were not accepted. Please make sure they are in the correct format for ${type}.`);
+      alert(`No valid files selected. Please make sure the files are in the correct format for ${type}.`);
       e.target.value = '';
       return;
     }
     
-    // Create previews avec gestion d'erreur
+    // Créer les previews
     const previews = validFiles.map(file => {
-      try {
-        const fileId = Date.now() + Math.random();
-        const extension = file.name.split('.').pop().toLowerCase();
-        const mimeType = file.type;
-        
-        switch(type) {
-          case 'images':
-            const imageUrl = URL.createObjectURL(file);
-            return {
-              url: imageUrl,
-              name: file.name,
-              id: fileId,
-              type: 'image',
-              size: file.size,
-              file: file
-            };
-            
-          case 'videos':
-            const videoUrl = URL.createObjectURL(file);
-            return {
-              url: videoUrl,
-              blobUrl: videoUrl,
-              name: file.name,
-              id: fileId,
-              type: 'video',
-              size: file.size,
-              extension: extension,
-              mimeType: mimeType,
-              file: file
-            };
-            
-          case 'audio':
-            const audioUrl = URL.createObjectURL(file);
-            return {
-              url: audioUrl,
-              blobUrl: audioUrl,
-              name: file.name,
-              id: fileId,
-              type: 'audio',
-              size: file.size,
-              extension: extension,
-              mimeType: mimeType,
-              file: file
-            };
-            
-          case 'documents':
-            return {
-              name: file.name,
-              id: fileId,
-              type: 'document',
-              size: file.size,
-              extension: extension,
-              mimeType: mimeType,
-              file: file
-            };
-            
-          default:
-            return null;
+      const fileId = Date.now() + Math.random();
+      const extension = file.name.split('.').pop().toLowerCase();
+      
+      let preview = {
+        id: fileId,
+        name: file.name,
+        size: file.size,
+        type: type,
+        file: file,
+        extension: extension
+      };
+      
+      // Créer une URL blob pour la prévisualisation
+      if (['images', 'videos', 'audio'].includes(type)) {
+        try {
+          const blobUrl = URL.createObjectURL(file);
+          preview.url = blobUrl;
+          preview.blobUrl = blobUrl;
+          
+          if (type === 'images') {
+            preview.previewType = 'image';
+          } else if (type === 'videos') {
+            preview.previewType = 'video';
+          } else if (type === 'audio') {
+            preview.previewType = 'audio';
+          }
+        } catch (error) {
+          console.error('Error creating blob URL:', error);
+          // Continuer sans URL blob
         }
-      } catch (error) {
-        console.error('Error creating preview for file:', file.name, error);
-        return null;
       }
-    }).filter(Boolean);
+      
+      return preview;
+    });
     
-    if (previews.length > 0) {
-      onFileSelect(type, validFiles, previews);
-    } else {
-      alert('Unable to create previews for the selected files.');
-    }
+    // Appeler la fonction parent
+    onFileSelect(type, validFiles, previews);
     
+    // Réinitialiser l'input
     e.target.value = '';
   };
 
   const getFilePreview = (preview, type, index) => {
-    // Fonction pour nettoyer les URLs blob
     const revokeBlobUrl = (url) => {
       if (url && url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
@@ -236,18 +195,38 @@ const NewMediaUploader = ({
       case 'videos':
         return (
           <div key={preview.id} className="file-preview-item">
-            <VideoPreview 
-              preview={preview} 
-              formatFileSize={formatFileSize} 
-              onRemove={() => {
-                revokeBlobUrl(preview.blobUrl);
-                onRemoveFile(type, index);
-              }}
-            />
+            <div className="video-preview-container">
+              <video 
+                controls 
+                className="video-preview"
+                onError={(e) => {
+                  console.error('Error loading video:', preview.name);
+                  revokeBlobUrl(preview.url);
+                  e.target.onerror = null;
+                  e.target.parentElement.innerHTML = `
+                    <div class="video-preview-error">
+                      <i class="fas fa-exclamation-triangle"></i>
+                      <span>Video not available</span>
+                    </div>
+                  `;
+                }}
+              >
+                <source src={preview.url} type={`video/${preview.extension}`} />
+                Your browser does not support video playback.
+              </video>
+              <div className="preview-info">
+                <span className="preview-name" title={preview.name}>
+                  {preview.name.length > 20 ? preview.name.substring(0, 17) + '...' : preview.name}
+                </span>
+                <div className="preview-meta">
+                  <span className="file-size">{formatFileSize(preview.size)}</span>
+                </div>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => {
-                revokeBlobUrl(preview.blobUrl);
+                revokeBlobUrl(preview.url);
                 onRemoveFile(type, index);
               }}
               className="remove-btn"
@@ -261,18 +240,41 @@ const NewMediaUploader = ({
       case 'audio':
         return (
           <div key={preview.id} className="file-preview-item">
-            <AudioPreview 
-              preview={preview} 
-              formatFileSize={formatFileSize} 
-              onRemove={() => {
-                revokeBlobUrl(preview.blobUrl);
-                onRemoveFile(type, index);
-              }}
-            />
+            <div className="audio-preview-container">
+              <div className="audio-player">
+                <i className="fas fa-music audio-icon"></i>
+                <audio 
+                  controls 
+                  className="audio-preview"
+                  onError={(e) => {
+                    console.error('Error loading audio:', preview.name);
+                    revokeBlobUrl(preview.url);
+                    e.target.onerror = null;
+                    e.target.parentElement.innerHTML = `
+                      <div class="audio-preview-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Audio not available</span>
+                      </div>
+                    `;
+                  }}
+                >
+                  <source src={preview.url} type={`audio/${preview.extension}`} />
+                  Your browser does not support audio playback.
+                </audio>
+              </div>
+              <div className="preview-info">
+                <span className="preview-name" title={preview.name}>
+                  {preview.name.length > 25 ? preview.name.substring(0, 22) + '...' : preview.name}
+                </span>
+                <div className="preview-meta">
+                  <span className="file-size">{formatFileSize(preview.size)}</span>
+                </div>
+              </div>
+            </div>
             <button
               type="button"
               onClick={() => {
-                revokeBlobUrl(preview.blobUrl);
+                revokeBlobUrl(preview.url);
                 onRemoveFile(type, index);
               }}
               className="remove-btn"
@@ -314,28 +316,11 @@ const NewMediaUploader = ({
     }
   };
 
-  // Fonction pour détecter si on est sur mobile
-  const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  };
-
-  // Fonction spéciale pour mobile - ouvrir directement la galerie audio
-  const handleMobileAudioUpload = () => {
-    if (isMobile()) {
-      // Sur mobile, on peut essayer différentes approches
-      console.log('Mobile device detected, using enhanced audio upload');
-    }
-    fileInputRefs.audio.current?.click();
-  };
-
   return (
     <>
       {uploadSections.map(({ type, title, icon, maxCount, accept, getHint }) => {
         const totalCount = existingMedia[type].length + newFiles[type].length;
         const isMaxReached = totalCount >= maxCount;
-        
-        // Gestion spéciale pour audio sur mobile
-        const isAudioOnMobile = type === 'audio' && isMobile();
         
         return (
           <div key={type} className="upload-section">
@@ -346,20 +331,13 @@ const NewMediaUploader = ({
             <div className="upload-group">
               <button
                 type="button"
-                onClick={isAudioOnMobile ? handleMobileAudioUpload : () => handleButtonClick(type)}
+                onClick={() => handleButtonClick(type)}
                 className={`btn-upload ${isMaxReached ? 'max-reached' : ''}`}
                 disabled={disabled || isMaxReached}
-                title={isAudioOnMobile ? "Tap to select audio files from your device" : ""}
               >
                 <i className="fas fa-plus"></i> 
-                {isMaxReached 
-                  ? `Maximum reached (${maxCount})` 
-                  : isAudioOnMobile
-                    ? `Tap to select audio`
-                    : `Add ${title.toLowerCase()}`
-                }
+                {isMaxReached ? `Maximum reached (${maxCount})` : `Add ${title.toLowerCase()}`}
               </button>
-              
               <input
                 type="file"
                 ref={fileInputRefs[type]}
@@ -368,9 +346,8 @@ const NewMediaUploader = ({
                 multiple={maxCount > 1}
                 style={{ display: 'none' }}
                 disabled={disabled || isMaxReached}
-                // Attributs spécifiques pour mobile
-                capture={type === 'audio' && isMobile() ? "user" : undefined}
-                webkitdirectory={type === 'documents' && isMobile() ? "false" : undefined}
+                // Attributs pour mobile
+                capture={type === 'audio' ? "user" : undefined}
               />
               
               {newPreviews[type].length > 0 && (
@@ -396,11 +373,6 @@ const NewMediaUploader = ({
                   <small>
                     <i className="fas fa-info-circle"></i>
                     {getHint()}
-                    {isAudioOnMobile && (
-                      <span style={{display: 'block', marginTop: '5px', color: '#666'}}>
-                        Note: On mobile, you can select files from your device's storage or recordings.
-                      </span>
-                    )}
                   </small>
                 </div>
               )}
@@ -409,24 +381,77 @@ const NewMediaUploader = ({
         );
       })}
       
-      {/* Message d'aide pour mobile */}
-      {isMobile() && (
-        <div className="mobile-help" style={{
-          marginTop: '20px',
-          padding: '10px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '5px',
-          fontSize: '12px',
-          color: '#666'
-        }}>
-          <strong>Mobile Tips:</strong>
-          <ul style={{margin: '5px 0 0 20px', padding: 0}}>
-            <li>For audio: Use "Files" app or "Audio Recorder" depending on your device</li>
-            <li>Supported formats: MP3, M4A, WAV, AAC</li>
-            <li>If files don't appear, check app permissions</li>
-          </ul>
-        </div>
-      )}
+      {/* Ajouter des styles inline pour s'assurer que tout est visible */}
+      <style jsx>{`
+        .audio-preview-container {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          margin-bottom: 10px;
+          width: 100%;
+        }
+        
+        .audio-player {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex: 1;
+        }
+        
+        .audio-icon {
+          font-size: 24px;
+          color: #667eea;
+        }
+        
+        .audio-preview {
+          flex: 1;
+          height: 40px;
+          border-radius: 20px;
+        }
+        
+        audio::-webkit-media-controls-panel {
+          background-color: #f1f5f9;
+        }
+        
+        audio::-webkit-media-controls-play-button {
+          background-color: #667eea;
+          border-radius: 50%;
+        }
+        
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display {
+          color: #333;
+        }
+        
+        /* Styles responsifs pour mobile */
+        @media (max-width: 768px) {
+          .audio-preview-container {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          
+          .audio-player {
+            flex-direction: row;
+          }
+          
+          audio {
+            min-width: 200px;
+          }
+        }
+        
+        /* Correction pour les contrôles audio sur iOS */
+        audio {
+          -webkit-appearance: none;
+          appearance: none;
+        }
+        
+        audio::-webkit-media-controls {
+          -webkit-appearance: initial;
+        }
+      `}</style>
     </>
   );
 };

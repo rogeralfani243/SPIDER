@@ -1,5 +1,5 @@
 // components/post_detail/PostDetail.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft,FaEllipsisV } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useRef } from 'react';
 import { usePost } from '../../hooks/post_detail/usePost';
 import { useMedia } from '../../hooks/post_detail/useMedia';
 import { useRating } from '../../hooks/post_detail/useRatings';
-
+import PostMenu from './PostMenu';
 // Components
 import LoadingSpinner from '../../common/LoadingSpinner';
 import ErrorDisplay from '../../common/ErrorDisplay';
@@ -165,14 +165,30 @@ const PostDetail = () => {
   const handleCloseDownloadModal = () => {
     setShowDownloadModal(false);
   };
+  const handleEditPost = useCallback((post) => {
+    console.log('Editing post:', post.id);
+    window.location.href = `/posts/edit/${post.id}/`;
+  }, []);
 
-  // ✅ Validate post exists
-  if (!post) {
-    return null;
-  }
   const handleThumbnailClick = (postId, files, clickedIndex) => {
     openGallery(postId, files, clickedIndex);
   };
+const handleDeletePost = useCallback((post) => {
+    console.log('Deleting post:', post.id);
+    if (window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      alert(`Delete post ${post.id}`);
+    }
+  }, []);
+
+  const handleReportPost = useCallback((post) => {
+    console.log('Reporting post:', post.id);
+    alert(`Report post ${post.id}`);
+  }, []);
+
+   // ✅ Validate post exists
+  if (!post) {
+    return null;
+  }
 
   // Render loading state
   if (loading) {
@@ -226,48 +242,34 @@ const PostDetail = () => {
                 userId={post.user_id || userId}
                 profileId={post.user_profile_id}
               />
-                <button 
-                          ref={optionsButtonRef}
-                          className="post-menu-toggles"
-                          onClick={() => setShowOptions(!showOptions)}
-                        >
-                          <FaEllipsisV />
-                        </button>
+              
+       
 
-                         {showOptions && (
+                   
                     <div className="container-download-btn-post-detail">
-
-                              <div className="download-button-post-section">
-      <button 
-        className="download-btn-post-detail"
-        onClick={handleInstall}
-        disabled={isLoading || mediaFiles.length === 0}
-        title={mediaFiles.length === 0 ? "No files available" : "Download files"}
-      >
-        <Download size={18} />
-        <span>Download</span>
-        {mediaFiles.length > 0 && (
-          <span className="file-count-badge">
-            {mediaFiles.length}
-          </span>
-        )}
-      </button>
-        <ShareMenu 
-            post={post} 
-            onViewPost={() => {}} 
-          />
-    </div>
-                    </div> )}
-  {/* Download modal */}
-      <DownloadMediaModal
-        isOpen={showDownloadModal}
+                 <div  className="post-menu-togge" style={{zIndex:'100'}}>
+           <PostMenu
+                  post={post}
+                  currentUser={currentUser}
+                  onEdit={handleEditPost}
+                  onDelete={handleDeletePost}
+                  onReport={handleReportPost}
+                  onShare={handleSharePost}
+                          isOpen={showDownloadModal}
         onClose={handleCloseDownloadModal}
-        post={post}
+
         URL={URL}
         onDownloadSelected={(selectedItems) => {
           console.log('Downloading selected items:', selectedItems);
         }}
-      />
+        isInstall={handleInstall}
+        mediaList={mediaFiles}
+        isLoading={isLoading}
+                />
+    
+    </div>
+                    </div> 
+
               {/* Titre et contenu du post */}
               <PostContent 
                 title={post.title}

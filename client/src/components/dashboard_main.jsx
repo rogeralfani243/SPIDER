@@ -7,6 +7,7 @@ import ProfileIcon from "./profile/ProfilMainIcon";
 import { conversationAPI } from '../hooks/messaging/messagingApi';
 import { profileAPI } from './services/api';
 import '../styles/dashboardMain.css';
+import { HiOutlineViewGrid  } from "react-icons/hi";
 
 // SVG Icons for dashboard
 const HomeIcon = () => (
@@ -564,7 +565,7 @@ export default function DashboardMain() {
                       navigate('/dashboard/')
                     }}
                   >
-                    
+                     <HiOutlineViewGrid  className="mobile-nav-icon" />
                     <span className="mobile-nav-label" translate='no'>My Dashboard</span>
                   </Link>
                 </li>
