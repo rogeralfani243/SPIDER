@@ -368,7 +368,7 @@ class GroupCreateSerializer(serializers.ModelSerializer):
     tags = serializers.ListField(
         child=serializers.CharField(),
         required=False,
-        default=list
+   
     )
     # AJOUTER is_visible avec valeur par défaut
     is_visible = serializers.BooleanField(required=False, default=True)
@@ -398,7 +398,19 @@ class GroupCreateSerializer(serializers.ModelSerializer):
             })
         
         return data
+    def to_internal_value(self, data):
+        # S'assurer que les tags vides ne deviennent pas "[]"
+        if 'tags' in data and data['tags'] == []:
+            data['tags'] = None
+        return super().to_internal_value(data)
     
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Ne pas inclure tags s'il est null
+        if data.get('tags') is None:
+            data.pop('tags', None)
+        return data
+
     def create(self, validated_data):
         participant_ids = validated_data.pop('participant_ids', [])
         category_id = validated_data.pop('category_id', None)
