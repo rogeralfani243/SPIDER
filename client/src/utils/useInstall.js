@@ -1,53 +1,32 @@
 // src/hooks/usePWAInstall.js
 import { useState, useEffect } from 'react';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Box,
-  Typography,
-  IconButton,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Chip,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material';
-import {
-  InstallDesktop,
-  PhoneAndroid,
-  PhoneIphone,
-  Close,
-  Download,
-  CheckCircle,
-  Share,
-  Home,
-} from '@mui/icons-material';
+import { 
+  FiSmartphone, 
+  FiDownload, 
+  FiShare2, 
+  FiHome,
+  FiX,
+  FiInfo
+} from 'react-icons/fi';
+import { 
+  MdOutlineInstallDesktop,
+  MdOutlineInstallMobile 
+} from 'react-icons/md';
 
 const usePWAInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
-  const [isInstalling, setIsInstalling] = useState(false);
-  
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // Détecter si c'est un appareil mobile
+  // Detect mobile devices
   const detectMobile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
   };
 
-  // Détecter si l'app est installée en mode standalone (PWA)
+  // Detect if app is installed as standalone PWA
   const detectStandalone = () => {
     return (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -56,50 +35,42 @@ const usePWAInstall = () => {
     );
   };
 
-  // Fonction pour montrer le prompt d'installation
+  // Function to show install modal
   const showInstallModal = () => {
     setShowInstallPrompt(true);
   };
 
-  // Fonction pour installer la PWA
+  // Function to install PWA
   const installPWA = async () => {
-    if (!deferredPrompt) {
-      // Si pas de deferredPrompt, on montre juste les instructions
-      setShowInstallPrompt(true);
-      return false;
-    }
+    if (!deferredPrompt) return false;
     
     try {
-      setIsInstalling(true);
-      // Afficher le prompt d'installation
+      // Show install prompt
       deferredPrompt.prompt();
       
-      // Attendre que l'utilisateur réponde
+      // Wait for user response
       const { outcome } = await deferredPrompt.userChoice;
       
       console.log(`User response to install prompt: ${outcome}`);
       
-      // Réinitialiser le prompt
+      // Reset prompt
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
-      setIsInstalling(false);
       
-      // Stocker dans localStorage que l'utilisateur a vu le prompt
+      // Store in localStorage that user has seen the prompt
       localStorage.setItem('pwaPromptShown', Date.now().toString());
       
       return outcome === 'accepted';
     } catch (error) {
       console.error('Error installing PWA:', error);
-      setIsInstalling(false);
       return false;
     }
   };
 
-  // Fonction pour fermer le modal
+  // Function to close modal
   const dismissInstallPrompt = () => {
     setShowInstallPrompt(false);
-    setIsInstalling(false);
-    // Stocker le moment du dismiss pour ne pas montrer trop souvent
+    // Store dismissal timestamp to avoid showing too frequently
     localStorage.setItem('pwaPromptDismissed', Date.now().toString());
   };
 
@@ -110,20 +81,20 @@ const usePWAInstall = () => {
     const isStandaloneApp = detectStandalone();
     setIsStandalone(isStandaloneApp);
 
-    // Écouter l'événement beforeinstallprompt
+    // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
-      console.log('📱 beforeinstallprompt event fired');
-      // Empêcher le prompt automatique
+      console.log('beforeinstallprompt event fired');
+      // Prevent default prompt
       e.preventDefault();
-      // Sauvegarder l'event pour plus tard
+      // Save event for later use
       setDeferredPrompt(e);
       
-      // Vérifier si on doit montrer le prompt automatiquement
+      // Check if we should show prompt automatically
       if (isMobileDevice && !isStandaloneApp) {
         const lastDismissed = localStorage.getItem('pwaPromptDismissed');
         const lastShown = localStorage.getItem('pwaPromptShown');
         
-        // Ne pas montrer si l'utilisateur a dismiss récemment (dans les 7 derniers jours)
+        // Don't show if user dismissed recently (within last 7 days)
         if (lastDismissed) {
           const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
           if (parseInt(lastDismissed) > oneWeekAgo) {
@@ -131,7 +102,7 @@ const usePWAInstall = () => {
           }
         }
         
-        // Ne pas montrer si déjà montré récemment (dans les 30 jours)
+        // Don't show if shown recently (within last 30 days)
         if (lastShown) {
           const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
           if (parseInt(lastShown) > thirtyDaysAgo) {
@@ -139,23 +110,22 @@ const usePWAInstall = () => {
           }
         }
         
-        // Montrer après un délai (5 secondes)
+        // Show after delay (3 seconds)
         const timer = setTimeout(() => {
           setShowInstallPrompt(true);
           localStorage.setItem('pwaPromptShown', Date.now().toString());
-        }, 5000);
+        }, 3000);
         
         return () => clearTimeout(timer);
       }
     };
 
-    // Écouter si l'app est installée
+    // Listen for app installation
     const handleAppInstalled = () => {
-      console.log('📱 PWA installed successfully');
+      console.log('PWA installed successfully');
       setIsStandalone(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
-      setIsInstalling(false);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -167,227 +137,177 @@ const usePWAInstall = () => {
     };
   }, []);
 
-  // Composant modal pour l'installation PWA
-  const InstallPromptModal = () => (
-    <Dialog
-      open={showInstallPrompt && isMobile && !isStandalone}
-      onClose={dismissInstallPrompt}
-      fullScreen={fullScreen}
-      maxWidth="sm"
-      fullWidth
-      aria-labelledby="pwa-install-dialog"
-      PaperProps={{
-        sx: {
-          borderRadius: fullScreen ? 0 : 2,
-          m: fullScreen ? 0 : 2,
-        }
-      }}
-    >
-      <DialogTitle sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'space-between',
-        bgcolor: 'primary.main',
-        color: 'primary.contrastText',
+  // Modal component for PWA installation
+  const InstallPromptModal = () => {
+    if (!showInstallPrompt || !isMobile || isStandalone) return null;
+
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 9999,
+        padding: '20px',
       }}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <InstallDesktop />
-          <Typography variant="h6" component="span">
-            Installer l'application
-          </Typography>
-        </Box>
-        <IconButton
-          onClick={dismissInstallPrompt}
-          sx={{ color: 'primary.contrastText' }}
-          size="small"
-        >
-          <Close />
-        </IconButton>
-      </DialogTitle>
-      
-      <DialogContent sx={{ pt: 3 }}>
-        <Box textAlign="center" mb={3}>
-          <Box
-            sx={{
-              width: 80,
-              height: 80,
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          maxWidth: '400px',
+          width: '100%',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+          animation: 'fadeIn 0.3s ease',
+          position: 'relative',
+        }}>
+          {/* Close button */}
+          <button
+            onClick={dismissInstallPrompt}
+            style={{
+              position: 'absolute',
+              top: '16px',
+              right: '16px',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+              color: '#999',
+              padding: '4px',
               borderRadius: '50%',
-              bgcolor: 'primary.light',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              mx: 'auto',
-              mb: 2,
             }}
+            onMouseOver={(e) => e.target.style.color = '#333'}
+            onMouseOut={(e) => e.target.style.color = '#999'}
           >
-            <Download sx={{ fontSize: 40, color: 'primary.main' }} />
-          </Box>
+            <FiX />
+          </button>
           
-          <Typography variant="h5" gutterBottom fontWeight="medium">
-            Améliorez votre expérience
-          </Typography>
+          <h3 style={{
+            marginTop: 0,
+            marginBottom: '16px',
+            color: '#333',
+            fontSize: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+          }}>
+            <FiSmartphone style={{ fontSize: '24px' }} />
+            Install App
+          </h3>
           
-          <Typography color="text.secondary" paragraph>
-            Installez notre application pour un accès plus rapide, 
-            une meilleure performance et l'utilisation hors connexion.
-          </Typography>
-        </Box>
-
-        <Box mb={3}>
-          <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-            <CheckCircle sx={{ mr: 1, color: 'success.main', verticalAlign: 'middle' }} />
-            Avantages de l'installation
-          </Typography>
+          <p style={{
+            color: '#666',
+            marginBottom: '24px',
+            lineHeight: '1.5',
+          }}>
+            For a better experience, install the app on your phone. 
+            You'll have faster access and can use all features even when offline.
+          </p>
           
-          <List dense>
-            <ListItem>
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <Download color="primary" />
-              </ListItemIcon>
-              <ListItemText primary="Accès rapide depuis l'écran d'accueil" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <Download color="primary" />
-              </ListItemIcon>
-              <ListItemText primary="Fonctionnement hors connexion" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <Download color="primary" />
-              </ListItemIcon>
-              <ListItemText primary="Notifications push" />
-            </ListItem>
-            <ListItem>
-              <ListItemIcon sx={{ minWidth: 36 }}>
-                <Download color="primary" />
-              </ListItemIcon>
-              <ListItemText primary="Expérience plein écran" />
-            </ListItem>
-          </List>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        <Box>
-          <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-            Instructions d'installation
-          </Typography>
-          
-          <Box display="flex" flexDirection={fullScreen ? 'column' : 'row'} gap={2} mb={2}>
-            <Box flex={1}>
-              <Chip
-                icon={<PhoneIphone />}
-                label="iOS"
-                color="info"
-                variant="outlined"
-                sx={{ mb: 1 }}
-              />
-              <List dense>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <Share fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary="1. Cliquez sur l'icône Partager" 
-                    primaryTypographyProps={{ variant: 'body2' }}
-                  />
-                </ListItem>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <Home fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary="2. Sélectionnez 'Sur l'écran d'accueil'" 
-                    primaryTypographyProps={{ variant: 'body2' }}
-                  />
-                </ListItem>
-              </List>
-            </Box>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}>
+            <button
+              onClick={installPWA}
+              style={{
+                backgroundColor: '#007AFF',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '16px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#0056CC'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#007AFF'}
+            >
+              <MdOutlineInstallMobile style={{ fontSize: '20px' }} />
+              Install App
+            </button>
             
-            <Box flex={1}>
-              <Chip
-                icon={<PhoneAndroid />}
-                label="Android"
-                color="success"
-                variant="outlined"
-                sx={{ mb: 1 }}
-              />
-              <List dense>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <Download fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary="1. Cliquez sur 'Installer l'application'" 
-                    primaryTypographyProps={{ variant: 'body2' }}
-                  />
-                </ListItem>
-                <ListItem sx={{ px: 0 }}>
-                  <ListItemIcon sx={{ minWidth: 36 }}>
-                    <Home fontSize="small" />
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary="2. Ou 'Ajouter à l'écran d'accueil'" 
-                    primaryTypographyProps={{ variant: 'body2' }}
-                  />
-                </ListItem>
-              </List>
-            </Box>
-          </Box>
+            <button
+              onClick={dismissInstallPrompt}
+              style={{
+                backgroundColor: 'transparent',
+                color: '#666',
+                border: '1px solid #ddd',
+                borderRadius: '12px',
+                padding: '16px',
+                fontSize: '16px',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
+            >
+              <FiX style={{ fontSize: '18px' }} />
+              Later
+            </button>
+          </div>
           
-          <Box
-            sx={{
-              bgcolor: 'warning.light',
-              p: 2,
-              borderRadius: 1,
-              border: '1px solid',
-              borderColor: 'warning.main',
-            }}
-          >
-            <Typography variant="body2" color="warning.dark">
-              <strong>Remarque :</strong> Selon votre navigateur, les instructions peuvent légèrement varier.
-            </Typography>
-          </Box>
-        </Box>
-      </DialogContent>
-      
-      <DialogActions sx={{ p: 3, pt: 0, flexDirection: fullScreen ? 'column' : 'row', gap: 1 }}>
-        <Button
-          onClick={dismissInstallPrompt}
-          variant="outlined"
-          fullWidth={fullScreen}
-          sx={{ minWidth: fullScreen ? '100%' : 120 }}
-        >
-          Plus tard
-        </Button>
-        
-        {deferredPrompt ? (
-          <Button
-            onClick={installPWA}
-            variant="contained"
-            color="primary"
-            fullWidth={fullScreen}
-            disabled={isInstalling}
-            startIcon={isInstalling ? null : <Download />}
-            sx={{ minWidth: fullScreen ? '100%' : 120 }}
-          >
-            {isInstalling ? 'Installation en cours...' : 'Installer maintenant'}
-          </Button>
-        ) : (
-          <Button
-            variant="contained"
-            color="secondary"
-            fullWidth={fullScreen}
-            onClick={() => window.location.reload()}
-            sx={{ minWidth: fullScreen ? '100%' : 180 }}
-          >
-            Actualiser pour voir l'option
-          </Button>
-        )}
-      </DialogActions>
-    </Dialog>
-  );
+          <div style={{
+            marginTop: '20px',
+            paddingTop: '16px',
+            borderTop: '1px solid #eee',
+            fontSize: '12px',
+            color: '#999',
+          }}>
+            <p style={{ 
+              margin: 0, 
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <FiInfo style={{ fontSize: '14px' }} />
+              <strong>How to install:</strong>
+            </p>
+            <ul style={{
+              margin: 0,
+              paddingLeft: '20px',
+            }}>
+              <li style={{ 
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <FiShare2 style={{ fontSize: '12px' }} />
+                <strong>iOS:</strong> Click "Share" then "Add to Home Screen"
+              </li>
+              <li style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}>
+                <MdOutlineInstallDesktop style={{ fontSize: '12px' }} />
+                <strong>Android:</strong> Click "Install App" or "Add to Home Screen"
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return {
     isStandalone,
@@ -398,29 +318,6 @@ const usePWAInstall = () => {
     showInstallModal,
     InstallPromptModal,
     deferredPrompt: !!deferredPrompt,
-    // Composant bouton d'installation
-    InstallButton: ({ variant = 'contained', color = 'primary', sx = {} }) => (
-      <Button
-        variant={variant}
-        color={color}
-        onClick={showInstallModal}
-        startIcon={<Download />}
-        disabled={isStandalone}
-        sx={sx}
-      >
-        {isStandalone ? 'Déjà installée' : 'Installer l\'app'}
-      </Button>
-    ),
-    // Badge pour indiquer l'état d'installation
-    InstallStatusBadge: () => (
-      <Chip
-        icon={isStandalone ? <CheckCircle /> : <Download />}
-        label={isStandalone ? 'App installée' : 'Installation disponible'}
-        color={isStandalone ? 'success' : 'primary'}
-        variant="outlined"
-        size="small"
-      />
-    ),
   };
 };
 

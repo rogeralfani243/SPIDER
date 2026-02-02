@@ -1,5 +1,6 @@
 // components/search/GroupCard.jsx
 import React, { useState } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search as SearchIcon,
@@ -56,7 +57,72 @@ export const GroupCard = ({
   const navigate = useNavigate();
   const [showOptions, setShowOptions] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-
+  const parseTags = useMemo(() => {
+    if (!group?.tags) return [];
+    
+    console.log('🔍 GroupCard - Raw tags:', group.tags);
+    console.log('🔍 GroupCard - Type:', typeof group.tags);
+    
+    // Si c'est déjà un tableau
+    if (Array.isArray(group.tags)) {
+      console.log('✅ GroupCard - Tags is array');
+      // Nettoyer le tableau
+      return group.tags
+        .map(tag => {
+          if (tag === null || tag === undefined) return '';
+          
+          // Si un tag est encore une string JSON
+          if (typeof tag === 'string' && tag.trim().startsWith('[')) {
+            try {
+              const parsed = JSON.parse(tag.trim());
+              return Array.isArray(parsed) && parsed.length > 0 
+                ? String(parsed[0]).trim() 
+                : String(parsed).trim();
+            } catch (error) {
+              // Nettoyer manuellement
+              return tag.replace(/[\[\]"]/g, '').trim();
+            }
+          }
+          
+          return String(tag).trim();
+        })
+        .filter(tag => tag !== '');
+    }
+    
+    // Si c'est une string
+    if (typeof group.tags === 'string') {
+      const str = group.tags.trim();
+      
+      // Chaîne vide
+      if (str === '' || str === '[]' || str === 'null' || str === 'undefined') {
+        return [];
+      }
+      
+      // JSON array string
+      if (str.startsWith('[') && str.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(str);
+          if (Array.isArray(parsed)) {
+            return parsed
+              .map(item => String(item).trim())
+              .filter(item => item !== '');
+          }
+          return [String(parsed).trim()];
+        } catch (error) {
+          // Continuer avec extraction manuelle
+        }
+      }
+      
+      // Extraction manuelle
+      return str
+        .replace(/[\[\]"]/g, '') // Enlever crochets et guillemets
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+    }
+    
+    return [];
+  }, [group?.tags]); 
   if (!group) return null;
 
   // Sécuriser les données du groupe
@@ -290,7 +356,7 @@ export const GroupCard = ({
                 />
               )}
               
-              {safeGroup.tags.slice(0, 1).map((tag, index) => (
+              {parseTags.slice(0, 1).map((tag, index) => (
                 <Chip
                   key={index}
                   icon={<TagIcon sx={{ fontSize: 12 }} />}

@@ -260,3 +260,16 @@
   opacity: 1;
   background: rgba(255, 255, 255, 0.2);
 }
+
+
+@media (max-width: 968px)  {
+  .volume-control{
+    display: none;
+  }
+  .video-controls-right  .volume-slider-container{
+    display: none;
+  }
+      .volume-percentage{
+    display: none;
+  }
+  }

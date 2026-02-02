@@ -13,7 +13,7 @@ import DashboardMain from './../dashboard_main';
 import ProfilePosts from './../profil_details/ProfilePosts';
 import { useLocation } from 'react-router-dom';
 import BlockedProfileView from '../profil_details/BlockedProfileView.jsx'; // Créez ce composant
-import API_URL from '../../hooks/useApiUrl';
+
 const ProfileDetail = () => {
   const { profileId } = useParams();
   const navigate = useNavigate();
@@ -305,80 +305,32 @@ const fetchProfileDetail = useCallback(async () => {
   }, [location]);
 
   // Récupération de l'utilisateur connecté
-useEffect(() => {
-  const getCurrentUser = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const userData = localStorage.getItem('user');
-      
-      console.log('🔍 [DEBUG] Auth check:', {
-        hasToken: !!token,
-        hasUserData: !!userData,
-        profileId: profileId
-      });
+  useEffect(() => {
+    const getCurrentUser = () => {
+      try {
+        const token = localStorage.getItem('token');
+        const userData = localStorage.getItem('user');
+        
+        console.log('🔍 [DEBUG] Auth check:', {
+          hasToken: !!token,
+          hasUserData: !!userData,
+          profileId: profileId
+        });
 
-      // Priorité 1: User depuis localStorage
-      if (userData) {
-        try {
+        if (userData) {
           const user = JSON.parse(userData);
           console.log('✅ [DEBUG] Current user found:', user);
           setCurrentUser(user);
-          return; // Sortir si on a trouvé le user
-        } catch (parseError) {
-          console.error('❌ [DEBUG] Error parsing user data:', parseError);
-          // Continuer pour essayer de récupérer autrement
-        }
-      }
-
-      // Priorité 2: Vérifier avec token
-      if (token) {
-        console.log('🔄 [DEBUG] Trying to authenticate with token');
-        try {
-          const response = await fetch(`${API_URL}/api/auth/user/`, {
-            headers: {
-              'Authorization': `Token ${token}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            const user = await response.json();
-            console.log('✅ [DEBUG] User authenticated via token:', user);
-            setCurrentUser(user);
-            localStorage.setItem('user', JSON.stringify(user));
-            return;
-          }
-        } catch (tokenError) {
-          console.warn('⚠️ [DEBUG] Token auth failed:', tokenError);
-        }
-      }
-
-      // Priorité 3: Vérifier la session Django
-      console.log('🔄 [DEBUG] Checking Django session');
-      try {
-        const response = await fetch(`${API_URL}/api/auth/me/`, {
-          credentials: 'include' // Important pour les cookies de session
-        });
-        
-        if (response.ok) {
-          const user = await response.json();
-          console.log('✅ [DEBUG] User from session:', user);
-          setCurrentUser(user);
-          localStorage.setItem('user', JSON.stringify(user));
         } else {
-          console.log('❌ [DEBUG] No active session found');
+          console.log('❌ [DEBUG] No user data found');
         }
-      } catch (sessionError) {
-        console.error('❌ [DEBUG] Session check failed:', sessionError);
+      } catch (error) {
+        console.error('❌ [DEBUG] Error getting current user:', error);
       }
-      
-    } catch (error) {
-      console.error('❌ [DEBUG] Error getting current user:', error);
-    }
-  };
+    };
 
-  getCurrentUser();
-}, [profileId]);
+    getCurrentUser();
+  }, [profileId]);
 
   // Effet pour charger les données du profil
   useEffect(() => {

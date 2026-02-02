@@ -66,6 +66,11 @@
 }
 
 .file-preview-main {
+  padding: 20px 40px;
+  border-radius: 20px;
+  display: grid;
+  background-color: rgba(128, 128, 128, 0.562);
+  place-items: center;
   text-align: center;
   color: var(--text-secondary, #64748b);
 }
@@ -101,7 +106,7 @@
 @media(max-width:746px){
 .main-media-videos {
   width: fit-content;
-  height:220px;
+  height:350px;
 
 
 }

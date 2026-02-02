@@ -249,3 +249,12 @@
 }
 
 }
+@media(max-width:546px){
+
+.whatsapp-volume-slider-container{
+  display: none;
+}
+.whatsapp-volume-percentage{
+  display: none;
+}
+}

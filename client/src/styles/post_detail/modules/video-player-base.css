@@ -284,8 +284,8 @@
   .video-main-controls {
     padding: 0 5px;
   }
-}
 
+}
 /* Special rules for touch devices - always show bottom controls */
 @media (max-width: 768px) and (hover: none) {
   .whatsapp-video-player {
@@ -302,7 +302,7 @@
     transform: translateY(0) !important;
     opacity: 0.3 !important;
   }
-  
+
   /* Ensure controls are visible in landscape mode */
   @media (orientation: landscape) {
     .video-controls-bottom {

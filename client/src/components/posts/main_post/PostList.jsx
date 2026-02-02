@@ -1,5 +1,5 @@
 // src/components/posts/PostList.jsx
-import React, { useState, useEffect, useRef,useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../../../styles/main_post/posts.css';
 import URL from '../../../hooks/useUrl';
 import PostCard from '../PostCard';
@@ -7,6 +7,10 @@ import PostFilters from './PostFilters';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardMain from '../../dashboard_main';
 import CategoryList from './CategoryList';
+
+// Composant pour le sélecteur d'algorithme
+import AlgorithmSelector from './AlgorithmSelector';
+
 const PostList = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,13 +21,21 @@ const PostList = () => {
   const [filters, setFilters] = useState({
     category: '',
     search: '',
-    sort: 'newest'
+    algorithm: 'recommended', // Nouveau: algorithme de recommandation
+    sort: 'newest',
+    tag: '',
+    user: ''
   });
   const [currentUser, setCurrentUser] = useState(null);
   const [highlightedPostId, setHighlightedPostId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-   const [localFilters, setLocalFilters] = useState(filters);
-    
+  const [localFilters, setLocalFilters] = useState(filters);
+  
+  // Nouveau: métadonnées de l'algorithme
+  const [algorithmInfo, setAlgorithmInfo] = useState(null);
+  const [userContext, setUserContext] = useState(null);
+  const [paginationMeta, setPaginationMeta] = useState(null);
+  
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const highlightedPostRef = useRef(null);
@@ -38,12 +50,12 @@ const PostList = () => {
         return;
       }
 
-      const response = await fetch( {
+      const response = await fetch(`${URL}/auth/user/`, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
         },
- withCredentials: false, 
+        withCredentials: false, 
       });
 
       if (response.ok) {
@@ -63,159 +75,155 @@ const PostList = () => {
     }
   };
 
-  // Fonction pour récupérer les posts
-// Ajoutez ceci dans votre fetchPosts function
-// Fonction pour récupérer les posts - VERSION CORRIGÉE
-// Fonction pour récupérer les posts - VERSION CORRIGÉE
-const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
-  try {
-    if (reset) {
-      setRefreshing(true);
-      setPage(1);
-    }
-    
-    const token = localStorage.getItem('token');
-    const currentFilters = customFilters || filters;
-    
-    console.log('🔍 Current filters:', currentFilters);
-    
-    // Construire les paramètres CORRECTEMENT
-    const params = new URLSearchParams({
-      page: reset ? 1 : page,
-      page_size: 20,
-      sort: currentFilters.sort || 'newest',
-    });
-    
-    // Ajouter la catégorie SEULEMENT si elle existe et n'est pas vide
-    if (currentFilters.category && currentFilters.category !== '') {
-      params.append('category', currentFilters.category);
-      console.log(`🔍 Adding category filter: ${currentFilters.category}`);
-    }
-    
-    // Ajouter la recherche SEULEMENT si elle existe et n'est pas vide
-    if (currentFilters.search && currentFilters.search.trim() !== '') {
-      params.append('search', currentFilters.search.trim());
-      console.log(`🔍 Adding search filter: "${currentFilters.search}"`);
-    }
-    
-    // IMPORTANT: Gérer le cas où on utilise les endpoints spéciaux
-    let url;
-    if (currentFilters.sort === 'rated') {
-      // Utiliser l'endpoint spécialisé pour "best rated"
-      const specialParams = new URLSearchParams({
-        limit: 20,
-        min_ratings: 3,
-        page: reset ? 1 : page
+  // Fonction pour récupérer les posts avec l'algorithme de recommandation
+  const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
+    try {
+      if (reset) {
+        setRefreshing(true);
+        setPage(1);
+      }
+      
+      const token = localStorage.getItem('token');
+      const currentFilters = customFilters || filters;
+      
+      console.log('🔍 Current filters:', currentFilters);
+      console.log('🤖 Using algorithm:', currentFilters.algorithm);
+      
+      // Construire les paramètres pour l'API de recommandation
+      const params = new URLSearchParams({
+        page: reset ? 1 : page,
+        page_size: 20,
+        algorithm: currentFilters.algorithm || 'recommended', // Paramètre algorithm
       });
       
-      // Ajouter la catégorie et la recherche aux endpoints spéciaux aussi
-      if (currentFilters.category) {
-        specialParams.append('category', currentFilters.category);
-      }
-      if (currentFilters.search) {
-        specialParams.append('search', currentFilters.search);
+      // Ajouter la catégorie SEULEMENT si elle existe et n'est pas vide
+      if (currentFilters.category && currentFilters.category !== '') {
+        params.append('category', currentFilters.category);
+        console.log(`🔍 Adding category filter: ${currentFilters.category}`);
       }
       
-      url = `${URL}/post/posts/best-rated/?${specialParams.toString()}`;
+      // Ajouter la recherche SEULEMENT si elle existe et n'est pas vide
+      if (currentFilters.search && currentFilters.search.trim() !== '') {
+        params.append('search', currentFilters.search.trim());
+        console.log(`🔍 Adding search filter: "${currentFilters.search}"`);
+      }
       
-    } else if (currentFilters.sort === 'popular') {
-      // Utiliser l'endpoint spécialisé pour "most popular"
-      const specialParams = new URLSearchParams({
-        limit: 20,
-        days: 30,
-        page: reset ? 1 : page
+      // Ajouter le tag SEULEMENT si spécifié
+      if (currentFilters.tag && currentFilters.tag.trim() !== '') {
+        params.append('tag', currentFilters.tag.trim());
+        console.log(`🔍 Adding tag filter: "${currentFilters.tag}"`);
+      }
+      
+      // Ajouter l'utilisateur SEULEMENT si spécifié
+      if (currentFilters.user && currentFilters.user.trim() !== '') {
+        params.append('user', currentFilters.user.trim());
+        console.log(`🔍 Adding user filter: "${currentFilters.user}"`);
+      }
+      
+      // Pour les algorithmes spéciaux, on utilise l'endpoint principal
+      // car l'algorithme est géré côté backend
+      const url = `${URL}/post/posts/?${params.toString()}`;
+      
+      console.log('📡 Fetching from:', url);
+      console.log('📊 Parameters:', params.toString());
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': token ? `Token ${token}` : '',
+        },
+        withCredentials: false, 
       });
-      
-      if (currentFilters.category) {
-        specialParams.append('category', currentFilters.category);
-      }
-      if (currentFilters.search) {
-        specialParams.append('search', currentFilters.search);
-      }
-      
-      url = `${URL}/post/posts/most-popular/?${specialParams.toString()}`;
-      
-    } else {
-      // Tri normal
-      url = `${URL}/post/posts/?${params.toString()}`;
-    }
-    
-    console.log('📡 Fetching from:', url);
-    
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': token ? `Token ${token}` : '',
-      },
- withCredentials: false, 
-    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('❌ API Error:', errorText);
-      throw new Error(`Erreur ${response.status}: ${response.statusText}`);
-    }
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API Error:', errorText);
+        throw new Error(`Erreur ${response.status}: ${response.statusText}`);
+      }
 
-    const data = await response.json();
-    console.log('📦 API Response received, posts count:', 
-      data.posts?.length || data.results?.length || (Array.isArray(data) ? data.length : 0));
-    
-    // GESTION DES DIFFÉRENTES STRUCTURES DE RÉPONSE
-    let postsArray = [];
-    
-    if (Array.isArray(data)) {
-      postsArray = data;
-    } else if (data.posts && Array.isArray(data.posts)) {
-      postsArray = data.posts;
-    } else if (data.results && Array.isArray(data.results)) {
-      postsArray = data.results;
-    } else if (Array.isArray(data.data)) {
-      postsArray = data.data;
-    } else {
-      // Chercher un tableau dans l'objet
-      for (const key in data) {
-        if (Array.isArray(data[key])) {
-          postsArray = data[key];
-          break;
+      const data = await response.json();
+      console.log('📦 API Response received:', data);
+      console.log('📊 Posts count:', data.posts?.length || 0);
+      
+      // Mettre à jour les métadonnées
+      if (data.pagination) {
+        setPaginationMeta(data.pagination);
+        setTotalPosts(data.pagination.total_posts || 0);
+        setHasMore(data.pagination.has_next || false);
+      }
+      
+      if (data.algorithm_info) {
+        setAlgorithmInfo(data.algorithm_info);
+      }
+      
+      if (data.user_context) {
+        setUserContext(data.user_context);
+      }
+      
+      if (data.filters) {
+        console.log('🎯 Active filters from backend:', data.filters);
+      }
+      
+      // GESTION DES POSTS
+      let postsArray = [];
+      
+      if (Array.isArray(data)) {
+        postsArray = data;
+      } else if (data.posts && Array.isArray(data.posts)) {
+        postsArray = data.posts;
+      } else if (data.results && Array.isArray(data.results)) {
+        postsArray = data.results;
+      } else if (Array.isArray(data.data)) {
+        postsArray = data.data;
+      } else {
+        // Chercher un tableau dans l'objet
+        for (const key in data) {
+          if (Array.isArray(data[key])) {
+            postsArray = data[key];
+            break;
+          }
         }
       }
-    }
-    
-    console.log(`📊 Extracted ${postsArray.length} posts`);
-    
-    // Mettre à jour l'état
-    if (reset) {
-      setPosts(postsArray);
-    } else {
-      setPosts(prev => [...prev, ...postsArray]);
-    }
-    
-    // Gérer hasMore
-    if (data.next) {
-      setHasMore(true);
-    } else if (data.pagination?.has_next !== undefined) {
-      setHasMore(data.pagination.has_next);
-    } else if (data.has_next !== undefined) {
-      setHasMore(data.has_next);
-    } else {
-      // Si on utilise les endpoints spéciaux, on ne charge pas plus
-      if (currentFilters.sort === 'rated' || currentFilters.sort === 'popular') {
-        setHasMore(false);
+      
+      console.log(`📊 Extracted ${postsArray.length} posts`);
+      
+      // Ajouter les informations d'algorithme à chaque post
+      const enrichedPosts = postsArray.map(post => ({
+        ...post,
+        algorithm_info: data.algorithm_info,
+        recommendation_score: post.recommendation_score || 0,
+        country_score: post.country_score || 0,
+        user_context: data.user_context
+      }));
+      
+      // Mettre à jour l'état
+      if (reset) {
+        setPosts(enrichedPosts);
       } else {
-        setHasMore(postsArray.length >= 20);
+        setPosts(prev => [...prev, ...enrichedPosts]);
       }
+      
+      // Gérer hasMore si pas de pagination dans la réponse
+      if (!data.pagination) {
+        if (data.next) {
+          setHasMore(true);
+        } else if (data.has_next !== undefined) {
+          setHasMore(data.has_next);
+        } else {
+          setHasMore(postsArray.length >= 20);
+        }
+      }
+      
+    } catch (err) {
+      console.error('Fetch posts error:', err);
+      setError(err.message || 'Failed to load posts');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-    
-  } catch (err) {
-    console.error('Fetch posts error:', err);
-    setError(err.message || 'Failed to load posts');
-  } finally {
-    setLoading(false);
-    setRefreshing(false);
-  }
-}, [filters, page]);
+  }, [filters, page]);
+
   // Fonction pour vérifier et gérer la mise en évidence
   const checkForPostHighlighting = () => {
-    // Vérifier les paramètres d'URL
     const highlightParam = searchParams.get('highlight');
     const refreshParam = searchParams.get('refresh');
     
@@ -224,7 +232,6 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
       if (!isNaN(postId)) {
         setHighlightedPostId(postId);
         
-        // Nettoyer l'URL si c'est un refresh
         if (refreshParam === 'true') {
           const newSearchParams = new URLSearchParams(searchParams);
           newSearchParams.delete('highlight');
@@ -234,14 +241,12 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
       }
     }
     
-    // Vérifier sessionStorage (pour les rafraîchissements de page)
     const storedPostId = sessionStorage.getItem('highlightedPost');
     const storedTimestamp = sessionStorage.getItem('highlightTimestamp');
     
     if (storedPostId && storedTimestamp) {
       const timeDiff = Date.now() - parseInt(storedTimestamp);
       
-      // Seulement si moins de 30 secondes se sont écoulées
       if (timeDiff < 30000) {
         const postId = parseInt(storedPostId);
         if (!isNaN(postId)) {
@@ -249,7 +254,6 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
         }
       }
       
-      // Nettoyer sessionStorage
       sessionStorage.removeItem('highlightedPost');
       sessionStorage.removeItem('highlightTimestamp');
     }
@@ -269,7 +273,6 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
   // Effet pour scroller vers le post mis en évidence
   useEffect(() => {
     if (highlightedPostId && posts.length > 0) {
-      // Attendre que le DOM soit mis à jour
       setTimeout(() => {
         if (highlightedPostRef.current) {
           highlightedPostRef.current.scrollIntoView({
@@ -277,12 +280,10 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
             block: 'center'
           });
           
-          // Ajouter la classe de mise en évidence
           const postElement = document.querySelector(`.post-card-container[data-post-id="${highlightedPostId}"]`);
           if (postElement) {
             postElement.classList.add('post-highlighted');
             
-            // Retirer la mise en évidence après 5 secondes
             setTimeout(() => {
               postElement.classList.remove('post-highlighted');
               setHighlightedPostId(null);
@@ -320,9 +321,25 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
   // Gérer les filtres
   const handleFilterChange = (newFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
+    setPage(1);
   };
 
-  // Fonctions pour les actions du post (à passer à PostCard)
+  // Gérer le changement d'algorithme
+  const handleAlgorithmChange = (newAlgorithm) => {
+    console.log('Changing algorithm to:', newAlgorithm);
+    setFilters(prev => ({ 
+      ...prev, 
+      algorithm: newAlgorithm,
+      sort: newAlgorithm === 'newest' ? 'newest' : prev.sort
+    }));
+    setPage(1);
+    setPosts([]);
+    
+    // Recharger les posts avec le nouvel algorithme
+    fetchPosts(true, { ...filters, algorithm: newAlgorithm });
+  };
+
+  // Fonction pour les actions du post
   const handleEditPost = (post) => {
     console.log('Edit post requested:', post.id);
     navigate(`/posts/edit/${post.id}`);
@@ -340,12 +357,12 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
         method: 'DELETE',
         headers: {
           'Authorization': token ? `Token ${token}` : '',
-        }, withCredentials: false, 
+        }, 
+        withCredentials: false, 
       });
 
       if (response.ok) {
         alert('Post deleted successfully');
-        // Rafraîchir la liste des posts
         refreshPosts();
       } else {
         const errorData = await response.json();
@@ -406,25 +423,23 @@ const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
   const handleRatingUpdate = async (postId, ratingData) => {
     console.log('Rating updated for post', postId, ':', ratingData);
   };
-const handleCategorySelect = useCallback((categoryId) => {
-  console.log('Category selected:', categoryId);
-  
-  // Mettre à jour les filtres
-  const newFilters = {
-    ...filters,
-    category: categoryId || '',
-    page: 1
-  };
-  
-  setFilters(newFilters);
-  setPage(1);
-  
-  // Réinitialiser et recharger les posts
-  setPosts([]);
-  fetchPosts(true, newFilters);
-}, [filters, fetchPosts]);
-    // Récupérer
-  // Fonction pour naviguer vers la création de post
+
+  const handleCategorySelect = useCallback((categoryId) => {
+    console.log('Category selected:', categoryId);
+    
+    const newFilters = {
+      ...filters,
+      category: categoryId || '',
+      page: 1
+    };
+    
+    setFilters(newFilters);
+    setPage(1);
+    setPosts([]);
+    fetchPosts(true, newFilters);
+  }, [filters, fetchPosts]);
+
+  // Récupérer
   const handleCreatePost = () => {
     window.location.href=('/create-post/');
   };
@@ -453,47 +468,87 @@ const handleCategorySelect = useCallback((categoryId) => {
 
   return (
     <>
-
-     <CategoryList
-  onCategorySelect={handleCategorySelect}
-  selectedCategory={filters.category}
-  onClearFilters={() => handleCategorySelect('')}
-/>
+      <CategoryList
+        onCategorySelect={handleCategorySelect}
+        selectedCategory={filters.category}
+        onClearFilters={() => handleCategorySelect('')}
+      />
+      
       <div className="post-list-container">
-
         {/* Bouton de création flottant */}
         <button className="fab-create" onClick={handleCreatePost}>
           <i className="fas fa-plus"></i>
           <span>Share Something New 🚀</span>
         </button>
 
-        {/* En-tête avec filtres */}
+        {/* En-tête avec algorithm selector et filtres */}
         <div className="post-list-header">
-     
+          {/* Sélecteur d'algorithme */}
+          <div className="algorithm-selector-container">
+            <AlgorithmSelector
+              currentAlgorithm={filters.algorithm}
+              onAlgorithmChange={handleAlgorithmChange}
+              algorithmInfo={algorithmInfo}
+              userContext={userContext}
+            />
+          </div>
           
+          {/* Filtres standards */}
           <PostFilters 
             filters={filters}
             onFilterChange={handleFilterChange}
             onRefresh={refreshPosts}
             refreshing={refreshing}
+            showAlgorithm={false} // On le gère séparément
           />
-     
+          
+          {/* Info sur l'algorithme actuel */}
+          {algorithmInfo && (
+            <div className="algorithm-info-banner">
+              <div className="algorithm-info-content">
+                <span className="algorithm-name">
+                  <i className="fas fa-robot"></i> {algorithmInfo.name}
+                </span>
+                <span className="algorithm-description">
+                  {algorithmInfo.description}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Statistiques (optionnel) */}
+        {paginationMeta && (
+          <div className="posts-stats">
+            <div className="stat-item">
+              <i className="fas fa-newspaper"></i>
+              <span>{totalPosts} posts total</span>
+            </div>
+            <div className="stat-item">
+              <i className="fas fa-user"></i>
+              <span>{userContext?.is_authenticated ? 'Personalized' : 'General'} recommendations</span>
+            </div>
+            {userContext?.country && (
+              <div className="stat-item">
+                <i className="fas fa-globe"></i>
+                <span>Country: {userContext.country}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Grille de posts */}
         {loading && posts.length === 0 ? (
           <div className="loading-container">
             <div className="spinner"></div>
-            <p>loading posts...</p>
+            <p>Loading personalized recommendations...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="empty-state">
-  <i className="fas fa-inbox"></i>
-  <h3>No posts found</h3>
-  <p>Create the first post or adjust your filters</p>
-
-</div>
-
+            <i className="fas fa-inbox"></i>
+            <h3>No posts found</h3>
+            <p>Create the first post or adjust your filters</p>
+          </div>
         ) : (
           <>
             <div className="posts-grid2">
@@ -506,7 +561,14 @@ const handleCategorySelect = useCallback((categoryId) => {
                     className={`post-cad-wrapper ${isHighlighted ? 'highlighted' : ''}`}
                     data-post-id={post.id}
                   >
-          
+                    {/* Badge d'algorithme (optionnel) */}
+                    {post.recommendation_score && post.recommendation_score > 50 && (
+                      <div className="recommendation-badge">
+                        <i className="fas fa-star"></i>
+                        <span>Recommended for you</span>
+                      </div>
+                    )}
+                    
                     <PostCard 
                       currentUser={currentUser}
                       post={post}
@@ -570,11 +632,11 @@ const handleCategorySelect = useCallback((categoryId) => {
                 >
                   {loading || refreshing ? (
                     <>
-                      <i className="fas fa-spinner fa-spin"></i> Loading...
+                      <i className="fas fa-spinner fa-spin"></i> Loading more...
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-arrow-down"></i> see more posts
+                      <i className="fas fa-arrow-down"></i> Load more posts
                     </>
                   )}
                 </button>

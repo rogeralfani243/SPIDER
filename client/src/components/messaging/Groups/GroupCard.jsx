@@ -339,19 +339,7 @@ export const GroupCard = ({ group, onClick, onJoinRequest, isHovered, onMouseEnt
         )}
 
         {/* Debug info (à retirer en production) */}
-        {process.env.NODE_ENV === 'development' && tags.length === 0 && group.tags && (
-          <Typography 
-            variant="caption" 
-            sx={{ 
-              color: alpha('#ff6b6b', 0.8),
-              mb: 1,
-              fontSize: '0.65rem',
-              fontStyle: 'italic',
-            }}
-          >
-            Debug: Tags exist but couldn't parse: {JSON.stringify(group.tags)}
-          </Typography>
-        )}
+
 
         {/* Hover Actions - Appear on Hover */}
         <Box
