@@ -10,7 +10,7 @@ import secrets
 
 def get_encryption_key():
     """Récupérer la clé d'encryption depuis les settings"""
-    key = getattr(settings, 'FERNET_KEY', None)
+    key = getattr(settings, 'ENCRYPTION_KEY', None)
     
     if not key:
         # Si pas de clé, en générer une (pour développement seulement)
