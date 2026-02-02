@@ -22,7 +22,7 @@ import os
 # Pour la production, utilisez une clé fixe stockée de manière sécurisée
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 # Quick-start development settings
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 

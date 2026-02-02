@@ -108,7 +108,7 @@ class Conversation(models.Model):
     requires_approval = models.BooleanField(default=True)
     is_visible = models.BooleanField(default=True)
     # CORRECTION: Pour JSONField, utiliser directement EncryptedJSONField
-    tags = EncryptedJSONField(default=list, blank=True)  # Encrypté
+    tags = models.JSONField(default=list, blank=True)
     location = EncryptedCharField(max_length=255, blank=True, null=True)  # Encrypté
     website = models.URLField(blank=True, null=True)  # Pas besoin d'encrypter les URLs
     rules = EncryptedTextField(blank=True, null=True)  # Encrypté
