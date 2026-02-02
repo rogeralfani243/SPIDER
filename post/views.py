@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view , permission_classes
 
 # Model 
+from django.db.models import BooleanField
+
 from .models import Post, Category, Tag, PostImage, PostFile, PostView
 from feedback_post.models import Rating
 from comment_post.models import Comment
@@ -35,7 +37,6 @@ def is_owner_or_read_only(request, post):
     if request.method in permissions.SAFE_METHODS:
         return True
     return post.user == request.user
-
 
 
 
@@ -96,20 +97,20 @@ def post_list_create(request):
                 output_field=FloatField()
             )
             
-            # 2. Score d'interaction de l'utilisateur
-            # Posts déjà vus (basés sur PostView)
-            viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
-            
+            # 2. Identifier les posts déjà interagis par l'utilisateur
             # Posts notés par l'utilisateur
-            user_ratings = Rating.objects.filter(user=request.user).values('post_id', 'stars')
-            user_rated_posts = {}
-            for rating in user_ratings:
-                user_rated_posts[rating['post_id']] = rating['stars']
+            user_rated_posts = Rating.objects.filter(user=request.user).values_list('post_id', flat=True)
+            user_ratings_dict = dict(Rating.objects.filter(
+                user=request.user
+            ).values_list('post_id', 'stars'))
             
             # Posts commentés par l'utilisateur
             commented_posts = Comment.objects.filter(
                 user=request.user
             ).values_list('post_id', flat=True).distinct()
+            
+            # Posts vus par l'utilisateur
+            viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
             
             # 3. Calculer les préférences de l'utilisateur
             # Catégories préférées (basées sur les ratings)
@@ -166,7 +167,7 @@ def post_list_create(request):
             
             # 6. Score de fraîcheur - version simplifiée basée sur l'ID
             freshness_score = ExpressionWrapper(
-                F('id') / 1000000.0 * 10.0,  # Les posts plus récents ont des IDs plus grands
+                F('id') / 1000000.0 * 10.0,
                 output_field=FloatField()
             )
             
@@ -178,41 +179,50 @@ def post_list_create(request):
                 output_field=FloatField()
             )
             
-            # 8. Score d'interaction négative (déjà vu/noté bas)
-            interaction_penalty = Case(
-                # Forte pénalité pour les posts notés bas (1-2 étoiles)
-                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars < 3], 
-                      then=Value(-80.0)),
-                # Pénalité modérée pour les posts notés moyens (3 étoiles)
-                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars == 3], 
-                      then=Value(-30.0)),
-                # Bonus pour les posts bien notés (4-5 étoiles)
-                When(id__in=[pid for pid, stars in user_rated_posts.items() if stars >= 4], 
-                      then=Value(40.0)),
-                # Pénalité légère pour les posts déjà vus
-                When(id__in=viewed_posts, then=Value(-25.0)),
-                # Petit bonus pour les posts commentés (engagement)
+            # 8. NOUVELLE LOGIQUE : Score de priorité pour non-interagis
+            # Posts déjà interagis (notés OU commentés)
+            interacted_posts = set(list(user_rated_posts) + list(commented_posts))
+            
+            # Score de priorité : haute valeur pour non-interagis, basse pour interagis
+            interaction_priority_score = Case(
+                When(id__in=interacted_posts, then=Value(0.0)),  # Très bas pour les posts interagis
+                default=Value(100.0),  # Très haut pour les posts non-interagis
+                output_field=FloatField()
+            )
+            
+            # 9. Score d'interaction spécifique (pour les posts déjà interagis)
+            interaction_score = Case(
+                # Bon bonus pour les posts bien notés (4-5 étoiles)
+                When(id__in=[pid for pid, stars in user_ratings_dict.items() if stars >= 4], 
+                      then=Value(30.0)),
+                # Petit bonus pour les posts commentés
                 When(id__in=commented_posts, then=Value(15.0)),
+                # Pénalité pour les posts mal notés (1-2 étoiles)
+                When(id__in=[pid for pid, stars in user_ratings_dict.items() if stars < 3], 
+                      then=Value(-50.0)),
+                # Pénalité légère pour les posts vus mais pas interagis autrement
+                When(id__in=viewed_posts, then=Value(-10.0)),
                 default=Value(0.0),
                 output_field=FloatField()
             )
             
-            # 9. Score d'activité de l'auteur
+            # 10. Score d'activité de l'auteur
             author_activity_score = Case(
                 When(user__is_active=True, then=Value(10.0)),
                 default=Value(0.0),
                 output_field=FloatField()
             )
             
-            # 10. Score final de recommandation
+            # 11. Score final de recommandation AVEC PRIORITÉ POUR NON-INTERAGIS
             recommendation_score = ExpressionWrapper(
-                country_score * 2.0 +  # Priorité forte au pays
-                category_similarity_score * 1.8 +  # Catégories préférées
-                tag_similarity_score * 1.5 +  # Tags préférés
-                freshness_score * 1.2 +  # Fraîcheur
-                popularity_score * 1.0 +  # Popularité globale
-                interaction_penalty * 1.5 +  # Interactions utilisateur
-                author_activity_score * 0.5,  # Qualité de l'auteur
+                interaction_priority_score * 3.0 +  # FORTE PRIORITÉ aux non-interagis
+                country_score * 1.5 +  # Priorité pays
+                category_similarity_score * 1.2 +  # Similarité catégorie
+                tag_similarity_score * 1.0 +  # Similarité tags
+                freshness_score * 0.8 +  # Fraîcheur
+                popularity_score * 0.7 +  # Popularité globale
+                interaction_score * 1.0 +  # Score d'interaction
+                author_activity_score * 0.3,  # Qualité de l'auteur
                 output_field=FloatField()
             )
             
@@ -223,7 +233,8 @@ def post_list_create(request):
                 tag_similarity=tag_similarity_score,
                 freshness_score=freshness_score,
                 popularity_score=popularity_score,
-                interaction_penalty=interaction_penalty,
+                interaction_priority_score=interaction_priority_score,
+                interaction_score=interaction_score,
                 author_activity_score=author_activity_score,
                 recommendation_score=recommendation_score,
                 # Annotations pour les informations utilisateur
@@ -245,6 +256,14 @@ def post_list_create(request):
                         post=OuterRef('pk')
                     )
                 ),
+                user_has_interacted=Case(
+                    When(
+                        Q(id__in=user_rated_posts) | Q(id__in=commented_posts),
+                        then=Value(True)
+                    ),
+                    default=Value(False),
+                    output_field=BooleanField()
+                ),
                 user_rating_value=Coalesce(
                     Subquery(
                         Rating.objects.filter(
@@ -259,29 +278,47 @@ def post_list_create(request):
             
             # Appliquer l'algorithme de tri
             if algorithm == 'recommended':
-                # Tri par score de recommandation (posts du pays + préférences + fraîcheur)
-                queryset = queryset.order_by('-recommendation_score', '-created_at')
+                # NOUVELLE LOGIQUE : Posts non-interagis d'abord, puis interagis
+                queryset = queryset.order_by(
+                    '-interaction_priority_score',  # Non-interagis en premier
+                    '-recommendation_score',        # Puis par score de recommandation
+                    '-created_at'                   # Enfin par date
+                )
             
             elif algorithm == 'country_priority':
-                # Priorité absolue aux posts du même pays
-                queryset = queryset.order_by('-country_score', '-freshness_score', '-created_at')
+                # Priorité aux posts du même pays, mais non-interagis d'abord
+                queryset = queryset.order_by(
+                    '-interaction_priority_score',  # Non-interagis en premier
+                    '-country_score',               # Puis par pays
+                    '-freshness_score',             # Puis fraîcheur
+                    '-created_at'
+                )
             
             elif algorithm == 'fresh_for_you':
-                # Posts récents mais adaptés aux préférences
+                # Posts récents mais adaptés aux préférences, non-interagis d'abord
                 recent_days = 7  # Dernière semaine
                 recent_posts = queryset.filter(
                     created_at__gte=timezone.now() - timezone.timedelta(days=recent_days)
-                ).order_by('-category_similarity', '-tag_similarity', '-created_at')
+                ).order_by(
+                    '-interaction_priority_score',  # Non-interagis en premier
+                    '-category_similarity',         # Puis similarité catégorie
+                    '-tag_similarity',              # Puis similarité tags
+                    '-created_at'
+                )
                 
                 older_posts = queryset.filter(
                     created_at__lt=timezone.now() - timezone.timedelta(days=recent_days)
-                ).order_by('-recommendation_score')
+                ).order_by(
+                    '-interaction_priority_score',  # Non-interagis en premier
+                    '-recommendation_score',        # Puis par score
+                    '-created_at'
+                )
                 
-                # Combiner : récents adaptés d'abord, puis recommandations
+                # Combiner : récents adaptés d'abord (avec non-interagis en premier), puis recommandations
                 queryset = list(recent_posts) + list(older_posts)
             
             elif algorithm == 'similar_users':
-                # Recommandation basée sur les utilisateurs similaires (même pays)
+                # Recommandation basée sur les utilisateurs similaires
                 similar_users = User.objects.filter(
                     profile__country=user_profile.country
                 ).exclude(id=request.user.id)
@@ -308,11 +345,25 @@ def post_list_create(request):
                         'ratings',
                         filter=Q(ratings__user__in=similar_users),
                         distinct=True
+                    ),
+                    # Ajouter le score de priorité pour non-interagis
+                    interaction_priority_score=Case(
+                        When(
+                            Q(id__in=user_rated_posts) | Q(id__in=commented_posts),
+                            then=Value(0.0)
+                        ),
+                        default=Value(100.0),
+                        output_field=FloatField()
                     )
                 ).filter(
                     similar_users_rating_avg__gte=3.5,
                     similar_users_count__gte=2
-                ).order_by('-similar_users_rating_avg', '-similar_users_count', '-created_at')
+                ).order_by(
+                    '-interaction_priority_score',      # Non-interagis en premier
+                    '-similar_users_rating_avg',        # Puis note moyenne
+                    '-similar_users_count',             # Puis nombre d'utilisateurs
+                    '-created_at'
+                )
                 
                 queryset = similar_posts
             
@@ -321,8 +372,23 @@ def post_list_create(request):
                 queryset = queryset.exclude(
                     id__in=viewed_posts
                 ).exclude(
-                    id__in=list(user_rated_posts.keys())
-                ).order_by('-country_score', '-freshness_score', '-created_at')
+                    id__in=list(user_ratings_dict.keys())
+                ).order_by(
+                    '-interaction_priority_score',  # Non-interagis en premier (tous le seront)
+                    '-country_score',
+                    '-freshness_score',
+                    '-created_at'
+                )
+            
+            elif algorithm == 'discovery_new':  # NOUVEL ALGORITHME
+                # Forte priorité aux posts non-interagis
+                queryset = queryset.order_by(
+                    '-interaction_priority_score',  # FORTE PRIORITÉ non-interagis
+                    '-freshness_score',             # Puis fraîcheur
+                    '-country_score',               # Puis pays
+                    '-popularity_score',            # Puis popularité
+                    '-created_at'
+                )
             
         else:
             # Pour les utilisateurs non authentifiés ou tri explicite
@@ -367,6 +433,31 @@ def post_list_create(request):
                             output_field=FloatField()
                         )
                     ).order_by('-is_same_country', '-created_at')
+                elif sort_by == 'discovery_new' and request.user.is_authenticated:
+                    # Algorithme découverte pour utilisateurs authentifiés
+                    user_rated_posts = Rating.objects.filter(
+                        user=request.user
+                    ).values_list('post_id', flat=True)
+                    commented_posts = Comment.objects.filter(
+                        user=request.user
+                    ).values_list('post_id', flat=True).distinct()
+                    
+                    interacted_posts = set(list(user_rated_posts) + list(commented_posts))
+                    
+                    interaction_priority = Case(
+                        When(id__in=interacted_posts, then=Value(0.0)),
+                        default=Value(100.0),
+                        output_field=FloatField()
+                    )
+                    
+                    queryset = queryset.annotate(
+                        interaction_priority=interaction_priority,
+                        is_interacted=Case(
+                            When(id__in=interacted_posts, then=Value(True)),
+                            default=Value(False),
+                            output_field=BooleanField()
+                        )
+                    ).order_by('-interaction_priority', '-created_at')
                 else:
                     queryset = queryset.order_by('-created_at')
         
@@ -431,13 +522,35 @@ def post_list_create(request):
         algorithm_info = {
             'name': algorithm,
             'description': {
-                'recommended': 'Algorithmes de recommandation personnalisée',
-                'country_priority': 'Priorité aux posts du même pays',
+                'recommended': 'Recommandation personnalisée avec priorité aux nouveaux posts',
+                'country_priority': 'Priorité aux posts du même pays (nouveaux en premier)',
                 'fresh_for_you': 'Nouveautés adaptées à vos préférences',
                 'similar_users': 'Recommandations basées sur les utilisateurs similaires',
                 'avoid_seen': 'Évite les posts déjà vus/notés',
-            }.get(algorithm, 'Tri standard')
+                'discovery_new': 'Découverte : priorités aux posts non-interagis',
+                'newest': 'Les plus récents',
+                'popular': 'Les plus populaires',
+                'top_rated': 'Les mieux notés',
+                'most_commented': 'Les plus commentés',
+            }.get(algorithm, 'Tri standard'),
+            'logic': 'Les posts déjà notés ou commentés sont placés en bas pour favoriser la découverte'
         }
+        
+        # Compter les posts interagis vs non-interagis
+        if request.user.is_authenticated and algorithm != 'newest':
+            interacted_count = Rating.objects.filter(
+                user=request.user
+            ).values('post').distinct().count()
+            interacted_count += Comment.objects.filter(
+                user=request.user
+            ).values('post').distinct().count()
+            # Éviter les doubles comptages
+            total_interacted = len(set(
+                list(Rating.objects.filter(user=request.user).values_list('post_id', flat=True)) +
+                list(Comment.objects.filter(user=request.user).values_list('post_id', flat=True).distinct())
+            ))
+        else:
+            total_interacted = 0
         
         # Retourner avec des métadonnées
         response_data = {
@@ -461,7 +574,13 @@ def post_list_create(request):
             'user_context': {
                 'country': request.user.profile.country if request.user.is_authenticated else None,
                 'is_authenticated': request.user.is_authenticated,
-                'preferences_calculated': request.user.is_authenticated and algorithm != 'newest'
+                'preferences_calculated': request.user.is_authenticated and algorithm != 'newest',
+                'total_interacted_posts': total_interacted if request.user.is_authenticated else 0
+            },
+            'discovery_stats': {
+                'posts_non_interacted_first': True,
+                'interaction_based_ordering': True,
+                'new_content_priority': 'high'
             }
         }
         
@@ -552,7 +671,7 @@ def post_list_create(request):
                 post_images_count = PostImage.objects.filter(post=post).count()
                 print(f"  - Post Images count: {post_images_count}")
                 
-                post_files_count = PostFile.objects.filter(post=post).count()
+                post_files_count = PostFile.objects.filter(post=post).count();
                 print(f"  - Post Files count: {post_files_count}")
                 
                 if post_files_count > 0:
@@ -573,8 +692,7 @@ def post_list_create(request):
                 )
         else:
             print("❌ [POST CREATE] Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_detail_update_delete(request, pk):
     """
