@@ -414,10 +414,11 @@ class GroupCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         participant_ids = validated_data.pop('participant_ids', [])
         category_id = validated_data.pop('category_id', None)
-        tags = validated_data.pop('tags', [])
+        tags = validated_data.pop('tags', None)
         
         request = self.context.get('request')
-        
+        if tags == [] or tags == ["[]"] or tags == '[]':
+            tags = None
         # Ensure is_visible is defined
         if 'is_visible' not in validated_data:
             validated_data['is_visible'] = True
