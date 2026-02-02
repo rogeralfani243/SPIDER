@@ -692,7 +692,9 @@ def post_list_create(request):
                 )
         else:
             print("❌ [POST CREATE] Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_detail_update_delete(request, pk):
     """
