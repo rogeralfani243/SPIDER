@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "Spider",
+  "short_name": "Spider",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#5a0002",
+  "theme_color": "#ab2224",
+  "background_color": "#ab2224",
   "display": "standalone"
 }
