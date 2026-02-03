@@ -242,7 +242,7 @@ class Message(models.Model):
     )
     
     # Champ principal (anciennement 'content', maintenant encrypté)
-    encrypted_content = EncryptedTextField(
+    content = EncryptedTextField(
         blank=True,
         null=True,
         help_text="Contenu du message encrypté"
@@ -333,10 +333,10 @@ class Message(models.Model):
     
     def __str__(self):
         """Compatibilité avec l'ancienne méthode __str__"""
-        if self.encrypted_content:
+        if self.content:
             try:
                 # Essayer d'afficher le contenu décrypté
-                content_preview = str(self.encrypted_content)[:30]
+                content_preview = str(self.content)[:30]
                 return f"{self.sender.username}: {content_preview}..."
             except:
                 return f"{self.sender.username}: [Message encrypté]"
@@ -353,8 +353,8 @@ class Message(models.Model):
             self.encryption_nonce = default_encryption_nonce()
         
         # Calculer le hash d'intégrité
-        if self.encrypted_content:
-            content_str = str(self.encrypted_content) if self.encrypted_content else ""
+        if self.content:
+            content_str = str(self.content) if self.content else ""
             self.content_hash = hashlib.sha256(
                 f"{content_str}{self.encryption_nonce}".encode()
             ).hexdigest()
@@ -373,16 +373,7 @@ class Message(models.Model):
         super().save(*args, **kwargs)
     
     # Propriétés de compatibilité
-    @property
-    def content(self):
-        """Compatibilité avec l'ancien champ 'content'"""
-        return self.encrypted_content
-    
-    @content.setter
-    def content(self, value):
-        """Setter pour l'ancien champ 'content'"""
-        self.encrypted_content = value
-    
+   
     @property
     def created_at(self):
         """Alias pour timestamp (pour certains codes)"""
