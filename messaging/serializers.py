@@ -5,6 +5,8 @@ from .models import Conversation, Message, GroupCategory, GroupFeedback, GroupJo
 from datetime import timedelta
 from django.utils import timezone
 from django.db.models import Avg, Count, Q
+from cryptography.fernet import Fernet 
+
 
 User = get_user_model()
 
@@ -126,6 +128,7 @@ class UserWithProfileSerializer(serializers.ModelSerializer):
 # ==================== SERIALIZERS MESSAGE ====================
 
 class MessageSerializer(serializers.ModelSerializer):
+    content = serializers.SerializerMethodField()
     sender = UserWithProfileSerializer(read_only=True)
     image_url = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
@@ -177,7 +180,28 @@ class MessageSerializer(serializers.ModelSerializer):
             else:
                 return 'file'
         return None
-
+    def get_content(self, obj):
+        """Décrypter le contenu si possible"""
+        if not obj.encrypted_content:
+            return ""
+        
+        try:
+            # Vérifier si on a la clé de décryption dans le contexte
+            decryption_key = self.context.get('decryption_key')
+            if decryption_key:
+                # Logique de décryption (à adapter selon votre implémentation)
+                fernet = Fernet(decryption_key)
+                decrypted = fernet.decrypt(
+                    obj.encrypted_content.encode() if isinstance(obj.encrypted_content, str) 
+                    else obj.encrypted_content
+                )
+                return decrypted.decode()
+            else:
+                # Retourner le contenu encrypté ou indiquer qu'il est encrypté
+                return "[Encrypted message]"
+        except Exception as e:
+            print(f"Encrypted error: {e}")
+            return "[Encrypted error]"
 # ==================== SERIALIZERS CONVERSATION ====================
 
 class ConversationCreateSerializer(serializers.ModelSerializer):

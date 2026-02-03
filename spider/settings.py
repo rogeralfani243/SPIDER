@@ -26,6 +26,28 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {
+            "format": "[{levelname}] {name}: {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO" if not DEBUG else "DEBUG",
+    },
+}
+
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
     'localhost',
