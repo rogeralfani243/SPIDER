@@ -72,7 +72,7 @@ const PostDetail = () => {
     try {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
       if (token) {
-        const response = await fetch(`${URL}/api/me/`, {
+        const response = await fetch( {
           headers: {
             'Authorization': `Token ${token}`
           }

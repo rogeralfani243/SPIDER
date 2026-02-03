@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import {
   Box,
   TextField,
@@ -20,6 +20,7 @@ import {
   Audiotrack as AudioIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import { href } from 'react-router-dom';
 
 const MessageInput = ({
   newMessage,
@@ -41,6 +42,18 @@ const MessageInput = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const isMobile = useMediaQuery('(max-width:736px)');
   const [showAttachments, setShowAttachments] = useState(false);
+const inputRef = useRef(null);
+
+<TextField
+  inputRef={inputRef}
+  fullWidth
+  multiline
+  maxRows={4}
+  placeholder="Write 😊..."
+  value={newMessage}
+  onClick={() => inputRef.current?.focus()}
+  onChange={(e) => setNewMessage(e.target.value)}
+/>
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -221,10 +234,10 @@ const MessageInput = ({
         <TextField
           fullWidth
           multiline
-        
           maxRows={4}
           placeholder="Write 😊..."
           value={newMessage}
+          onClick={() => href.current?.focus()}
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyPress={handleKeyPress}
           variant="outlined"

@@ -998,7 +998,7 @@ if (fileType === 'video') {
         onEnded={() => handleVideoEnded(messageId)}
       >
         <source src={message.file_url} type="video/mp4" />
-        Votre navigateur ne supporte pas la vidéo.
+Your browser does not support this video
       </video>
 
       {/* Bouton plein écran pour ouvrir MediaViewer */}

@@ -113,7 +113,7 @@ const CommentForm = ({
         
         // Charger l'utilisateur courant
         try {
-          const currentUserResponse = await axios.get(`${API_URL}/auth/user/`, {
+          const currentUserResponse = await axios.get( {
             headers: {
               'Authorization': `Token ${token}`
             }

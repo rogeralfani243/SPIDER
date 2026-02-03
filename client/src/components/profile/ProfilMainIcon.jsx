@@ -66,6 +66,7 @@ const ProfileIcon = () => {
   };
 const handleMenyClickProfil = () => {
   navigate('/dashboard/')
+  setIsMenuOpen(false);
 }
   const handleMenuClick = (action) => {
 setShowProfileEdit(true)

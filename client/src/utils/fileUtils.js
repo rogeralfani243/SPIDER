@@ -110,11 +110,32 @@ export const isPdfFile = (item) => {
 export const getFileType = (item) => {
   if (!item) return 'file';
   
+  // Détection spéciale pour les fichiers audio enregistrés
+  const fileName = getSafeFileName(item);
+  const url = getSafeUrl(item);
+  
+  // Si c'est un fichier audio enregistré (commence par "audio_" ou contient "recording")
+  if (fileName && (
+    fileName.startsWith('audio_') ||
+    fileName.includes('recording_') ||
+    fileName.includes('voice_note') ||
+    fileName.includes('audio-message')
+  )) {
+    return 'audio'; // Forcer audio pour les enregistrements
+  }
+  
   // Check explicit type
   if (typeof item === 'object') {
     const fileType = item.file_type || item.type;
     if (fileType && typeof fileType === 'string') {
-      return fileType.toLowerCase();
+      const typeLower = fileType.toLowerCase();
+      
+      // Détection spécifique pour webm audio
+      if (typeLower.includes('audio/webm') || typeLower.includes('audio')) {
+        return 'audio';
+      }
+      
+      return typeLower;
     }
   }
   
@@ -122,15 +143,35 @@ export const getFileType = (item) => {
   const extension = getFileExtension(item);
   if (!extension) return 'file';
   
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'].includes(extension)) {
+  if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension)) {
     return 'image';
   }
-  if (['mp4', 'mov', 'avi', 'mkv', 'webm', 'flv', 'wmv'].includes(extension)) {
+  
+  // WEBP est une image, pas une vidéo
+  if (extension === 'webp') {
+    return 'image';
+  }
+  
+  // WEBM peut être audio ou vidéo - besoin d'une détection intelligente
+  if (extension === 'webm') {
+    // Heuristiques pour déterminer si c'est un audio webm
+    const isLikelyAudio = 
+      (fileName && (fileName.includes('audio') || fileName.includes('recording'))) ||
+      (url && url.includes('/audio/')) ||
+      (typeof item === 'object' && item.type && item.type.includes('audio'));
+    
+    return isLikelyAudio ? 'audio' : 'video';
+  }
+  
+  // Autres vidéos (sans webm)
+  if (['mp4', 'mov', 'avi', 'mkv', 'flv', 'wmv'].includes(extension)) {
     return 'video';
   }
+  
   if (['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac'].includes(extension)) {
     return 'audio';
   }
+  
   if (extension === 'pdf') return 'pdf';
   if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(extension)) return 'document';
   

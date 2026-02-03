@@ -50,7 +50,7 @@ const PostList = () => {
         return;
       }
 
-      const response = await fetch(`${URL}/auth/user/`, {
+      const response = await fetch({
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'

@@ -322,11 +322,11 @@ const MessageBubble = ({
             backgroundColor: isOwn ? '#820808ff' : '#540404ff',
           }
         }}
-        onClick={handleBubbleClick} // Gestionnaire de clic
-        onContextMenu={(e) => {
-          e.preventDefault(); // Empêcher le menu contextuel par défaut
-          handleContextMenu(e, message);
-        }}
+onContextMenu={(e) => {
+  e.preventDefault();       // empêche menu navigateur
+  e.stopPropagation();      // ⛔ stop propagation
+  handleContextMenu(e, message);
+}}
         // Alternative au clic
       >
         {!isOwn && (

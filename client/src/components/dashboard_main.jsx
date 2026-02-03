@@ -562,6 +562,7 @@ export default function DashboardMain() {
                     to={links.profile} 
                     className="mobile-nav-link" 
                     onClick={() => {
+                       setIsMobileMenuOpen(false);
                       navigate('/dashboard/')
                     }}
                   >

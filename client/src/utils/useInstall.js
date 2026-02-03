@@ -1,17 +1,6 @@
 // src/hooks/usePWAInstall.js
 import { useState, useEffect } from 'react';
-import { 
-  FiSmartphone, 
-  FiDownload, 
-  FiShare2, 
-  FiHome,
-  FiX,
-  FiInfo
-} from 'react-icons/fi';
-import { 
-  MdOutlineInstallDesktop,
-  MdOutlineInstallMobile 
-} from 'react-icons/md';
+import { InstallDesktop, Smartphone, Share, Download } from '@mui/icons-material';
 
 const usePWAInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -19,14 +8,14 @@ const usePWAInstall = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
-  // Detect mobile devices
+  // Detect if it's a mobile device
   const detectMobile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
   };
 
-  // Detect if app is installed as standalone PWA
+  // Detect if the app is installed in standalone mode (PWA)
   const detectStandalone = () => {
     return (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -35,17 +24,17 @@ const usePWAInstall = () => {
     );
   };
 
-  // Function to show install modal
+  // Function to show the install prompt
   const showInstallModal = () => {
     setShowInstallPrompt(true);
   };
 
-  // Function to install PWA
+  // Function to install the PWA
   const installPWA = async () => {
     if (!deferredPrompt) return false;
     
     try {
-      // Show install prompt
+      // Show the install prompt
       deferredPrompt.prompt();
       
       // Wait for user response
@@ -53,7 +42,7 @@ const usePWAInstall = () => {
       
       console.log(`User response to install prompt: ${outcome}`);
       
-      // Reset prompt
+      // Reset the prompt
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
       
@@ -67,10 +56,10 @@ const usePWAInstall = () => {
     }
   };
 
-  // Function to close modal
+  // Function to close the modal
   const dismissInstallPrompt = () => {
     setShowInstallPrompt(false);
-    // Store dismissal timestamp to avoid showing too frequently
+    // Store dismissal time to avoid showing too often
     localStorage.setItem('pwaPromptDismissed', Date.now().toString());
   };
 
@@ -84,12 +73,12 @@ const usePWAInstall = () => {
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e) => {
       console.log('beforeinstallprompt event fired');
-      // Prevent default prompt
+      // Prevent automatic prompt
       e.preventDefault();
-      // Save event for later use
+      // Save the event for later use
       setDeferredPrompt(e);
       
-      // Check if we should show prompt automatically
+      // Check if we should show the prompt automatically
       if (isMobileDevice && !isStandaloneApp) {
         const lastDismissed = localStorage.getItem('pwaPromptDismissed');
         const lastShown = localStorage.getItem('pwaPromptShown');
@@ -102,7 +91,7 @@ const usePWAInstall = () => {
           }
         }
         
-        // Don't show if shown recently (within last 30 days)
+        // Don't show if already shown recently (within last 30 days)
         if (lastShown) {
           const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
           if (parseInt(lastShown) > thirtyDaysAgo) {
@@ -110,7 +99,7 @@ const usePWAInstall = () => {
           }
         }
         
-        // Show after delay (3 seconds)
+        // Show after a delay (3 seconds)
         const timer = setTimeout(() => {
           setShowInstallPrompt(true);
           localStorage.setItem('pwaPromptShown', Date.now().toString());
@@ -120,7 +109,7 @@ const usePWAInstall = () => {
       }
     };
 
-    // Listen for app installation
+    // Listen for app installed event
     const handleAppInstalled = () => {
       console.log('PWA installed successfully');
       setIsStandalone(true);
@@ -163,44 +152,22 @@ const usePWAInstall = () => {
           width: '100%',
           boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
           animation: 'fadeIn 0.3s ease',
-          position: 'relative',
         }}>
-          {/* Close button */}
-          <button
-            onClick={dismissInstallPrompt}
-            style={{
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'none',
-              border: 'none',
-              fontSize: '20px',
-              cursor: 'pointer',
-              color: '#999',
-              padding: '4px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseOver={(e) => e.target.style.color = '#333'}
-            onMouseOut={(e) => e.target.style.color = '#999'}
-          >
-            <FiX />
-          </button>
-          
-          <h3 style={{
-            marginTop: 0,
-            marginBottom: '16px',
-            color: '#333',
-            fontSize: '20px',
+          <div style={{
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
+            marginBottom: '16px',
           }}>
-            <FiSmartphone style={{ fontSize: '24px' }} />
-            Install App
-          </h3>
+            <InstallDesktop style={{ color: '#007AFF', fontSize: '24px' }} />
+            <h3 style={{
+              margin: 0,
+              color: '#333',
+              fontSize: '20px',
+            }}>
+              Install the App
+            </h3>
+          </div>
           
           <p style={{
             color: '#666',
@@ -208,7 +175,7 @@ const usePWAInstall = () => {
             lineHeight: '1.5',
           }}>
             For a better experience, install the app on your phone. 
-            You'll have faster access and can use all features even when offline.
+            You'll get faster access and can use all features even when offline.
           </p>
           
           <div style={{
@@ -231,13 +198,13 @@ const usePWAInstall = () => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '10px',
+                gap: '8px',
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#0056CC'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#007AFF'}
             >
-              <MdOutlineInstallMobile style={{ fontSize: '20px' }} />
-              Install App
+              <Download style={{ fontSize: '20px' }} />
+              Install the App
             </button>
             
             <button
@@ -251,15 +218,10 @@ const usePWAInstall = () => {
                 fontSize: '16px',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
               onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
             >
-              <FiX style={{ fontSize: '18px' }} />
               Later
             </button>
           </div>
@@ -271,38 +233,17 @@ const usePWAInstall = () => {
             fontSize: '12px',
             color: '#999',
           }}>
-            <p style={{ 
-              margin: 0, 
-              marginBottom: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <FiInfo style={{ fontSize: '14px' }} />
-              <strong>How to install:</strong>
+            <p style={{ margin: 0 }}>
+              <strong>How to install:</strong><br />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                <Smartphone style={{ fontSize: '14px' }} />
+                <strong>iOS:</strong> Tap "Share" then "Add to Home Screen"
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                <Download style={{ fontSize: '14px' }} />
+                <strong>Android:</strong> Tap "Install App" or "Add to Home Screen"
+              </div>
             </p>
-            <ul style={{
-              margin: 0,
-              paddingLeft: '20px',
-            }}>
-              <li style={{ 
-                marginBottom: '4px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <FiShare2 style={{ fontSize: '12px' }} />
-                <strong>iOS:</strong> Click "Share" then "Add to Home Screen"
-              </li>
-              <li style={{ 
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}>
-                <MdOutlineInstallDesktop style={{ fontSize: '12px' }} />
-                <strong>Android:</strong> Click "Install App" or "Add to Home Screen"
-              </li>
-            </ul>
           </div>
         </div>
       </div>
