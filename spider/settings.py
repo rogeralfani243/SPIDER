@@ -25,28 +25,14 @@ ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# Pour aucun print en production
+if not DEBUG:
+    import builtins
 
+    def _no_print(*args, **kwargs):
+        pass
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "simple": {
-            "format": "[{levelname}] {name}: {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "INFO" if not DEBUG else "DEBUG",
-    },
-}
+    builtins.print = _no_print
 
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
@@ -359,6 +345,7 @@ if not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
 
 
 # Logging configuration pour debugger CORS
+"""
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -378,3 +365,5 @@ LOGGING = {
         },
     },
 }
+
+"""
