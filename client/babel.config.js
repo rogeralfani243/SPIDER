@@ -1,8 +1,15 @@
-module.exports = {
-  presets: ['react-app'],
-  plugins: [
-    process.env.NODE_ENV === 'production' 
-      ? ['transform-remove-console', { exclude: ['error', 'warn'] }]
-      : null
-  ].filter(Boolean),
+// babel.config.js
+module.exports = function (api) {
+  const isProduction = api.env('production');
+  
+  return {
+    presets: [
+      'react-app'
+    ],
+    plugins: [
+      isProduction && ['transform-remove-console', { 
+        exclude: ['error', 'warn'] 
+      }]
+    ].filter(Boolean)
+  };
 };
