@@ -118,7 +118,7 @@ class Conversation(models.Model):
     total_members_left = models.IntegerField(default=0)
     
     # Champs d'intégrité
-    content_hash = models.CharField(max_length=64, blank=True)
+    content = models.CharField(max_length=64, blank=True)
     
     def __str__(self):
         if self.is_group:
@@ -133,7 +133,7 @@ class Conversation(models.Model):
         """Calculate content hash for integrity verification"""
         if self.name or self.description:
             content_to_hash = f"{self.name}{self.description}{self.tags}"
-            self.content_hash = hashlib.sha256(content_to_hash.encode()).hexdigest()
+            self.content = hashlib.sha256(content_to_hash.encode()).hexdigest()
         super().save(*args, **kwargs)
     
     class Meta:
