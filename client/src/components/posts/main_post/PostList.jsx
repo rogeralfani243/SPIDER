@@ -456,10 +456,10 @@ const PostList = () => {
       <div className="post-list-error">
         <div className="error-card">
           <i className="fas fa-exclamation-triangle"></i>
-          <h3>Erreur de chargement</h3>
+          <h3>Loading Error</h3>
           <p>{error}</p>
           <button onClick={() => fetchPosts(true)} className="btn-retry">
-            <i className="fas fa-redo"></i> Réessayer
+            <i className="fas fa-redo"></i> Try again
           </button>
         </div>
       </div>
@@ -494,54 +494,17 @@ const PostList = () => {
           </div>
           
           {/* Filtres standards */}
-          <PostFilters 
-            filters={filters}
-            onFilterChange={handleFilterChange}
-            onRefresh={refreshPosts}
-            refreshing={refreshing}
-            showAlgorithm={false} // On le gère séparément
-          />
-          
+
           {/* Info sur l'algorithme actuel */}
-          {algorithmInfo && (
-            <div className="algorithm-info-banner">
-              <div className="algorithm-info-content">
-                <span className="algorithm-name">
-                  <i className="fas fa-robot"></i> {algorithmInfo.name}
-                </span>
-                <span className="algorithm-description">
-                  {algorithmInfo.description}
-                </span>
-              </div>
-            </div>
-          )}
+        
         </div>
 
-        {/* Statistiques (optionnel) */}
-        {paginationMeta && (
-          <div className="posts-stats">
-            <div className="stat-item">
-              <i className="fas fa-newspaper"></i>
-              <span>{totalPosts} posts total</span>
-            </div>
-            <div className="stat-item">
-              <i className="fas fa-user"></i>
-              <span>{userContext?.is_authenticated ? 'Personalized' : 'General'} recommendations</span>
-            </div>
-            {userContext?.country && (
-              <div className="stat-item">
-                <i className="fas fa-globe"></i>
-                <span>Country: {userContext.country}</span>
-              </div>
-            )}
-          </div>
-        )}
+       
 
         {/* Grille de posts */}
         {loading && posts.length === 0 ? (
           <div className="loading-container">
             <div className="spinner"></div>
-            <p>Loading personalized recommendations...</p>
           </div>
         ) : posts.length === 0 ? (
           <div className="empty-state">
@@ -562,12 +525,12 @@ const PostList = () => {
                     data-post-id={post.id}
                   >
                     {/* Badge d'algorithme (optionnel) */}
-                    {post.recommendation_score && post.recommendation_score > 50 && (
+                    {/*post.recommendation_score && post.recommendation_score > 50 && (
                       <div className="recommendation-badge">
                         <i className="fas fa-star"></i>
                         <span>Recommended for you</span>
                       </div>
-                    )}
+                    )*/}
                     
                     <PostCard 
                       currentUser={currentUser}

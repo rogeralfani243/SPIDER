@@ -948,7 +948,7 @@ const PostCard = ({
     : description;
 
   const musicCategory = isMusicCategory();
-
+const userInitials = `${localPost.user_name[0]}`;
   return (
   
       <div className="software-card-post">
@@ -981,7 +981,7 @@ const PostCard = ({
             </div>
           ) : (
             <div className="profile-placeholder">
-              <User size={16} />
+              {userInitials}
             </div>
           )}
           <div className=''>

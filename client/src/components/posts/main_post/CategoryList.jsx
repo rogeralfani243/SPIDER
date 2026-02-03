@@ -216,13 +216,11 @@ const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
               <div className="card-info">
                 <h4 className="card-title">All</h4>
                 <p className="card-count">
-                  {activeCategories.length} categories
+               
                 </p>
               </div>
             </div>
-            {!selectedCategoryId && (
-              <div className="selection-indicator"></div>
-            )}
+            
           </div>
           
           {/* Category Cards */}
@@ -267,7 +265,7 @@ const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
                     )}
                   </h4>
                   <p className="card-count">
-                    {category.posts_count || 0} posts
+                    {/* category.posts_count || 0} posts */}
                   </p>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+// App.js
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
@@ -10,35 +11,38 @@ import AppLayout from './components/app/AppLayout.jsx';
 import NotificationContainer from './components/notifications/NotificationContainer';
 import { Box } from 'lucide-react';
 import DashboardMain from './components/dashboard_main';
-import { appLogger } from './utils/logger';
 import AutoTranslateWrapper from './components/translation/autoTranslation.jsx';
 import useAutoTranslate from './hooks/useTranslations';
 import useTranslations from './hooks/useTranslations';
 import usePWAInstall from './utils/useInstall.js';
+import appLogger from './AppLogger.js'; // Importez le nouveau logger
+
 function App() {
   const { InstallPromptModal } = usePWAInstall();
-  const { translateText, language } = useAutoTranslate(); // Ajoutez ce hook
+  const { translateText, language } = useAutoTranslate();
   const { user, loading, login, logout, isAuthenticated, verifyAndLogin } = useAuth();
+  
   useTranslations();
+
   useEffect(() => {
     configureCharset();
   }, []);
 
   useEffect(() => {
-    // Log la langue détectée
+    // Log la langue détectée (seulement en développement)
     appLogger.debug(`Langue du navigateur détectée: ${language}`);
   }, [isAuthenticated, user, language]);
 
   const configureCharset = () => {
     // ... votre code existant ...
-     appLogger.debug('Charset configured');
+    appLogger.debug('Charset configured'); // Seulement en dev
   };
 
   const handleLogin = async (loginData) => {
     if (loginData.token) {
       // Traduire le message de succès
       const successMessage = await translateText('Email verification success');
-      appLogger.success(successMessage);
+      appLogger.success(successMessage); // Seulement en dev
       
       if (loginData.user) {
         localStorage.setItem('user', JSON.stringify(loginData.user));
@@ -55,22 +59,21 @@ function App() {
   };
 
   const handleLogout = () => {
-    appLogger.info('User logout', user?.username);
+    appLogger.info('User logout', user?.username); // Seulement en dev
     logout();
   };
 
   if (loading) {
-    appLogger.debug('App loading...');
+    appLogger.debug('App loading...'); // Seulement en dev
     return <AppLayout.LoadingScreen />;
   }
   
-  appLogger.debug('App rendering', { isAuthenticated, user: user?.username });
+  appLogger.debug('App rendering', { isAuthenticated, user: user?.username }); // Seulement en dev
 
   return (
     <NotificationProvider>
       <Router>
         <SecurityInterceptor>
-          {/* Enveloppez votre application avec le traducteur automatique */}
           <AutoTranslateWrapper>
             <div className="App">
               {isAuthenticated && (

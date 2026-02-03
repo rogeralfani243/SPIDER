@@ -1,232 +1,358 @@
-// src/components/posts/AlgorithmSelector.jsx - MODIFICATIONS
-import React, { useState } from 'react';
-import { 
-  FiFilter,
-  FiGlobe,
-  FiUser,
-  FiTrendingUp,
-  FiClock,
-  FiStar,
-  FiMessageCircle,
-  FiEye,
-  FiTarget,
-  FiEyeOff,
-  FiRefreshCw
-} from 'react-icons/fi';
-import { 
-  MdOutlineRecommend,
-  MdOutlineNewReleases,
-  MdOutlineFlag,
-  MdOutlineGroup,
-  MdOutlineArrowDropDown,
-  MdOutlineVisibilityOff
-} from 'react-icons/md';
-import { TbTargetArrow, TbEyeCancel } from 'react-icons/tb';
+// src/components/posts/AlgorithmSelector.jsx
+import React, { useState, useRef, useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemButton,
+  Avatar,
+  Chip,
+  IconButton,
+  Tooltip,
+  Fade,
+  Divider,
+  useTheme,
+  useMediaQuery,
+  colors
+} from '@mui/material';
+import {
+  ExpandMore,
+  ExpandLess,
+  Recommend,
+  Flag,
+  NewReleases,
+  Group,
+  AccessTime,
+  TrendingUp,
+  Star,
+  ChatBubble,
+  Visibility,
+  Info,
+  CheckCircle
+} from '@mui/icons-material';
 
-const AlgorithmSelector = ({ currentAlgorithm, onAlgorithmChange, algorithmInfo, userContext }) => {
+/**
+ * Algorithm Selector Component
+ * 
+ * A professional algorithm selection dropdown with theming support.
+ * Allows users to switch between different content recommendation algorithms.
+ * 
+ * @param {string} currentAlgorithm - Currently selected algorithm ID
+ * @param {function} onAlgorithmChange - Callback when algorithm changes
+ * @param {object} algorithmInfo - Additional info about current algorithm
+ * @param {object} userContext - User context/state information
+ */
+const AlgorithmSelector = ({ 
+  currentAlgorithm, 
+  onAlgorithmChange, 
+  algorithmInfo, 
+  userContext 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Algorithm definitions with icons, colors, and descriptions
   const algorithms = [
-    {
-      id: 'avoid_seen_priority', // NOUVEL ALGORITHME
-      name: 'Discover New',
-      icon: <FiEyeOff />,
-      description: 'Prioritize posts you haven\'t interacted with',
-      color: '#FF6B6B',
-      priority: 1
-    },
     {
       id: 'recommended',
       name: 'Recommended',
-      icon: <MdOutlineRecommend />,
-      description: 'Personalized recommendation algorithm',
-      color: '#007AFF',
-      priority: 2
+      icon: <Recommend />,
+      description: 'Personalized recommendations based on your activity',
+      color: theme.palette.primary.main,
+      badge: 'Default',
+      badgeColor: 'primary'
     },
     {
       id: 'country_priority',
       name: 'Country Priority',
-      icon: <MdOutlineFlag />,
-      description: 'Priority to posts from your country',
+      icon: <Flag />,
+      description: 'Prioritizes content from your country',
       color: '#34C759',
-      priority: 3
+      badge: 'Local',
+      badgeColor: 'success'
     },
-    {
-      id: 'fresh_for_you',
-      name: 'Fresh for You',
-      icon: <MdOutlineNewReleases />,
-      description: 'Recent posts adapted to your preferences',
-      color: '#FF9500',
-      priority: 4
-    },
+   
     {
       id: 'similar_users',
       name: 'Similar Users',
-      icon: <MdOutlineGroup />,
-      description: 'Recommendations from similar users',
+      icon: <Group />,
+      description: 'Content liked by users with similar tastes',
       color: '#AF52DE',
-      priority: 5
+      badge: 'Social',
+      badgeColor: 'secondary'
     },
     {
       id: 'avoid_seen',
       name: 'Avoid Seen',
-      icon: <TbTargetArrow />,
-      description: 'Avoid posts already seen/rated',
+      icon: <Visibility />,
+      description: 'Filters out content you have already viewed',
       color: '#FF3B30',
-      priority: 6
+      badge: 'Clean',
+      badgeColor: 'error'
     },
     {
       id: 'newest',
       name: 'Newest',
-      icon: <FiClock />,
-      description: 'Most recent posts',
+      icon: <AccessTime />,
+      description: 'Chronological order - newest posts first',
       color: '#8E8E93',
-      priority: 7
+      badge: 'Time',
+      badgeColor: 'default'
     },
     {
       id: 'popular',
       name: 'Popular',
-      icon: <FiTrendingUp />,
-      description: 'Most popular posts',
+      icon: <TrendingUp />,
+      description: 'Most liked and shared content',
       color: '#5856D6',
-      priority: 8
+      badge: 'Trending',
+      badgeColor: 'primary'
     },
     {
       id: 'top_rated',
       name: 'Top Rated',
-      icon: <FiStar />,
-      description: 'Best rated posts',
+      icon: <Star />,
+      description: 'Highest rated content from the community',
       color: '#FFCC00',
-      priority: 9
+      badge: 'Quality',
+      badgeColor: 'warning'
     },
     {
       id: 'most_commented',
       name: 'Most Commented',
-      icon: <FiMessageCircle />,
-      description: 'Most commented posts',
+      icon: <ChatBubble />,
+      description: 'Content with the most discussions',
       color: '#5AC8FA',
-      priority: 10
+      badge: 'Engaging',
+      badgeColor: 'info'
     }
   ];
-
-  // Trier par priorité
-  const sortedAlgorithms = [...algorithms].sort((a, b) => a.priority - b.priority);
 
   const currentAlgorithmData = algorithms.find(algo => algo.id === currentAlgorithm) || algorithms[0];
-
-  // Grouper les algorithmes par catégorie
-  const algorithmCategories = [
-    {
-      name: 'Discovery',
-      algorithms: sortedAlgorithms.filter(algo => 
-        ['avoid_seen_priority', 'fresh_for_you', 'newest'].includes(algo.id)
-      )
+  const bgColor = `linear-gradient(
+  135deg,
+  rgb(10, 10, 10),
+  rgb(60, 10, 10),
+  rgb(180, 20, 20),
+  rgb(255, 0, 80) 
+)`
+  // Theme configuration for consistent styling
+  const styles = {
+    selectorButton: {
+      minWidth: isMobile ? 'auto' : 240,
+      px: 2,
+      py: 1.5,
+      border: `1px solid ${theme.palette.divider}`,
+      borderRadius: 2,
+      backgroundColor: theme.palette.background.paper,
+      '&:hover': {
+        color:'#fff',
+        backgroundColor: theme.palette.action.hover,
+        borderColor: theme.palette.primary.main,
+      }
     },
-    {
-      name: 'Personalized',
-      algorithms: sortedAlgorithms.filter(algo => 
-        ['recommended', 'country_priority', 'similar_users'].includes(algo.id)
-      )
+    algorithmIcon: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 36,
+      height: 36,
+      borderRadius: '50%',
+      marginRight: 2
     },
-    {
-      name: 'Filtered',
-      algorithms: sortedAlgorithms.filter(algo => 
-        ['avoid_seen'].includes(algo.id)
-      )
+    dropdown: {
+      position: 'absolute',
+      top: 'calc(100% + 8px)',
+      left: 0,
+      width: isMobile ? '100vw' : 380,
+      maxWidth: '90vw',
+      zIndex: theme.zIndex.modal,
+      boxShadow: theme.shadows[8],
+      borderRadius: theme.shape.borderRadius,
+      overflow: 'hidden'
     },
-    {
-      name: 'Popularity',
-      algorithms: sortedAlgorithms.filter(algo => 
-        ['popular', 'top_rated', 'most_commented'].includes(algo.id)
-      )
+    algorithmOption: {
+      borderRadius: 1,
+      mb: 0.5,
+      '&:hover': {
+        backgroundColor: theme.palette.action.hover,
+      }
+    },
+    activeAlgorithm: {
+      backgroundColor: `${theme.palette.primary.main}10`,
+      borderLeft: `3px solid ${theme.palette.primary.main}`,
     }
-  ];
+  };
 
   return (
-    <div className="algorithm-selector">
-      <button 
-        className="algorithm-selector-button"
+    <Box position="relative" ref={dropdownRef}>
+      {/* Main selector button */}
+      <Button
+        variant="outlined"
         onClick={() => setIsOpen(!isOpen)}
+        sx={styles.selectorButton}
+        fullWidth={isMobile}
+        endIcon={isOpen ? <ExpandLess /> : <ExpandMore />}
+        aria-label="Select recommendation algorithm"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
-        <span className="algorithm-current">
-          <span className="algorithm-icon" style={{ color: currentAlgorithmData.color }}>
-            {currentAlgorithmData.icon}
-          </span>
-          <span className="algorithm-name">{currentAlgorithmData.name}</span>
-          <MdOutlineArrowDropDown className="dropdown-arrow" />
-        </span>
-        {currentAlgorithm === 'avoid_seen_priority' && (
-          <span className="algorithm-badge-new">NEW</span>
-        )}
-      </button>
+        <Box sx={styles.algorithmIcon} style={{ backgroundColor: `${currentAlgorithmData.color}20` }}>
+          {React.cloneElement(currentAlgorithmData.icon, { 
+            sx: { color: currentAlgorithmData.color, fontSize: 20 } 
+          })}
+        </Box>
+        <Box textAlign="left" flex={1}>
+          <Typography variant="body2" color="text.secondary" fontSize={12}>
+            Current filter
+          </Typography>
+          <Typography variant="subtitle2" fontWeight={600}>
+            {currentAlgorithmData.name}
+          </Typography>
+        </Box>
+      </Button>
 
-      {isOpen && (
-        <div className="algorithm-dropdown">
-          <div className="algorithm-dropdown-header">
-            <h4>📊 Content Discovery</h4>
-            <p>Choose how posts are sorted and recommended to you</p>
-          </div>
-          
-          {algorithmCategories.map((category, index) => (
-            <div key={index} className="algorithm-category">
-              <div className="algorithm-category-name">{category.name}</div>
-              <div className="algorithm-list">
-                {category.algorithms.map(algorithm => (
-                  <button
-                    key={algorithm.id}
-                    className={`algorithm-option ${currentAlgorithm === algorithm.id ? 'active' : ''}`}
+      {/* Dropdown menu */}
+      <Fade in={isOpen}>
+        <Paper sx={styles.dropdown} elevation={8}>
+          {/* Header */}
+          <Box sx={{ p: 3, background: bgColor, color: 'white' }}>
+            <Typography variant="h6" fontWeight={600} color='white'>
+              Filter
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+              Choose how content is sorted and recommended to you
+            </Typography>
+          </Box>
+
+          {/* Algorithms list */}
+          <Box sx={{ maxHeight: 400, overflow: 'auto', p: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1 }}>
+              Select a filter:
+            </Typography>
+            
+            <List disablePadding>
+              {algorithms.map((algorithm) => (
+                <ListItem 
+                  key={algorithm.id} 
+                  disablePadding
+                  sx={{
+                    ...styles.algorithmOption,
+                    ...(currentAlgorithm === algorithm.id && styles.activeAlgorithm)
+                  }}
+                >
+                  <ListItemButton
                     onClick={() => {
                       onAlgorithmChange(algorithm.id);
                       setIsOpen(false);
                     }}
+                    selected={currentAlgorithm === algorithm.id}
+                    aria-selected={currentAlgorithm === algorithm.id}
+                    role="option"
                   >
-                    <div className="algorithm-option-icon" style={{ 
-                      backgroundColor: `${algorithm.color}15`, 
-                      color: algorithm.color 
-                    }}>
-                      {algorithm.icon}
-                    </div>
-                    <div className="algorithm-option-info">
-                      <div className="algorithm-option-name">
-                        {algorithm.name}
-                        {algorithm.id === 'avoid_seen_priority' && (
-                          <span className="algorithm-tag-new">New</span>
-                        )}
-                      </div>
-                      <div className="algorithm-option-description">{algorithm.description}</div>
-                    </div>
+                    <ListItemIcon>
+                      <Avatar
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          backgroundColor: `${algorithm.color}20`,
+                          color: algorithm.color
+                        }}
+                      >
+                        {algorithm.icon}
+                      </Avatar>
+                    </ListItemIcon>
+                    
+                    <ListItemText
+                      primary={
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            {algorithm.name}
+                          </Typography>
+                          {algorithm.badge && (
+                            <Chip 
+                              label={algorithm.badge} 
+                              size="small" 
+                              color={algorithm.badgeColor}
+                              variant="outlined"
+                              sx={{ height: 20, fontSize: '0.65rem' }}
+                            />
+                          )}
+                        </Box>
+                      }
+                      secondary={
+                        <Typography variant="body2" color="text.secondary">
+                          {algorithm.description}
+                        </Typography>
+                      }
+                      secondaryTypographyProps={{ variant: 'body2' }}
+                    />
+
                     {currentAlgorithm === algorithm.id && (
-                      <div className="algorithm-option-check">
-                        <div className="check-circle" style={{ backgroundColor: algorithm.color }}>
-                          ✓
-                        </div>
-                      </div>
+                      <CheckCircle sx={{ color: algorithm.color, ml: 1 }} />
                     )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-          
-          <div className="algorithm-stats">
-            {userContext && userContext.is_authenticated && (
-              <>
-                <div className="stat-item">
-                  <FiEye />
-                  <span>Personalized for you</span>
-                </div>
-                {userContext.country && (
-                  <div className="stat-item">
-                    <FiGlobe />
-                    <span>Country: {userContext.country}</span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+
+          {/* Algorithm information section */}
+          {algorithmInfo && (
+            <>
+              <Divider />
+              <Box sx={{ p: 2, backgroundColor: theme.palette.background.default }}>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Info sx={{ color: "#740000ff" }} />
+                  <Typography variant="subtitle2" fontWeight={600}>
+                    Current filter Details
+                  </Typography>
+                </Box>
+                
+                <Paper variant="outlined" sx={{ p: 2, backgroundColor: theme.palette.background.paper }}>
+                  <Typography variant="body2">
+                    <Box component="span" fontWeight={600} color="#740000ff">
+                      {algorithmInfo.name}
+                    </Box>
+                    {' '}— {algorithmInfo.description}
+                  </Typography>
+                  
+                  {userContext && (
+                    <Box mt={1}>
+                      <Typography variant="caption" color="text.secondary">
+                        Personalized for your interests in {userContext.interests?.join(', ')}
+                      </Typography>
+                    </Box>
+                  )}
+                </Paper>
+              </Box>
+            </>
+          )}
+
+        
+        </Paper>
+      </Fade>
+    </Box>
   );
 };
+
 export default AlgorithmSelector;
