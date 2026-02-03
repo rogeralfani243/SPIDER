@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -42,18 +42,6 @@ const MessageInput = ({
   const [anchorEl, setAnchorEl] = useState(null);
   const isMobile = useMediaQuery('(max-width:736px)');
   const [showAttachments, setShowAttachments] = useState(false);
-const inputRef = useRef(null);
-
-<TextField
-  inputRef={inputRef}
-  fullWidth
-  multiline
-  maxRows={4}
-  placeholder="Write 😊..."
-  value={newMessage}
-  onClick={() => inputRef.current?.focus()}
-  onChange={(e) => setNewMessage(e.target.value)}
-/>
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -234,6 +222,7 @@ const inputRef = useRef(null);
         <TextField
           fullWidth
           multiline
+        autoFocus
           maxRows={4}
           placeholder="Write 😊..."
           value={newMessage}

@@ -88,50 +88,126 @@ const CommentForm = ({
     }
   }, [isEditing, initialImage, initialVideo, initialFile, commentId]);
 
-  // 🔥 Charger la liste des utilisateurs pour les mentions
-  useEffect(() => {
-    const fetchUsersAndCurrentUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-      
-      setIsLoadingUsers(true);
-      try {
-        // Charger la liste des utilisateurs
-        const usersResponse = await axios.get(`${API_URL}/comment/users/list/`, {
-          headers: {
-            'Authorization': `Token ${token}`
-          },
-          params: {
-            limit: 100,
-            exclude_self: true
-          }
-        });
-        
-        const usersData = usersResponse.data.users || usersResponse.data || [];
-        setUsers(usersData);
-        setFilteredUsers(usersData);
-        
-        // Charger l'utilisateur courant
+// 🔥 Charger la liste des utilisateurs pour les mentions
+useEffect(() => {
+  const fetchUsersAndCurrentUser = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.log('No authentication token found');
+      return;
+    }
+    
+    setIsLoadingUsers(true);
+    
+    try {
+      // 1. Récupérer l'utilisateur courant depuis localStorage ou décoder depuis le token
+      const fetchCurrentUser = async () => {
         try {
-          const currentUserResponse = await axios.get( {
-            headers: {
-              'Authorization': `Token ${token}`
+          // D'abord vérifier si on a déjà l'utilisateur dans localStorage
+          const storedUser = localStorage.getItem('currentUser');
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setCurrentUser(parsedUser);
+              return parsedUser; // Retourner pour usage immédiat si besoin
+            } catch (parseError) {
+              console.warn('Error parsing stored user:', parseError);
             }
-          });
-          setCurrentUser(currentUserResponse.data);
-        } catch (userError) {
-          console.warn("Could not fetch current user:", userError);
+          }
+          
+          // Si pas dans localStorage, essayer de décoder le token JWT (si c'est un JWT)
+          const tokenParts = token.split('.');
+          if (tokenParts.length === 3) {
+            try {
+              // Décoder la payload du JWT
+              const payload = JSON.parse(atob(tokenParts[1]));
+              
+              // Créer un objet utilisateur basique depuis le token
+              const userFromToken = {
+                id: payload.user_id || payload.sub,
+                username: payload.username || payload.email?.split('@')[0],
+                email: payload.email,
+                first_name: payload.first_name,
+                last_name: payload.last_name,
+                profile_picture: payload.profile_picture,
+                // Ajouter d'autres champs si présents dans le token
+              };
+              
+              // Filtrer les propriétés null/undefined
+              const filteredUser = Object.fromEntries(
+                Object.entries(userFromToken).filter(([_, v]) => v != null)
+              );
+              
+              setCurrentUser(filteredUser);
+              localStorage.setItem('currentUser', JSON.stringify(filteredUser));
+              return filteredUser;
+            } catch (decodeError) {
+              console.warn('Cannot decode token as JWT:', decodeError);
+            }
+          }
+          
+          // Si on arrive ici, on n'a pas pu récupérer l'utilisateur
+          console.warn('Could not retrieve current user information');
+          return null;
+          
+        } catch (error) {
+          console.error('Error fetching current user:', error);
+          return null;
         }
-        
-      } catch (error) {
-        console.error("Error fetching users for mentions:", error);
-      } finally {
-        setIsLoadingUsers(false);
+      };
+      
+      // Récupérer l'utilisateur courant
+      await fetchCurrentUser();
+      
+      // 2. Charger la liste des autres utilisateurs pour les mentions
+      const usersResponse = await axios.get(`${API_URL}/comment/users/list/`, {
+        headers: {
+          'Authorization': `Token ${token}`
+        },
+        params: {
+          limit: 100,
+          exclude_self: true
+        }
+      });
+      
+      const usersData = usersResponse.data.users || usersResponse.data || [];
+      setUsers(usersData);
+      setFilteredUsers(usersData);
+      
+      // Optionnel: mettre en cache les utilisateurs
+      localStorage.setItem('cachedUsers', JSON.stringify(usersData));
+      
+    } catch (error) {
+      console.error("Error fetching users for mentions:", error);
+      
+      // Gestion d'erreur
+      if (error.response) {
+        if (error.response.status === 401) {
+          console.error("Authentication error. Token might be invalid or expired.");
+          // Nettoyer le localStorage si token invalide
+          localStorage.removeItem('currentUser');
+          localStorage.removeItem('token');
+        }
       }
-    };
+      
+      // Fallback: utiliser des données locales si disponibles
+      const storedUsers = localStorage.getItem('cachedUsers');
+      if (storedUsers) {
+        try {
+          const cachedUsers = JSON.parse(storedUsers);
+          setUsers(cachedUsers);
+          setFilteredUsers(cachedUsers);
+        } catch (parseError) {
+          console.error("Error parsing cached users:", parseError);
+        }
+      }
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
 
-    fetchUsersAndCurrentUser();
-  }, []);
+  fetchUsersAndCurrentUser();
+}, []);
 
   // 🔥 Détecter les mentions (@) dans le texte
   useEffect(() => {

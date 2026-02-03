@@ -1,6 +1,5 @@
 // src/hooks/usePWAInstall.js
 import { useState, useEffect } from 'react';
-import { InstallDesktop, Smartphone, Share, Download } from '@mui/icons-material';
 
 const usePWAInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -8,14 +7,14 @@ const usePWAInstall = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
-  // Detect if it's a mobile device
+  // Détecter si c'est un appareil mobile
   const detectMobile = () => {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       navigator.userAgent
     );
   };
 
-  // Detect if the app is installed in standalone mode (PWA)
+  // Détecter si l'app est installée en mode standalone (PWA)
   const detectStandalone = () => {
     return (
       window.matchMedia('(display-mode: standalone)').matches ||
@@ -24,29 +23,29 @@ const usePWAInstall = () => {
     );
   };
 
-  // Function to show the install prompt
+  // Fonction pour montrer le prompt d'installation
   const showInstallModal = () => {
     setShowInstallPrompt(true);
   };
 
-  // Function to install the PWA
+  // Fonction pour installer la PWA
   const installPWA = async () => {
     if (!deferredPrompt) return false;
     
     try {
-      // Show the install prompt
+      // Afficher le prompt d'installation
       deferredPrompt.prompt();
       
-      // Wait for user response
+      // Attendre que l'utilisateur réponde
       const { outcome } = await deferredPrompt.userChoice;
       
       console.log(`User response to install prompt: ${outcome}`);
       
-      // Reset the prompt
+      // Réinitialiser le prompt
       setDeferredPrompt(null);
       setShowInstallPrompt(false);
       
-      // Store in localStorage that user has seen the prompt
+      // Stocker dans localStorage que l'utilisateur a vu le prompt
       localStorage.setItem('pwaPromptShown', Date.now().toString());
       
       return outcome === 'accepted';
@@ -56,10 +55,10 @@ const usePWAInstall = () => {
     }
   };
 
-  // Function to close the modal
+  // Fonction pour fermer le modal
   const dismissInstallPrompt = () => {
     setShowInstallPrompt(false);
-    // Store dismissal time to avoid showing too often
+    // Stocker le moment du dismiss pour ne pas montrer trop souvent
     localStorage.setItem('pwaPromptDismissed', Date.now().toString());
   };
 
@@ -70,20 +69,20 @@ const usePWAInstall = () => {
     const isStandaloneApp = detectStandalone();
     setIsStandalone(isStandaloneApp);
 
-    // Listen for beforeinstallprompt event
+    // Écouter l'événement beforeinstallprompt
     const handleBeforeInstallPrompt = (e) => {
-      console.log('beforeinstallprompt event fired');
-      // Prevent automatic prompt
+      console.log('📱 beforeinstallprompt event fired');
+      // Empêcher le prompt automatique
       e.preventDefault();
-      // Save the event for later use
+      // Sauvegarder l'event pour plus tard
       setDeferredPrompt(e);
       
-      // Check if we should show the prompt automatically
+      // Vérifier si on doit montrer le prompt automatiquement
       if (isMobileDevice && !isStandaloneApp) {
         const lastDismissed = localStorage.getItem('pwaPromptDismissed');
         const lastShown = localStorage.getItem('pwaPromptShown');
         
-        // Don't show if user dismissed recently (within last 7 days)
+        // Ne pas montrer si l'utilisateur a dismiss récemment (dans les 7 derniers jours)
         if (lastDismissed) {
           const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
           if (parseInt(lastDismissed) > oneWeekAgo) {
@@ -91,7 +90,7 @@ const usePWAInstall = () => {
           }
         }
         
-        // Don't show if already shown recently (within last 30 days)
+        // Ne pas montrer si déjà montré récemment (dans les 30 jours)
         if (lastShown) {
           const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
           if (parseInt(lastShown) > thirtyDaysAgo) {
@@ -99,7 +98,7 @@ const usePWAInstall = () => {
           }
         }
         
-        // Show after a delay (3 seconds)
+        // Montrer après un délai (3 secondes)
         const timer = setTimeout(() => {
           setShowInstallPrompt(true);
           localStorage.setItem('pwaPromptShown', Date.now().toString());
@@ -109,9 +108,9 @@ const usePWAInstall = () => {
       }
     };
 
-    // Listen for app installed event
+    // Écouter si l'app est installée
     const handleAppInstalled = () => {
-      console.log('PWA installed successfully');
+      console.log('📱 PWA installed successfully');
       setIsStandalone(true);
       setShowInstallPrompt(false);
       setDeferredPrompt(null);
@@ -126,7 +125,7 @@ const usePWAInstall = () => {
     };
   }, []);
 
-  // Modal component for PWA installation
+  // Composant modal pour l'installation PWA
   const InstallPromptModal = () => {
     if (!showInstallPrompt || !isMobile || isStandalone) return null;
 
@@ -153,29 +152,26 @@ const usePWAInstall = () => {
           boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
           animation: 'fadeIn 0.3s ease',
         }}>
-          <div style={{
+          <h3 style={{
+            marginTop: 0,
+            marginBottom: '16px',
+            color: '#333',
+            fontSize: '20px',
             display: 'flex',
             alignItems: 'center',
             gap: '10px',
-            marginBottom: '16px',
           }}>
-            <InstallDesktop style={{ color: '#007AFF', fontSize: '24px' }} />
-            <h3 style={{
-              margin: 0,
-              color: '#333',
-              fontSize: '20px',
-            }}>
-              Install the App
-            </h3>
-          </div>
+            <span>📱</span> Installer l'application
+          </h3>
           
           <p style={{
             color: '#666',
             marginBottom: '24px',
             lineHeight: '1.5',
           }}>
-            For a better experience, install the app on your phone. 
-            You'll get faster access and can use all features even when offline.
+            Pour une meilleure expérience, installez l'application sur votre téléphone. 
+            Vous aurez un accès plus rapide et pourrez utiliser toutes les fonctionnalités 
+            même hors connexion.
           </p>
           
           <div style={{
@@ -195,16 +191,11 @@ const usePWAInstall = () => {
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
               }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#0056CC'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#007AFF'}
             >
-              <Download style={{ fontSize: '20px' }} />
-              Install the App
+              📥 Installer l'application
             </button>
             
             <button
@@ -222,7 +213,7 @@ const usePWAInstall = () => {
               onMouseOver={(e) => e.target.style.backgroundColor = '#f5f5f5'}
               onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
             >
-              Later
+              Plus tard
             </button>
           </div>
           
@@ -234,15 +225,9 @@ const usePWAInstall = () => {
             color: '#999',
           }}>
             <p style={{ margin: 0 }}>
-              <strong>How to install:</strong><br />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                <Smartphone style={{ fontSize: '14px' }} />
-                <strong>iOS:</strong> Tap "Share" then "Add to Home Screen"
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                <Download style={{ fontSize: '14px' }} />
-                <strong>Android:</strong> Tap "Install App" or "Add to Home Screen"
-              </div>
+              <strong>Pour installer :</strong><br />
+              • <strong>iOS :</strong> Cliquez sur "Partager" puis "Sur l'écran d'accueil"<br />
+              • <strong>Android :</strong> Cliquez sur "Installer l'application" ou "Ajouter à l'écran d'accueil"
             </p>
           </div>
         </div>
