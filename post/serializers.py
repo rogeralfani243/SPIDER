@@ -100,8 +100,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-            'title', 'content', 'category_id', 'link', 'image', 
-            'images', 'videos', 'audio', 'documents'
+            'title', 'content', 'category_id', 'link', 'image', 'updated_at',
+            'images', 'videos', 'audio', 'documents','created_at'
         ]
         extra_kwargs = {
             'title': {'required': True},
