@@ -7,7 +7,6 @@ export const usePost = (userId, postId) => {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const fetchPostDetail = useCallback(async () => {
     try {
       setLoading(true);

@@ -208,7 +208,7 @@ const PostMenu = ({
         navigator.share({
           title: post.title || 'Post',
           text: post.content?.substring(0, 100) || '',
-          url: `${window.location.origin}/post/${post.id}`,
+          url: `${window.location.origin}/user/${post.user_profile_id}/post/${post.id}`,
         });
       } else {
         navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);

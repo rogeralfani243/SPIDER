@@ -56,6 +56,7 @@ const PostDetail = () => {
   useEffect(() => {
     if (userId && postId) {
       fetchPostDetail();
+      fetchMediaData()
       const checkMobile = () => setIsMobile(window.innerWidth <= 768);
       checkMobile();
       window.addEventListener('resize', checkMobile);
@@ -66,7 +67,23 @@ const PostDetail = () => {
       return () => window.removeEventListener('resize', checkMobile);
     }
   }, [userId, postId, fetchPostDetail]);
-
+const fetchMediaData = async () => {
+    if (!post || !post.id || !URL) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${URL}/post/posts/${post.id}/media-list/`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        setMediaList(data.media || []);
+      }
+    }
+    catch(err){
+      console.error(err)
+    }
+  }
   // Function to get current user
   const fetchCurrentUser = async () => {
     try {
@@ -254,7 +271,7 @@ const handleDeletePost = useCallback((post) => {
                   onEdit={handleEditPost}
                   onDelete={handleDeletePost}
                   onReport={handleReportPost}
-                  onShare={handleSharePost}
+                  
                           isOpen={showDownloadModal}
         onClose={handleCloseDownloadModal}
 
@@ -263,7 +280,7 @@ const handleDeletePost = useCallback((post) => {
           console.log('Downloading selected items:', selectedItems);
         }}
         isInstall={handleInstall}
-        mediaList={mediaFiles}
+        mediaList={mediaList}
         isLoading={isLoading}
                 />
     

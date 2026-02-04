@@ -41,6 +41,8 @@ const PostCard = ({
     audio: 0,
     documents: 0
   });
+
+
   const [isLoading, setIsLoading] = useState(false);
   const [mainMedia, setMainMedia] = useState(null);
   const [mainMediaType, setMainMediaType] = useState('image');
@@ -1092,7 +1094,7 @@ const userInitials = `${localPost.user_name[0]}`;
                   onEdit={handleEditPost}
                   onDelete={handleDeletePost}
                   onReport={handleReportPost}
-                  onShare={handleSharePost}
+             
                           isOpen={showDownloadModal}
         onClose={handleCloseDownloadModal}
 
@@ -1197,3 +1199,6 @@ const userInitials = `${localPost.user_name[0]}`;
 };
 
 export default PostCard;
+
+
+  export const mediaLists =   PostCard.mediaList
