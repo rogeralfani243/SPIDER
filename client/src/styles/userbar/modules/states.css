@@ -17,7 +17,7 @@
 
 .swiper-slide-active .profile-image-3d {
   border-color: var(--spider-secondary);
-  box-shadow: 0 12px 35px rgba(255, 99, 99, 0.5);
+  box-shadow: none;
   transform: scale(1.15);
 }
 
@@ -36,7 +36,7 @@
 }
 
 .swiper-slide-active .profile-initials-3d {
-  box-shadow: 0 12px 35px rgba(255, 99, 99, 0.5);
+  box-shadow: none;
 }
 
 /* Rating Styles */

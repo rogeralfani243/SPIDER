@@ -361,24 +361,67 @@ const PostCard = ({
     }
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Recently';
-    
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diffTime = Math.abs(now - date);
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      if (diffDays === 0) return 'Today';
-      if (diffDays === 1) return 'Yesterday';
-      if (diffDays < 7) return `${diffDays} days ago`;
-      if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-      return `${Math.floor(diffDays / 30)} months ago`;
-    } catch (e) {
-      return 'Recently';
+const formatDate = (dateString) => {
+  if (!dateString) return 'Recently';
+
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffMs = now - date;
+
+    // Sécurité
+    if (diffMs < 0) return 'Just now';
+
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+
+    // ---- Today logic ----
+    const isSameDay =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+
+    if (isSameDay) {
+      if (diffSeconds < 60) {
+        return diffSeconds <= 1 ? 'Just now' : `${diffSeconds} seconds ago`;
+      }
+
+      if (diffMinutes < 60) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+      }
+
+      return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
     }
-  };
+
+    // ---- Not today ----
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+
+    const startOfDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
+
+    const diffDays = Math.floor(
+      (startOfToday - startOfDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 14) return `${Math.floor(diffDays / 7)} week ago` ;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  } catch {
+    return 'Recently';
+  }
+};
+
 
   const handleRatingUpdate = useCallback((ratingData) => {
     const userRating = ratingData.userRating || ratingData.user_rating || 0;
@@ -1200,5 +1243,3 @@ const userInitials = `${localPost.user_name[0]}`;
 
 export default PostCard;
 
-
-  export const mediaLists =   PostCard.mediaList
