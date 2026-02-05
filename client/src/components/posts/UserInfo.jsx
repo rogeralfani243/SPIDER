@@ -122,7 +122,13 @@ const UserInfo = ({
       </div>
       
 </div>
- <p className="post-date">
+ <p className="post-date"
+ onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+ >
           {createdAt ? new Date(createdAt).toLocaleString() : 'Unknown date'}
         </p>
     </div>

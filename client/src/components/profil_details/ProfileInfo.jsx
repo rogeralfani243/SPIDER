@@ -15,6 +15,7 @@ import {
   Link as LinkIcon,
  Share as ShareIcon,
 } from '@mui/icons-material';
+import useParamDrag from '../../utils/useDrag';
 //Icons 
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PublicIcon from '@mui/icons-material/Public';
@@ -39,7 +40,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
     const baseUrl = window.location.origin;
     return `${baseUrl}/profile/${localProfile.id}/`;
   };
-
+  const blockDrag = useParamDrag()
   // Fonction pour générer le texte de partage avec métadonnées
   const generateShareText = () => {
     const name = localProfile.first_name && localProfile.last_name 
@@ -301,7 +302,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
   const socialLinks = getSocialLinksArray();
 
   return (
-    <div className="profile-info-section">
+    <div className="profile-info-section" {...blockDrag}>
       <h1 className="profile-name-infos" translate='no'>
         {localProfile.first_name && localProfile.last_name 
           ? `${localProfile.first_name} ${localProfile.last_name}`
@@ -318,7 +319,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
         />
       </div>
 
-      <div className="profile-details">
+      <div className="profile-details"       >
         {localProfile.bio && (
           <div className="detail-section">
             <h3 className="section-titles-bio">

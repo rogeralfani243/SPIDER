@@ -8,7 +8,7 @@ import { conversationAPI } from '../hooks/messaging/messagingApi';
 import { profileAPI } from './services/api';
 import '../styles/dashboardMain.css';
 import { HiOutlineViewGrid  } from "react-icons/hi";
-
+import useParamDrag from '../utils/useDrag';
 // SVG Icons for dashboard
 const HomeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -107,7 +107,7 @@ export default function DashboardMain() {
   const [searchQuery, setSearchQuery] = useState(''); // État pour la requête de recherche
  const [notificationsCount, setNotificationsCount] = useState(0); // Initialisé à 0
   const [loadingNotifications, setLoadingNotifications] = useState(false);
-  
+  const dragBlock = useParamDrag()
   // Screen size detection - gardez votre code existant
   useEffect(() => {
     const checkMobile = () => {
@@ -331,7 +331,7 @@ export default function DashboardMain() {
 
   return (
     <>
-      <div className="dashboard-main">
+      <div className="dashboard-main" {...dragBlock}>
         {/* Logo and mobile menu */}
         <div className="dashboard-left-section">
           {isMobile && (
@@ -506,7 +506,7 @@ export default function DashboardMain() {
      
       {/* Mobile menu */}
       {isMobile && isMobileMenuOpen && (
-        <div className="mobile-menu-overlay">
+        <div className="mobile-menu-overlay" {...dragBlock}>
           <div className="mobile-menu">
             <div className="mobile-menu-header">
               <button 

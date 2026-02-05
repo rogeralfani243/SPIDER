@@ -169,7 +169,13 @@ const StarRating = ({ postId, initialUserRating, averageRating, totalRatings, on
           disabled={isSubmitting}
           title={`Rate ${star} star${star > 1 ? 's' : ''}`}
           aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
-        >
+       
+      
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+       >
           {isActive ? <FaStar /> : <FaRegStar />}
         </button>
       );
@@ -190,6 +196,11 @@ const StarRating = ({ postId, initialUserRating, averageRating, totalRatings, on
             disabled={isSubmitting}
             title="Remove my rating"
             aria-label="Remove my rating"
+          
+           onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
           >
             ×
           </button>

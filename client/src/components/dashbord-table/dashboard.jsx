@@ -504,7 +504,10 @@ const getSocialLinksArray = () => {
   return (
       <>
       
-    <DashboardContainer sx={{marginTop:'50px'}}>
+    <DashboardContainer sx={{marginTop:'50px'}}   onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
       <Container maxWidth="xl" sx={{ py: 3 }}>
         {/* Profile Header */}
 <ProfileHeader elevation={0}>

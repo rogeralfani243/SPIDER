@@ -9,6 +9,7 @@ import URL from '../../hooks/useUrl';
 import ProfileSearchResults from './ProfileSearchResults';
 import { groupAPI } from '../../hooks/messaging/messagingApi';
 import '../../styles/search-result.css'
+import useParamDrag from '../../utils/useDrag';
 const SearchResults = ({ onClose }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ const SearchResults = ({ onClose }) => {
   const [groupCategories, setGroupCategories] = useState([]);
   const [groupsPage, setGroupsPage] = useState(1);
   const [hasMoreGroups, setHasMoreGroups] = useState(true);
-
+  const dragBlock = useParamDrag()
   // Ref pour suivre la dernière recherche
   const lastSearchQuery = useRef('');
 
@@ -674,7 +675,7 @@ const SearchResults = ({ onClose }) => {
   }, [groupsPage]);
 
   return (
-    <div className="search-results-page">
+    <div className="search-results-page" {...dragBlock}>
       {/* Header with SearchBar and close button */}
       <div className="search-results-header">
         <div className="searh-container">

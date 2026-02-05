@@ -270,7 +270,11 @@ const RecentPosts = ({
   return (
     <div className="recent-posts-container">
       <div className="recent-posts-header">
-        <h3 className="recent-posts-title">
+        <h3 className="recent-posts-title"   onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
           <FaClock className="title-icon" />
           User’s Recent Posts
           {recentPosts.length > 0 && (

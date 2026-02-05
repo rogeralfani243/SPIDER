@@ -13,7 +13,7 @@ import DashboardMain from './../dashboard_main';
 import ProfilePosts from './../profil_details/ProfilePosts';
 import { useLocation } from 'react-router-dom';
 import BlockedProfileView from '../profil_details/BlockedProfileView.jsx'; // Créez ce composant
-
+import useParamDrag from '../../utils/useDrag';
 const ProfileDetail = () => {
   const { profileId } = useParams();
   const navigate = useNavigate();
@@ -21,8 +21,6 @@ const ProfileDetail = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isTop100, setIsTop100] = useState(false);
-  const [top100Rank, setTop100Rank] = useState(null);
   const [mapCoordinates, setMapCoordinates] = useState(null);
   const [mapLoading, setMapLoading] = useState(false);
   const [mapError, setMapError] = useState(null);
@@ -35,7 +33,9 @@ const ProfileDetail = () => {
   const [blockData, setBlockData] = useState(null);
   const [profileAccessible, setProfileAccessible] = useState(true);
   const location = useLocation();
-
+  const dragBlock = useParamDrag()
+   const [rankings, setRankings] = useState(null);
+   
   // Fonction pour vérifier si le profil est accessible
   const checkProfileAccess = useCallback(async (profileData) => {
     try {
@@ -280,7 +280,7 @@ const fetchProfileDetail = useCallback(async () => {
       }
     }
     
-    checkTop100Status(data);
+
     
   } catch (err) {
     console.error('❌ [DEBUG] Error fetching profile:', err);
@@ -336,6 +336,7 @@ const fetchProfileDetail = useCallback(async () => {
   useEffect(() => {
     console.log('🎯 [DEBUG] ProfileDetail mounted, profileId:', profileId);
     fetchProfileDetail();
+    fetchProfileRankings()
   }, [fetchProfileDetail, profileId]);
 
   // Debug quand les feedbacks changent
@@ -370,21 +371,6 @@ const fetchProfileDetail = useCallback(async () => {
     }));
   };
 
-  const checkTop100Status = async (profileData) => {
-    try {
-      const response = await fetch('/api/top-profiles/');
-      if (response.ok) {
-        const topProfiles = await response.json();
-        const rank = topProfiles.findIndex(p => p.id === profileData.id) + 1;
-        if (rank > 0 && rank <= 100) {
-          setIsTop100(true);
-          setTop100Rank(rank);
-        }
-      }
-    } catch (err) {
-      console.error('Error checking top 100 status:', err);
-    }
-  };
 
   // Fonction pour gérer l'unblock
   const handleUnblock = async () => {
@@ -418,7 +404,42 @@ const fetchProfileDetail = useCallback(async () => {
       showError('Error unblocking user');
     }
   };
+// Fonction pour récupérer les classements
+  const fetchProfileRankings = async () => {
+    try {
+      console.log('🏆 Fetching rankings from API...');
 
+      
+      const response = await  fetch(`${URL}/api/rankings/profile/${profileId}/`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('📊 Rankings response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Rankings data received:', data);
+        setRankings(data);
+
+      } else {
+        console.warn('⚠️ Rankings not available:', response.status);
+        setRankings(null);
+      }
+    } catch (err) {
+      console.error('❌ Rankings fetch error:', err.message);
+ 
+      setRankings(null);
+    } finally {
+
+    }
+  };
+const globalRank = rankings?.global?.rank;
+  const isTop100 = globalRank && globalRank <= 100;
+  const top100Rank = globalRank;
   // États de chargement et d'erreur
   if (loading) {
     return <LoadingState />;
@@ -476,7 +497,8 @@ const fetchProfileDetail = useCallback(async () => {
   });
 
   return (
-    <div className="profile-detail-page">
+    <div className="profile-detail-page" {...dragBlock}
+    >
       {/* Popup pour les erreurs et succès */}
       {popup.show && (
         <ErrorPopup 
@@ -491,8 +513,8 @@ const fetchProfileDetail = useCallback(async () => {
       <div className="profile-main-section">
         <ProfileAvatar 
           profile={profile} 
-          isTop100={isTop100} 
-          top100Rank={top100Rank} 
+isTop100={isTop100}
+          top100Rank={top100Rank}
         />
         
         <ProfileInfo 

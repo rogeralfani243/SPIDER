@@ -28,7 +28,7 @@ import { useWebSocket } from '../hooks/messaging/webSocketContext';
 import { conversationAPI } from '../hooks/messaging/messagingApi';
 import '../styles/messaging/index.css';
 import { useNavigate } from 'react-router-dom';
-
+import useParamDrag from '../utils/useDrag';
 // Use React.memo for child components
 const MemoizedConversationList = memo(ConversationList);
 const MemoizedUserSearch = memo(UserSearch);
@@ -42,7 +42,7 @@ const Messaging = () => {
   const [error, setError] = useState(null);
   const [createGroupModalOpen, setCreateGroupModalOpen] = useState(false);
   const [mobileView, setMobileView] = useState('list'); // 'list' or 'chat'
-  
+  const dragBlock = useParamDrag()
   const { user } = useAuth();
   const { connectWebSocket, disconnectWebSocket, isConnected } = useWebSocket();
   const {
@@ -531,7 +531,9 @@ const Messaging = () => {
         borderBottom: 1, 
         borderColor: 'divider',
         bgcolor: 'background.paper'
-      }}>
+      }}
+      
+      >
         <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.25rem' }}>
           Messages
         </Typography>
@@ -789,6 +791,7 @@ const Messaging = () => {
     <>
 
       <Container 
+      {...dragBlock}
         maxWidth="xl" 
         sx={{ 
           mt: 4, 

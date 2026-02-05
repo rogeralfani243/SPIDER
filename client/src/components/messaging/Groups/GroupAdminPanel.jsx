@@ -24,7 +24,7 @@ import JoinRequestsTab from './group-panel-admin/JoinRequestTab';
 import MembersTab from './group-panel-admin/MembersTab';
 import AnalyticsTab from './group-panel-admin/AnalyticTab';
 import SettingsTab from './group-panel-admin/SettingsTab';
-
+import useParamDrag from '../../../utils/useDrag';
 const GroupAdminPanel = ({ onClose: externalOnClose }) => {
   const { groupId } = useParams();
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const GroupAdminPanel = ({ onClose: externalOnClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
   const [membersPerPage] = useState(10);
-  
+  const dragBlock = useParamDrag()
   // Load group data
   useEffect(() => {
     const loadGroup = async () => {
@@ -246,6 +246,7 @@ const GroupAdminPanel = ({ onClose: externalOnClose }) => {
         pb: 6,
         overflowX: 'hidden',
       }}
+      {...dragBlock}
     >
       {/* Header */}
       <AdminHeader

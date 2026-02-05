@@ -49,10 +49,22 @@ const PostContent = ({ title, content, showReadMore = true, maxLines = 3 }) => {
   };
 
   return (
-    <div className="post-body">
+    <div className="post-body"  
+    onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+    >
       {title && <h2 className="post-title-content">{title}</h2>}
       
       <div 
+
+      onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
         ref={contentRef}
         className={`post-text-content ${isOverflowing && !isExpanded ? 'truncated' : ''}`}
         style={isOverflowing && !isExpanded ? { 

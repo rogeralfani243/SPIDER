@@ -25,7 +25,7 @@ import URL from '../../hooks/useUrl';
 import DownloadMediaModal from './main_post/category/software/DownloadManager';
 // Styles
 import '../../styles/post_detail/post_detail.css';
-
+import useParamDrag from '../../utils/useDrag';
 const PostDetail = () => {
   const { userId, postId } = useParams();
   const navigate = useNavigate();
@@ -48,6 +48,7 @@ const PostDetail = () => {
   const location = useLocation(); // Pour lire les query params
   const commentsSectionRef = useRef(null); // Ref pour le commentaire
     const optionsButtonRef = useRef(null);
+  const dragBlock = useParamDrag()
   const getCommentIdFromURL = () => {
     const searchParams = new URLSearchParams(location.search);
     return searchParams.get('comment');
@@ -229,12 +230,18 @@ const handleDeletePost = useCallback((post) => {
   }
 
   return (
-    <div className="post-detail-wrapper">
+    <div className="post-detail-wrapper" {...dragBlock}>
   
       <div className="post-detail-container">
         
         {/* Header avec navigation et actions */}
-        <div className="post-header">
+        <div className="post-header" 
+      
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+        >
           <button 
             onClick={() => navigate(-1)} 
             className="back-button"

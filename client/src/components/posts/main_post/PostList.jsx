@@ -7,7 +7,7 @@ import PostFilters from './PostFilters';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardMain from '../../dashboard_main';
 import CategoryList from './CategoryList';
-
+import useParamDrag from '../../../utils/useDrag';
 // Composant pour le sélecteur d'algorithme
 import AlgorithmSelector from './AlgorithmSelector';
 
@@ -30,7 +30,7 @@ const PostList = () => {
   const [highlightedPostId, setHighlightedPostId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [localFilters, setLocalFilters] = useState(filters);
-  
+  const dragBlock = useParamDrag()
   // Nouveau: métadonnées de l'algorithme
   const [algorithmInfo, setAlgorithmInfo] = useState(null);
   const [userContext, setUserContext] = useState(null);
@@ -467,7 +467,7 @@ const PostList = () => {
   }
 
   return (
-    <>
+    <div {...dragBlock}>
       <CategoryList
         onCategorySelect={handleCategorySelect}
         selectedCategory={filters.category}
@@ -514,7 +514,7 @@ const PostList = () => {
           </div>
         ) : (
           <>
-            <div className="posts-grid2">
+            <div className="posts-grid2"   >
               {posts.map(post => {
                 const isHighlighted = post.id === highlightedPostId;
                 return (
@@ -608,7 +608,7 @@ const PostList = () => {
           </>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

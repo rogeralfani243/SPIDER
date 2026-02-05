@@ -1417,6 +1417,7 @@ Your browser does not support this video
             maxWidth: '100%',
             '&:hover': { bgcolor: isOwn ? 'rgba(220, 248, 198, 0.7)' : 'grey.200' }
           }}
+
           onClick={() => handleViewMedia(message)}
         >
           <Box display="flex" alignItems="center" gap={2}>
@@ -1713,7 +1714,12 @@ Your browser does not support this video
         maxHeight: 'auto', 
         height: '100%'
       } 
-    }}>
+    }}
+    
+      onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
       {/* Header */}
       <ChatHeader
         currentUser={currentUser} 

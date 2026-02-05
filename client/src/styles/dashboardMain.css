@@ -97,7 +97,8 @@
 
 .logo-link:hover {
   transform: translateY(-2px);
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
+  color: var(--primary-red);
+  text-shadow: 0 4px 8px rgba(165, 165, 165, 0.7);
 }
 
 .logo-badge {

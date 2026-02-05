@@ -16,9 +16,9 @@ import useAutoTranslate from './hooks/useTranslations';
 import useTranslations from './hooks/useTranslations';
 import usePWAInstall from './utils/useInstall.js';
 import appLogger from './AppLogger.js'; // Importez le nouveau logger
-
+import PWAInstallBanner from './components/pwa/PWAInstallBanner.jsx'
 function App() {
-  const { InstallPromptModal } = usePWAInstall();
+
   const { translateText, language } = useAutoTranslate();
   const { user, loading, login, logout, isAuthenticated, verifyAndLogin } = useAuth();
   
@@ -81,14 +81,14 @@ function App() {
                   <DashboardMain className='dashboard-main' />
                 </div>
               )}
-              
+              <PWAInstallBanner />
+
               <AppRoutes 
                 isAuthenticated={isAuthenticated}
                 user={user}
                 onLogin={handleLogin}
                 onLogout={handleLogout}
               />
-              <InstallPromptModal />
               <NotificationContainer />
             </div>
           </AutoTranslateWrapper>

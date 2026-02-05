@@ -23,8 +23,15 @@ const CommentSectionHeader = ({
   const displayCount = formattedCount ;
 
   return (
-    <div className="comments-header">
-      <div className="comments-title-container">
+    <div className="comments-header"
+    >
+      <div className="comments-title-container"
+      onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+      >
         <div className="comment-icon-with-count">
           <svg 
             className="comment-icon" 

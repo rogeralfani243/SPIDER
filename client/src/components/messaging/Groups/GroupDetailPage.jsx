@@ -31,6 +31,7 @@ import AdminPanelDialog from './group-detail/AdminPanelDialog';
 import LoadingState from './group-detail/LoadingState';
 import ErrorState from './group-detail/ErrorState';
 import DashboardMain from '../../dashboard_main';
+import useParamDrag from '../../../utils/useDrag';
 const GroupDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ const GroupDetailPage = () => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
-
+  const dragBlock = useParamDrag()
   useEffect(() => {
     if (id) {
       loadGroupDetails();
@@ -342,7 +343,7 @@ const handleOpenChat = () => {
   }
 
   return (
-   <>
+   <div {...dragBlock}>
 
     <Container maxWidth="lg" sx={{ py: 4, paddingTop:'4em',   zIndex: 1,  position: 'relative',  }}>
       {/* Breadcrumbs */}
@@ -438,7 +439,7 @@ const handleOpenChat = () => {
         loadGroupDetails={loadGroupDetails}
       />
     </Container>
-   </>
+   </div>
   );
 };
 

@@ -4,7 +4,7 @@ import URL from '../../hooks/useUrl';
 import CategorySelector from './category/CategorySelector';
 import FileUploadSection from './Files/FileUploadSection ';
 import FileSummary from './Files/FileSummary';
-
+import useParamDrag from '../../utils/useDrag';
 const PostCreate = ({ onPostCreated, initialData = null, externalCategories = [] }) => {
   // Form states (exactement comme avant)
   const [formData, setFormData] = useState({
@@ -40,7 +40,7 @@ const PostCreate = ({ onPostCreated, initialData = null, externalCategories = []
     step2: false,
     step3: false
   });
-
+  const dragBlock = useParamDrag()
   // Refs for inputs
   const titleRef = useRef(null);
   const contentRef = useRef(null);
@@ -679,7 +679,7 @@ const PostCreate = ({ onPostCreated, initialData = null, externalCategories = []
   );
 
   return (
-    <div className="post-create-container">
+    <div className="post-create-container" {...dragBlock}>
       <div className="post-create-card">
         <div className="post-create-header">
           <h2 className="post-create-title">

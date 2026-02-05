@@ -996,7 +996,11 @@ const formatDate = (dateString) => {
 const userInitials = `${localPost.user_name[0]}`;
   return (
   
-      <div className="software-card-post">
+      <div className="software-card-post" 
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
         {/* Rating badge */}
         <div className="rating-badge-absolute">
           <Star size={14} />
@@ -1057,12 +1061,22 @@ const userInitials = `${localPost.user_name[0]}`;
         <div className="card-content-simple">
           {/* Title and Category */}
           <div className="title-section">
-            <h3 className="app-title-simples" onClick={handlePostView}>
+            <h3 className="app-title-simples"  
+         
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+            onClick={handlePostView}>
               {localPost.title || 'Untitled Post'}
             </h3>
               {/* Description */}
           {localPost.content && (
-            <div className="description-section-simple">
+            <div className="description-section-simple"          onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
               <p className="description-text-simple">
                 {showFullDescription ? description : truncatedDescription}
               </p>
@@ -1076,7 +1090,11 @@ const userInitials = `${localPost.user_name[0]}`;
               )}
             </div>
           )}
-            <div className="category-meta">
+            <div className="category-meta" 
+            SelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}>
               <div className="category-badge">
                 {localPost.category?.image_url ? (
                   <img 
@@ -1126,10 +1144,16 @@ const userInitials = `${localPost.user_name[0]}`;
                 )}
                 <span>{localPost.category_name || 'Post'}</span>
               </div>
-              <div className="size-date-info">
-                <div className="date-info">
+              <div className="size-date-info" 
+              onMouseDown={(e) => e.preventDefault()}
+  onSelectStart={(e) => e.preventDefault()}
+  onContextMenu={(e) => e.preventDefault()}
+  onCopy={(e) => e.preventDefault()}
+  onDragStart={(e) => e.preventDefault()}
+              >
+                <div className="date-info" > 
                   <Calendar size={12} />
-                  <span>{formatDate(localPost.updated_at || localPost.created_at)}</span>
+                  <span >{formatDate(localPost.updated_at || localPost.created_at)}</span>
                 </div>
                 <PostMenu
                   post={localPost}

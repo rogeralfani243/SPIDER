@@ -47,7 +47,7 @@ import GroupCategoryFilter from './Groups/GroupCategoryFilter';
 import GroupSearchFilters from './Groups/GroupSearchFilters';
 import DashboardMain from '../dashboard_main';
 import { GroupCard } from './Groups/GroupCard';
-
+import useParamDrag from '../../utils/useDrag';
 const GroupExplorePage = () => {
   const [groups, setGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]); // Stocke tous les groupes sans filtre
@@ -72,6 +72,7 @@ const GroupExplorePage = () => {
   const [myGroupsOnly, setMyGroupsOnly] = useState(false); // Nouvel état
   const containerRef = useRef(null);
   const navigate = useNavigate();
+  const dragBlock = useParamDrag()
   // Ajoutez cet effet pour empêcher la traduction sur ce composant
 // SOLUTION : Désactiver la traduction pour cette page
   useEffect(() => {
@@ -266,7 +267,7 @@ const handleJoinRequest = async (groupId) => {
   };
 
   return (
-    <>
+    <div   {...dragBlock}>
 
       
       <Container maxWidth="xl" sx={{ py: 4, minHeight: '100vh',marginTop:'3em' }}>
@@ -619,7 +620,7 @@ const handleJoinRequest = async (groupId) => {
           </>
         )}
       </Container>
-    </>
+    </div>
   );
 };
 

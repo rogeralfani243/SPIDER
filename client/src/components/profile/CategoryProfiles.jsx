@@ -35,7 +35,7 @@ import {
 import URL from '../../hooks/useUrl';
 import '../../styles/CategoryProfiles.css';
 import DashboardMain from '../dashboard_main';
-
+import useParamDrag from '../../utils/useDrag';
 const CategoryProfiles = () => {
   const { categoryId } = useParams();
   const location = useLocation();
@@ -50,7 +50,7 @@ const CategoryProfiles = () => {
   const [categoryData, setCategoryData] = useState(null);
 
   const categoryName = location.state?.categoryName || 'Category';
-
+  const dragBlock = useParamDrag()
   useEffect(() => {
     fetchCategoryProfiles();
   }, [categoryId]);
@@ -489,7 +489,7 @@ const CategoryProfiles = () => {
       minHeight: '100vh',
       bgcolor: 'background.default',
       py: 3
-    }}>
+    }} {...dragBlock}>
       <Container maxWidth="md">
         {/* Header */}
         <Box sx={{ 

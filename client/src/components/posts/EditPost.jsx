@@ -22,7 +22,7 @@ import ExistingMediaManager from './edit_post/ExistingMediaManager';
 import NewMediaUploader from './edit_post/NewMediaUploader';
 import CategorySelector from '../create_post/category/CategorySelector';
 import Alert from './edit_post/Alert';
-
+import useParamDrag from '../../utils/useDrag';
 const EditPost = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -85,7 +85,7 @@ const EditPost = () => {
   });
 
   const [categoriesError, setCategoriesError] = useState('');
-
+  const dragBlock = useParamDrag()
   // Cleanup function
   useEffect(() => {
     isMounted.current = true;
@@ -748,7 +748,7 @@ const EditPost = () => {
   }
 
   return (
-    <>
+    <div {...dragBlock}>
 
       <div className="edit-post-container edit-post-container2">
         {/* Header */}
@@ -984,7 +984,7 @@ const EditPost = () => {
           </div>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 

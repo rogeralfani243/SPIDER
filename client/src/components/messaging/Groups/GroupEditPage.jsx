@@ -48,7 +48,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { groupAPI } from '../../../hooks/messaging/messagingApi';
 import { useAuth } from '../../../hooks/useAuth';
-
+import useParamDrag from '../../../utils/useDrag';
 const GroupEditPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ const GroupEditPage = () => {
   const [members, setMembers] = useState([]);
   const [newOwnerId, setNewOwnerId] = useState('');
   const [initialized, setInitialized] = useState(false);
-
+  const dragBlock = useParamDrag()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -809,7 +809,7 @@ const handleTransferOwnership = async () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}   {...dragBlock}>
       <Button
         startIcon={<ArrowBackIcon />}
         onClick={() => navigate(`/groups/${id}`)}

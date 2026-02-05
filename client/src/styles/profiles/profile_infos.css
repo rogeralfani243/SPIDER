@@ -5,6 +5,7 @@
   width: 100%;
   display: grid;
   place-content: center;
+  margin-top: 10em;
 
 }
 /* Styles pour les boutons de partage */
@@ -191,6 +192,7 @@
 @media (max-width: 965px) {
   .profile-info-section {
     width: 100%;
+      margin-top: 2em;
   }
 }
 

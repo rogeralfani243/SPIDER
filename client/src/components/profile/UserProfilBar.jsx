@@ -15,6 +15,7 @@ import {
   FiPlusCircle,
   FiSearch
 } from 'react-icons/fi';
+import useParamDrag from '../../utils/useDrag';
 import { useNavigate } from 'react-router-dom';
 const UserProfileBar = () => {
   const [categories, setCategories] = useState([]);
@@ -23,6 +24,7 @@ const UserProfileBar = () => {
   const [middleSlideIndex, setMiddleSlideIndex] = useState(0);
   const [showWelcome, setShowWelcome] = useState(true); // État pour contrôler l'affichage
   const swiperRef = useRef(null);
+  const dragBlock = useParamDrag()
 const navigate = useNavigate()
   // Vérifier si l'utilisateur a déjà vu le message
   useEffect(() => {
@@ -339,9 +341,9 @@ const navigate = useNavigate()
     );
   }
 
-  return (   <>
+  return (   <div {...dragBlock}>
      <RankingDashboard />
-    <div className="user-profile-bar">
+    <div className="user-profile-bar" >
 
       {/* Header */}
       <div className="user-header">
@@ -511,7 +513,7 @@ const navigate = useNavigate()
       })}
     </div>
 
-  </>  );
+  </div>  );
 };
 
 export default UserProfileBar;

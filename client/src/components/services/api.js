@@ -250,7 +250,7 @@ export const rankingAPI = {
     if (categoryId) params.append('category', categoryId);
     if (countryCode) params.append('country', countryCode);
     if (city) params.append('city', city);
-    return api.get(`/search/profiles/?${params.toString()}`);
+    return api.get(`api/search/profile/?${params.toString()}`);
   },
   getTopByCity: (city, countryCode) => 
     api.get(`api/rankings/city/?city=${city}&country=${countryCode}`),

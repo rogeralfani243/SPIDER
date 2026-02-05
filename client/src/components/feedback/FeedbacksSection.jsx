@@ -4,7 +4,7 @@ import FeedbackCard from './FeedbackCard';
 import StaticStars from '../shared/StaticStars';
 import '../../styles/profiles/feedback_sections.css';
 import URL from "../../hooks/useUrl";
-
+import useParamDrag from '../../utils/useDrag';
 const FeedbacksSection = ({ 
   feedbacks, 
   profileId, 
@@ -37,7 +37,7 @@ const FeedbacksSection = ({
     });
     return distribution;
   };
-
+  const blockPrevent = useParamDrag()
   const averageRating = calculateAverageRating();
   const ratingDistribution = getRatingDistribution();
   const totalReviews = feedbacks.length;
@@ -67,7 +67,7 @@ const FeedbacksSection = ({
   };
 
   return (
-    <div className="feedbacks-section">
+    <div className="feedbacks-section"    {...blockPrevent}>
       <div className="section-header">
         <div className="reviews-summary">
           <h2 className="section-titles-bio">Client Reviews</h2>
