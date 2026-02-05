@@ -13,6 +13,7 @@ import {
   Facebook as FacebookIcon,
   YouTube as YouTubeIcon,
   Link as LinkIcon,
+ Share as ShareIcon,
 } from '@mui/icons-material';
 //Icons 
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -28,7 +29,133 @@ import OpeningHoursWidget from './ProfileOpeningHours';
 const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeocoding, currentUserId }) => {
   // ✅ ÉTAT LOCAL pour les counts qui se mettent à jour immédiatement
   const [localProfile, setLocalProfile] = useState(profile);
-  
+    // ✅ ÉTAT LOCAL pour les counts qui se mettent à jour immédiatement
+ const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+   // Fonction pour générer le lien de partage avec métadonnées
+  const generateShareUrl = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/profile/${localProfile.id}/`;
+  };
+
+  // Fonction pour générer le texte de partage avec métadonnées
+  const generateShareText = () => {
+    const name = localProfile.first_name && localProfile.last_name 
+      ? `${localProfile.first_name} ${localProfile.last_name}`
+      : localProfile.username;
+    
+    const rating = localProfile.average_rating ? 
+      `⭐ ${localProfile.average_rating.toFixed(1)}/5` : '';
+    
+    const totalRatings = localProfile.total_ratings ? 
+      `(${localProfile.total_ratings} ratings)` : '';
+    
+    const category = localProfile.category_name ? 
+      `📁 ${localProfile.category_name}` : '';
+    
+    const location = localProfile.city ? 
+      `📍 ${localProfile.city}` : '';
+    
+    const textParts = [
+      `👤 ${name}`,
+      rating && totalRatings ? `${rating} ${totalRatings}` : rating,
+      category,
+      location,
+      localProfile.bio ? `📝 ${localProfile.bio.substring(0, 120)}...` : '',
+    ].filter(Boolean);
+    
+    return textParts.join('\n');
+  };
+
+  // Fonction principale de partage utilisant l'API Web Share
+  const handleShareProfile = async () => {
+    const shareUrl = generateShareUrl();
+    const shareText = generateShareText();
+    
+    // Préparer les données de partage
+    const shareData = {
+      title: `${localProfile.first_name || localProfile.username}'s Profile`,
+      text: shareText,
+      url: shareUrl,
+    };
+    
+    // Ajouter l'image si disponible (pour les appareils qui le supportent)
+    if (localProfile.image && navigator.canShare && navigator.canShare({ files: [] })) {
+      try {
+        // Télécharger l'image pour la partager
+        const response = await fetch(localProfile.image);
+        const blob = await response.blob();
+        const file = new File([blob], 'profile-image.jpg', { type: 'image/jpeg' });
+        
+        shareData.files = [file];
+      } catch (error) {
+        console.log("Couldn't share image, sharing without it:", error);
+      }
+    }
+    
+    // Utiliser l'API Web Share si disponible
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        showSnackbar('Profile shared successfully!', 'success');
+      } catch (error) {
+        // L'utilisateur a annulé le partage
+        if (error.name !== 'AbortError') {
+          showSnackbar('Failed to share profile', 'error');
+        }
+      }
+    } else {
+      // Fallback: copier le lien dans le presse-papier
+      try {
+        await navigator.clipboard.writeText(`${shareText}\n\n🔗 ${shareUrl}`);
+        showSnackbar('Profile info copied to clipboard!', 'success');
+      } catch (error) {
+        // Fallback pour anciens navigateurs
+        const textArea = document.createElement('textarea');
+        textArea.value = `${shareText}\n\n🔗 ${shareUrl}`;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showSnackbar('Profile info copied to clipboard!', 'success');
+      }
+    }
+  };
+
+  // Copier juste le lien (alternative)
+  const copyProfileLink = () => {
+    const shareUrl = generateShareUrl();
+    navigator.clipboard.writeText(shareUrl)
+      .then(() => {
+        showSnackbar('Profile link copied!', 'success');
+      })
+      .catch(err => {
+        console.error('Failed to copy: ', err);
+        showSnackbar('Failed to copy link', 'error');
+      });
+  };
+
+  // Mettre à jour localProfile quand profile change
+  React.useEffect(() => {
+    setLocalProfile(profile);
+  }, [profile]);
+  // Fonction pour afficher les notifications
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
+  // Fonction pour fermer le menu de partage
+  const closeShareMenu = () => {
+    setShareMenuOpen(false);
+  };
   // Fonction utilitaire pour obtenir l'icône selon la plateforme (version agrandie)
   const getSocialIcon = (platform) => {
     const iconStyle = {
@@ -181,7 +308,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
           : localProfile.username
         }
       </h1>
-
+  
       {/* ✅ SECTION STATISTIQUES SOCIALES AVEC CALLBACK */}
       <div className="social-stats-integrated">
         <ProfileSocialStats 
@@ -204,11 +331,34 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
 
         {hasContactData && (
           <div className="detail-section">
-            <h3 className="section-titles-bio">
+          <div className="detail-section-h3">
+              <h3 className="section-titles-bio">
               <LocationOnIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: '1.2rem' }} />
-              Contacts
+              Contacts  
             </h3>
-                  
+               <div className="share-buttons-container">
+          <Tooltip title="Share profile" arrow>
+            <IconButton
+              onClick={handleShareProfile}
+              sx={{
+               backgroundColor: '#f1f1f193',
+          
+                marginLeft:'2px',
+                '&:hover': {
+                  backgroundColor: '#e0e0e0',
+                  transform: 'scale(1.05)',
+                 
+                },
+                transition: 'all 0.2s ease',
+                width: 44,
+                height: 44,
+              }}
+            >
+              <ShareIcon />
+            </IconButton>
+          </Tooltip>
+          </div>  
+            </div> 
  
             <div className="contact-info">
                                  
@@ -255,6 +405,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
                               }
                             }}
                           >
+                            
                             {getSocialIcon(platform)}
                           </IconButton>
                         </Tooltip>
@@ -283,6 +434,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
                             }
                           }}
                         >
+                          
                           <LanguageIcon sx={{ fontSize: '2rem' }} />
                         </IconButton>
                       </Tooltip>

@@ -32,7 +32,7 @@ import SecurityViolationPage from '../messaging/securtity/SecurityInterceptorPag
 import SecurityLogsPage from '../messaging/securtity/SecurityLogsPage.jsx';
 import NotificationContainer from '../notifications/NotificationContainer';
 import GroupPermissionGuard from '../messaging/securtity/GroupPermissionGuard.jsx';
-
+import RankingDashboard from '../profile/RakingDahboard.jsx';
 const AppRoutes = ({ isAuthenticated, user, onLogin, onLogout }) => {
   return (
     <>
@@ -83,7 +83,13 @@ const AppRoutes = ({ isAuthenticated, user, onLogin, onLogout }) => {
         {/* Public Pages */}
         <Route path="policy/" element={<PolicyPage />} />
         <Route path="faq/" element={<Faq />} />
-
+{/* Raking Routes */}
+        <Route path="rankings" element={
+          <PrivateRoute isAuthenticated={isAuthenticated}>
+            <RankingDashboard />
+          </PrivateRoute>
+        } />
+        
         {/* Messaging Routes */}
         <Route path="message" element={
           <PrivateRoute isAuthenticated={isAuthenticated}>

@@ -191,4 +191,68 @@ export const searchAPI = {
     }));
   }
 };
+
+export const rankingAPI = {
+  // Rising stars (3+ feedbacks cette semaine)
+  getRisingStars: () => api.get('api/rankings/rising/'),
+  
+  // Top 10 profils globaux
+  getTopProfiles: () => api.get('api/rankings/top/'),
+  
+  // Top par catégorie
+
+   getCategories: () => api.get('api/categories/'),
+  getTopByCategory: (categoryId) => api.get(`api/rankings/category/${categoryId}/`),
+  // Leaders d'une catégorie spécifique
+  getCategoryLeaders: (categoryId) => 
+    api.get(`api/categories/${categoryId}/leaders/`),
+  
+  // Position d'un profil dans les classements
+  getProfileRankings: (profileId) => 
+    api.get(`api/profiles/${profileId}/rankings/`),
+   getAvailableCountries: () => api.get('api/countries/available/'),
+  getCitiesByCountry :(countryCode) => 
+    api.get(`api/rankings/city/${countryCode}/`),
+   getTopByCityAndCategory: (city, country, category) => {
+    const params = new URLSearchParams();
+    
+    // Paramètres requis
+    params.append('city', city);
+    params.append('country', country);
+    
+    // Paramètre optionnel
+    if (category) {
+      params.append('category', category);
+    }
+    
+    return api.get(`api/rankings/city_&_category/?${params.toString()}`);
+  },
+  
+  // Pour les pays avec catégorie
+  getTopByCountryAndCategory: (countryCode, category) => {
+    let url = `api/rankings/country_&_category/${encodeURIComponent(countryCode)}/`;
+    
+    // Ajouter category seulement si fourni
+    if (category) {
+      const params = new URLSearchParams();
+      params.append('category', category);
+      url = `${url}?${params.toString()}`;
+    }
+    
+    return api.get(url);
+  },
+  
+  getTopByCountry: (countryCode) => 
+    api.get(`api/rankings/country/${countryCode}/`),
+  searchProfiles: (query, categoryId, countryCode, city) => {
+    const params = new URLSearchParams();
+    if (query) params.append('q', query);
+    if (categoryId) params.append('category', categoryId);
+    if (countryCode) params.append('country', countryCode);
+    if (city) params.append('city', city);
+    return api.get(`/search/profiles/?${params.toString()}`);
+  },
+  getTopByCity: (city, countryCode) => 
+    api.get(`api/rankings/city/?city=${city}&country=${countryCode}`),
+};
 export default api;

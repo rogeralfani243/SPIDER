@@ -6,6 +6,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
 import '../../styles/userbar/user_profil_bar.css';
+import RankingDashboard from './RakingDahboard';
 import URL from '../../hooks/useUrl';
 import { 
   FiGlobe, 
@@ -338,8 +339,10 @@ const navigate = useNavigate()
     );
   }
 
-  return (
+  return (   <>
+     <RankingDashboard />
     <div className="user-profile-bar">
+
       {/* Header */}
       <div className="user-header">
         {showWelcome && (
@@ -507,7 +510,8 @@ const navigate = useNavigate()
         );
       })}
     </div>
-  );
+
+  </>  );
 };
 
 export default UserProfileBar;
