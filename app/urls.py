@@ -77,9 +77,10 @@ urlpatterns = [
     path('profile/<int:profile_id>/opening-hours/<int:hour_id>/', 
          views.opening_hour_detail, name='opening_hour_detail'),
     
-    # Statut d'ouverture
-    path('profile/<int:profile_id>/is-open/', 
-         views.check_if_open, name='check_if_open'),
+    # Statut d'ouverture search
+    path('/profile/<int:profile_id>/rankings/', views.get_profile_rankings, name='profile-rankings'),
+    path('profile/<int:profile_id>/is-open/',  views.check_if_open, name='check_if_open'),
+    path('search/profile/',  views.search_profiles, name='search_profiles'),
  path('rankings/category/<int:category_id>/', views.get_top_by_category, name='top-by-category'),
     path('countries/available/', views.get_available_countries, name='available-countries'),
     path('rankings/country/<str:country_code>/', views.get_top_by_country, name='top-by-country'),
@@ -90,4 +91,5 @@ path('rankings/rising/', views.rising_stars, name='rising-stars'),
     path('rankings/top/', views.top_profiles, name='top-profiles'),
     path('rankings/by-category/', views.top_by_category, name='top-by-category'),
     path('rankings/city/<str:country_code>/', views.get_cities_by_country, name='get_cities_by_country'),
+    path('rankings/profile/<int:profile_id>/', views.get_profile_rankings, name='get_profile_rankings'),
 ]
