@@ -4,7 +4,7 @@ from accounts.serializers import UserSerializer
 from django.contrib.auth.models import User 
 from django.contrib.auth import authenticate
 from django.utils import timezone 
-
+from feedback.models import Feedback
 
 class OpeningHoursSerializer(serializers.ModelSerializer):
     day_display = serializers.CharField(source='get_day_display', read_only=True)
@@ -127,6 +127,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     opening_hours = OpeningHoursSerializer(many=True, read_only=True)
     is_open_now = serializers.BooleanField(read_only=True)
     image_url = serializers.SerializerMethodField()
+# Champs calculés
+    average_rating = serializers.SerializerMethodField()
+    total_feedbacks = serializers.SerializerMethodField()
+    weekly_feedbacks = serializers.SerializerMethodField()
+    followers_count = serializers.SerializerMethodField()
+    engagement_score = serializers.SerializerMethodField()
+    is_rising = serializers.SerializerMethodField()
     class Meta:
         model = Profile
         fields = [
@@ -136,6 +143,9 @@ class ProfileSerializer(serializers.ModelSerializer):
             'bio', 'image', 'image_bio', 'website', 'location',
             'address', 'city', 'state', 'zip_code', 'country',
             'birth_date', 'followers', 'category', 'category_id',
+             # Champs calculés
+            'average_rating', 'total_feedbacks', 'weekly_feedbacks',
+            'followers_count', 'engagement_score', 'is_rising',
             'created_at', 'image_url','social_links','phone','is_open_now','opening_hours'
         ]
         read_only_fields = ['id', 'user', 'followers', 'created_at']
@@ -179,7 +189,23 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-
+    def get_average_rating(self, obj):
+        return obj.get_average_rating()
+    
+    def get_total_feedbacks(self, obj):
+        return Feedback.objects.filter(professional=obj.user).count()
+    
+    def get_weekly_feedbacks(self, obj):
+        return obj.get_weekly_feedback_count()
+    
+    def get_followers_count(self, obj):
+        return obj.followers.count()
+    
+    def get_engagement_score(self, obj):
+        return obj.get_engagement_score()
+    
+    def get_is_rising(self, obj):
+        return obj.is_rising_star()
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     """Serializer simplifié pour la mise à jour du profil"""
     category_id = serializers.PrimaryKeyRelatedField(

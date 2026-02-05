@@ -80,6 +80,14 @@ urlpatterns = [
     # Statut d'ouverture
     path('profile/<int:profile_id>/is-open/', 
          views.check_if_open, name='check_if_open'),
-    
-
+ path('rankings/category/<int:category_id>/', views.get_top_by_category, name='top-by-category'),
+    path('countries/available/', views.get_available_countries, name='available-countries'),
+    path('rankings/country/<str:country_code>/', views.get_top_by_country, name='top-by-country'),
+    path('rankings/city_&_category/', views.get_top_by_city_and_category, name='get_top_by_city_and_category'),
+    path('rankings/country_&_category/<str:country_code>/', views.get_top_by_country_and_category, name='get_top_by_country_and_category'),
+    path('rankings/city/', views.get_top_by_city, name='top-by-city'),
+path('rankings/rising/', views.rising_stars, name='rising-stars'),
+    path('rankings/top/', views.top_profiles, name='top-profiles'),
+    path('rankings/by-category/', views.top_by_category, name='top-by-category'),
+    path('rankings/city/<str:country_code>/', views.get_cities_by_country, name='get_cities_by_country'),
 ]

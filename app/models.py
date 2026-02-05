@@ -7,6 +7,8 @@ from django.dispatch import receiver
 from post.models import Post
 from django.db.models import JSONField
 from datetime import timedelta
+from django.db.models import Sum, Count, Avg, Q, F
+from feedback.models import Feedback
 User = get_user_model()
 #here's the model for categories on posts
 class Category(models.Model):           
@@ -178,6 +180,62 @@ class Profile(models.Model):
             formatted.append(str(hour))
         
         return formatted
+    
+    def get_weekly_feedback_count(self):
+        """Nombre de feedbacks reçus cette semaine"""
+        week_start = timezone.now() - timedelta(days=7)
+        return Feedback.objects.filter(
+            professional=self.user,
+            created_at__gte=week_start
+        ).count()
+    
+    def get_total_feedbacks(self):
+        """Total des feedbacks reçus"""
+        return Feedback.objects.filter(professional=self.user).count()
+    
+    def get_average_rating(self):
+        """Note moyenne"""
+        avg = Feedback.objects.filter(
+            professional=self.user
+        ).aggregate(Avg('rating'))['rating__avg']
+        return float(avg) if avg else 0.0
+    
+    def get_total_helpful_count(self):
+        """Total des marques 'utile'"""
+        total = Feedback.objects.filter(
+            professional=self.user
+        ).aggregate(Sum('helpful_count'))['helpful_count__sum']
+        return total or 0
+    
+    def get_followers_count(self):
+        """Nombre de followers"""
+        return self.followers.count()
+    
+    def is_rising_star(self, min_feedbacks=3):
+        """Vérifie si c'est un profil 'rising'"""
+        return self.get_weekly_feedback_count() >= min_feedbacks
+    
+    def get_engagement_score(self):
+        """Score d'engagement"""
+        score = 0
+        
+        # Note moyenne (0-50 points)
+        avg_rating = self.get_average_rating()
+        score += avg_rating * 10
+        
+        # Nombre de followers (0-20 points)
+        follower_count = self.get_followers_count()
+        score += min(follower_count * 0.5, 20)
+        
+        # Feedback de cette semaine (0-30 points)
+        weekly_feedbacks = self.get_weekly_feedback_count()
+        score += min(weekly_feedbacks * 10, 30)
+        
+        # Total des marques 'utile' (0-20 points)
+        helpful_count = self.get_total_helpful_count()
+        score += min(helpful_count * 0.1, 20)
+        
+        return round(score, 2)
 #signal to create automaticly    
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created , **kwargs):
