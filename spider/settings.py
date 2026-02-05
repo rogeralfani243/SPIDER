@@ -26,13 +26,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # Pour aucun print en production
-if not DEBUG:
-    import builtins
 
-    def _no_print(*args, **kwargs):
-        pass
-
-    builtins.print = _no_print
 
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
