@@ -44,7 +44,7 @@ const HelpfulButton = ({
         headers: {
           'Content-Type': 'application/json',
         },
-        withCredentials: true,
+     
       };
       
       // Add authorization token
