@@ -14,15 +14,30 @@ const isPWAInstalled = () =>
 const usePWAInstall = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showBanner, setShowBanner] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    if (!isMobile() || isPWAInstalled()) return;
+    if (
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true
+    ) {
+      setIsInstalled(true);
+      return;
+    }
 
-    setShowBanner(true);
+    window.addEventListener('appinstalled', () => {
+      setIsInstalled(true);
+      setShowBanner(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile() || isInstalled) return;
 
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      setShowBanner(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
@@ -30,7 +45,7 @@ const usePWAInstall = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', handler);
     };
-  }, []);
+  }, [isInstalled]);
 
   const installApp = async () => {
     if (!deferredPrompt) return;
@@ -46,8 +61,10 @@ const usePWAInstall = () => {
     installApp,
     isIOS: isIOS(),
     hasPrompt: !!deferredPrompt,
+    isInstalled,
     closeBanner: () => setShowBanner(false),
   };
 };
+
 
 export default usePWAInstall;
