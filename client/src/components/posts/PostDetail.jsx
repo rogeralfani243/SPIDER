@@ -287,7 +287,7 @@ const handleDeletePost = useCallback((post) => {
           console.log('Downloading selected items:', selectedItems);
         }}
         isInstall={handleInstall}
-        mediaList={mediaList}
+        mediaList={mediaFiles}
         isLoading={isLoading}
                 />
     
