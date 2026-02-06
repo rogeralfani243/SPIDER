@@ -377,6 +377,7 @@ const generateShareText = () => {
                 transition: 'all 0.2s ease',
                 width: 44,
                 height: 44,
+                zIndex1:'9999'
               }}
             >
            

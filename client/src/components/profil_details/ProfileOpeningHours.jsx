@@ -58,8 +58,9 @@ const FloatingDesktopWidget = styled(Paper)(({ theme }) => ({
     transform: 'translateY(-50%) scale(1.02)',
   },
   '@media (max-width: 1400px)': {
-    width: 280,
+    width: 220,
     right: 10,
+    top:'120%'
   }
 }));
 
