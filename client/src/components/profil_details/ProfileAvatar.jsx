@@ -13,6 +13,7 @@ import {
   Fade,
   Collapse
 } from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
 import '../../styles/profil_avatar.css';
 import useParamDrag from '../../utils/useDrag';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -299,6 +300,27 @@ const ProfileAvatar = ({ profile, isTop100, top100Rank }) => {
                               </Tooltip>
                             </Grid>
                           )}
+
+                           {profile.username ? (
+                            <Grid item xs={6}>
+                              <Tooltip title="Achievements">
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center',
+                                  p: 1,
+                                  bgcolor: 'rgba(255,255,255,0.1)',
+                                  borderRadius: 1,
+                                  gap: 0.5
+                                }}>
+                                  <PersonIcon  fontSize="small" />
+                                  <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                                    @ {profile.username}
+                                  </Typography>
+                                </Box>
+                              </Tooltip>
+                            </Grid>
+                          ): null}
                         </Box>
                         
                                            </Grid>
@@ -498,6 +520,28 @@ const ProfileAvatar = ({ profile, isTop100, top100Rank }) => {
                               </Tooltip>
                             </Grid>
                           )}
+
+
+           {profile.username ? (
+                            <Grid item xs={6}>
+                              <Tooltip title="Achievements">
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  justifyContent: 'center',
+                                  p: 1,
+                                  bgcolor: 'rgba(255,255,255,0.1)',
+                                  borderRadius: 1,
+                                  gap: 0.5
+                                }}>
+                                  <PersonIcon  fontSize="small" />
+                                  <Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
+                                    @ {profile.username}
+                                  </Typography>
+                                </Box>
+                              </Tooltip>
+                            </Grid>
+                          ): null}
                         </Box>
                         
                       

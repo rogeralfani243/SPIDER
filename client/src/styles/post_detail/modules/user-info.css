@@ -26,6 +26,7 @@
   font-weight: bold;
   font-size: 18px;
   flex-shrink: 0;
+  border: none;
 }
 .user-avatars:hover{
   box-shadow: none;

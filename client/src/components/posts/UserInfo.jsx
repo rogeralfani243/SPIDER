@@ -92,7 +92,7 @@ const UserInfo = ({
           <img 
             src={profileImageUrl} 
             alt={`${userName || 'User'}'s profile`}
-            className="profile-image"
+            className="profile-images"
             onError={(e) => {
               console.log('❌ Image failed to load:', profileImageUrl);
               setImageError(true);

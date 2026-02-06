@@ -334,7 +334,7 @@ const handleOpenChat = () => {
   const can_invite = group?.can_invite && isMember 
   // Loading State
   if (loading) {
-    return <LoadingState />;
+    return <LoadingState color='red' />;
   }
 
   // Error State

@@ -504,7 +504,7 @@ const PostList = () => {
         {/* Grille de posts */}
         {loading && posts.length === 0 ? (
           <div className="loading-container">
-            <div className="spinner"></div>
+            <div className="loading-spinner"></div>
           </div>
         ) : posts.length === 0 ? (
           <div className="empty-state">
@@ -575,10 +575,10 @@ const PostList = () => {
                       onEditPost={handleEditPost}
                       onDeletePost={handleDeletePost}
                       onReportPost={handleReportPost}
-                      onSharePost={handleSharePost}
+                      onShrePost={handleSharePost}
                       onRatingUpdate={handleRatingUpdate}
                       showUserBio={false}
-                      userBio={''}
+                      userBaio={''}
                     />
                   </div>
                 );

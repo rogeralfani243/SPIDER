@@ -494,8 +494,8 @@ const handleJoinRequest = async (groupId) => {
 
         {/* Loading State */}
         {loading && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 8 }}>
-            <CircularProgress size={60} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', p: 8,color:'red' }}>
+            <CircularProgress size={60} color='red' />
           </Box>
         )}
 

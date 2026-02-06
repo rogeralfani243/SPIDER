@@ -319,9 +319,9 @@ const fetchProfileData = async () => {
   if (loading && !refreshing) {
     return (
       <LoadingOverlay>
-        <CircularProgress size={60} />
+        <CircularProgress size={60} sx={{color:'red'}} />
         <Typography variant="h6" sx={{ mt: 3, color: theme.palette.primary.main }}>
-          Loading Profile...
+     
         </Typography>
       </LoadingOverlay>
     );
@@ -1191,7 +1191,7 @@ const getSocialLinksArray = () => {
       {/* Refreshing overlay */}
       {refreshing && (
         <LoadingOverlay>
-          <CircularProgress size={40} />
+          <CircularProgress size={40} sx={{color:'red'}} />
           <Typography variant="body2" sx={{ mt: 2, color: theme.palette.text.secondary }}>
             Updating profile data...
           </Typography>

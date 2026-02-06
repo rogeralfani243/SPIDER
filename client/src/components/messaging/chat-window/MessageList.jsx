@@ -28,7 +28,7 @@ const MessageList = ({
   if (loadingMessages) {
     return (
       <Box display="flex" justifyContent="center" p={3}>
-        <CircularProgress />
+        <CircularProgress sx={{color:'red'}} />
       </Box>
     );
   }

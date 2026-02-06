@@ -25,7 +25,7 @@ const LoadingState = () => (
     </Card>
     
     <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-      <CircularProgress />
+      <CircularProgress sx={{color:'red'}} />
     </Box>
   </Container>
 );

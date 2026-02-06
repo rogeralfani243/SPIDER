@@ -278,7 +278,7 @@ const ProfilePosts = ({ profileId, userId }) => {
       
       <div className="section-header">
         <h2 className="section-titles-bio">
-          Posts 
+          Threads 
           <span className="posts-count-profile">({posts.length})</span>
         </h2>
         

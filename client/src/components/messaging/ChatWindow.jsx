@@ -1686,7 +1686,7 @@ Your browser does not support this video
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-        <CircularProgress />
+        <CircularProgress sx={{color:'red'}} />
       </Box>
     );
   }
