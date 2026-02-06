@@ -268,7 +268,7 @@ const RecentPosts = ({
   }
   
   return (
-    <div className="recent-posts-container">
+    <div className="recent-posts-container" {...blockDrag}>
       <div className="recent-posts-header">
         <h3 className="recent-posts-title"   onMouseDown={(e) => e.preventDefault()}
   onSelectStart={(e) => e.preventDefault()}
