@@ -9,6 +9,7 @@ import '../../styles/main/post-card-main.css';
 import { useNavigate } from 'react-router-dom';
 import { Download, Calendar, User, Eye, MessageCircle, Share2, Image, Video, Music, File, Star, Package, Headphones, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AudioPlayer from './media_section/AudioPlayer';
+import useParamDrag from '../../utils/useDrag';
 import DownloadMediaModal from './main_post/category/software/DownloadManager';
 const PostCard = ({ 
   post: initialPost, 
@@ -41,8 +42,7 @@ const PostCard = ({
     audio: 0,
     documents: 0
   });
-
-
+  const blockDrag= useParamDrag()
   const [isLoading, setIsLoading] = useState(false);
   const [mainMedia, setMainMedia] = useState(null);
   const [mainMediaType, setMainMediaType] = useState('image');
@@ -996,11 +996,7 @@ const formatDate = (dateString) => {
 const userInitials = `${localPost.user_name[0]}`;
   return (
   
-      <div className="software-card-post" 
-  onSelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}>
+      <div className="software-card-post" {...blockDrag}>
         {/* Rating badge */}
         <div className="rating-badge-absolute">
           <Star size={14} />
