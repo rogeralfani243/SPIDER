@@ -3,6 +3,7 @@ import StaticStars from '../shared/StaticStars';
 import LocationMap from './LocationMap';
 import ProfileSocialStats from './ProfilSocial';
 import '../../styles/profiles/profile_infos.css';
+import { Helmet } from 'react-helmet-async';
 import { Tooltip, IconButton } from '@mui/material';
 import {
   Language as LanguageIcon,
@@ -36,39 +37,43 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
    // Fonction pour générer le lien de partage avec métadonnées
-  const generateShareUrl = () => {
+    const name =
+    profile.first_name && profile.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : profile.username;
+
+  const description =
+    profile.bio
+      ? profile.bio.substring(0, 160)
+      : `View ${name}'s professional profile`;
+
+  const image =
+    profile.image ||
+    `${window.location.origin}/default-profile.jpg`;
+
+  const url = window.location.href;
+   const generateShareUrl = () => {
     const baseUrl = window.location.origin;
     return `${baseUrl}/profile/${localProfile.id}/`;
   };
   const blockDrag = useParamDrag()
   // Fonction pour générer le texte de partage avec métadonnées
-  const generateShareText = () => {
-    const name = localProfile.first_name && localProfile.last_name 
+const generateShareText = () => {
+  const name =
+    localProfile.first_name && localProfile.last_name
       ? `${localProfile.first_name} ${localProfile.last_name}`
       : localProfile.username;
-    
-    const rating = localProfile.average_rating ? 
-      `⭐ ${localProfile.average_rating.toFixed(1)}/5` : '';
-    
-    const totalRatings = localProfile.total_ratings ? 
-      `(${localProfile.total_ratings} ratings)` : '';
-    
-    const category = localProfile.category_name ? 
-      `📁 ${localProfile.category_name}` : '';
-    
-    const location = localProfile.city ? 
-      `📍 ${localProfile.city}` : '';
-    
-    const textParts = [
-      `👤 ${name}`,
-      rating && totalRatings ? `${rating} ${totalRatings}` : rating,
-      category,
-      location,
-      localProfile.bio ? `📝 ${localProfile.bio.substring(0, 120)}...` : '',
-    ].filter(Boolean);
-    
-    return textParts.join('\n');
-  };
+
+  const parts = [
+    name,
+    localProfile.category_name,
+    localProfile.city,
+    localProfile.country,
+  ].filter(Boolean);
+
+  return parts.join(' • ');
+};
+
 
   // Fonction principale de partage utilisant l'API Web Share
   const handleShareProfile = async () => {
@@ -302,6 +307,25 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
   const socialLinks = getSocialLinksArray();
 
   return (
+     <>
+        <Helmet>
+        {/* SEO */}
+        <title>{name}</title>
+        <meta name="description" content={description} />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="profile" />
+        <meta property="og:title" content={name} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={image} />
+        <meta property="og:url" content={url} />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={name} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={image} />
+      </Helmet>
     <div className="profile-info-section" {...blockDrag}>
       <h1 className="profile-name-infos" translate='no'>
         {localProfile.first_name && localProfile.last_name 
@@ -355,6 +379,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
                 height: 44,
               }}
             >
+           
               <ShareIcon />
             </IconButton>
           </Tooltip>
@@ -473,6 +498,7 @@ const ProfileInfo = ({ profile, mapCoordinates, mapLoading, mapError, onRetryGeo
         )}
       </div>
     </div>
+     </>
   );
 };
 
