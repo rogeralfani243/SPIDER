@@ -185,13 +185,15 @@ const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
           )}
         </div>
         
+      {/*
         {!selectedCategory && (
           <div className="grid-stats">
             <span className="total-categories-badge">
               {activeCategories.length} categories
             </span>
           </div>
-        )}
+        ) }
+      */}
       </div>
       
       {/* Categories Grid Container */}
@@ -301,10 +303,7 @@ const CategoryList = ({ onCategorySelect, selectedCategoryId = null }) => {
       {/* Footer Info */}
       <div className="category-grid-footer">
         <p>
-          {selectedCategory 
-            ? `Selected: ${selectedCategory.name} • ${selectedCategory.posts_count || 0} posts`
-            : `${activeCategories.length} active categories available`
-          }
+
           {showAllCategories && categories.length > visibleCategoriesCount - 1 && (
             <button 
               className="show-less-btn"

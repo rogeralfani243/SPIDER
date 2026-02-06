@@ -472,22 +472,7 @@ const NewMediaUploader = ({
       })}
       
       {/* Debug info pour mobile */}
-      {isMobile && (
-        <div style={{
-          marginTop: '10px',
-          padding: '8px',
-          backgroundColor: '#f8f9fa',
-          borderRadius: '4px',
-          fontSize: '11px',
-          color: '#666',
-          border: '1px solid #dee2e6'
-        }}>
-          <strong>Debug Mobile Info:</strong> 
-          <div>User Agent: {navigator.userAgent.substring(0, 50)}...</div>
-          <div>Platform: {navigator.platform}</div>
-        </div>
-      )}
-      
+    
       {/* Styles inline */}
       <style jsx>{`
         .audio-preview-container {

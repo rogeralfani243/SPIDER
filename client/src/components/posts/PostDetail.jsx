@@ -23,6 +23,7 @@ import { Download } from 'lucide-react';
 import CommentsSection from '../commentPost/CommentSection';
 import URL from '../../hooks/useUrl';
 import DownloadMediaModal from './main_post/category/software/DownloadManager';
+
 // Styles
 import '../../styles/post_detail/post_detail.css';
 import useParamDrag from '../../utils/useDrag';
@@ -237,15 +238,11 @@ const handleDeletePost = useCallback((post) => {
         {/* Header avec navigation et actions */}
         <div className="post-header" 
       
-  onSelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}
-        >
+>
           <button 
             onClick={() => navigate(-1)} 
             className="back-button"
-          >
+         {...dragBlock} >
             <FaArrowLeft /> Back
           </button>
       

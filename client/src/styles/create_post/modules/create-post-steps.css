@@ -40,10 +40,10 @@
 }
 
 .step-circle.active {
-  background-color: #007bff;
+  background:var(--primary-color-bar);
   color: white;
   transform: scale(1.1);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.25);
 }
 
 .step-label {
@@ -69,7 +69,7 @@
 
 /* Step Counter */
 .step-counter {
-  background: #007bff;
+  background: var(--primary-color-bar);
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -98,7 +98,7 @@
   border-radius: 10px;
   padding: 20px;
   margin-bottom: 30px;
-  border-left: 4px solid #007bff;
+  border-left: 4px solid #ff0000;
 }
 
 .step-description h4 {

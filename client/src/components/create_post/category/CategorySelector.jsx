@@ -171,7 +171,7 @@ const CategorySelector = memo(({
 
   return (
     <div className="modern-category-selector" ref={dropdownRef}>
-      <div className="selector-label">Category *</div>
+      <div className="selector-label"></div>
       
       <div className="selector-container">
         {/* Main selection field */}
@@ -224,7 +224,7 @@ const CategorySelector = memo(({
             <div className="dropdown-header">
               <h5>
                 <i className="fas fa-folder"></i>
-                Select a category ({parentCategories.length} available)
+                Select a category {/* ({parentCategories.length} available) */}
               </h5>
             </div>
             

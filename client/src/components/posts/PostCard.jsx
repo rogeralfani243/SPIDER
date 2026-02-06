@@ -1154,9 +1154,9 @@ const userInitials = `${localPost.user_name[0]}`;
                 <PostMenu
                   post={localPost}
                   currentUser={currentUser}
-                  onEdit={handleEditPost}
                   onDelete={handleDeletePost}
                   onReport={handleReportPost}
+             onEdit={handleEditPost}
              
                           isOpen={showDownloadModal}
         onClose={handleCloseDownloadModal}

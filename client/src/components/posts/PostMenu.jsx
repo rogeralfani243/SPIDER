@@ -129,12 +129,14 @@ const PostMenu = ({
     try {
       if (onDelete) {
         await axiosAuth.delete(`${URL}/post/posts/${post.id}/`);
-      }
+     
+    }
     } catch (error) {
       console.error('Error deleting post:', error);
       alert('Failed to delete post. Please try again.');
     } finally {
       setShowDeleteModal(false);
+       window.location.href=('/posts/')  
     }
   };
 

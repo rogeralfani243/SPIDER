@@ -172,7 +172,7 @@ const CommentsSection = ({ postId, currentUser, totalComments }) => {
           postId={postId}
           onSubmit={handleCommentSubmit}
           placeholder="Share your thoughts..."
-          autoFocus={hasNoComments} // Auto-focus le champ s'il n'y a pas de commentaires
+        //  autoFocus={hasNoComments} // Auto-focus le champ s'il n'y a pas de commentaires
         />
       </div>
       

@@ -16,7 +16,7 @@ import {
 import { useRecentPosts } from '../../hooks/post_detail/useRecentPosts';
 import URL from '../../hooks/useUrl';
 import PostCard from './PostCard';
-
+import useParamDrag from '../../utils/useDrag';
 // Helper function to safely get URL from file or string
 const getSafeUrl = (item) => {
   if (!item) return null;
@@ -79,7 +79,7 @@ const RecentPosts = ({
     userId, 
     excludeCurrentPost ? currentPostId : null
   );
-  
+  const blockDrag = useParamDrag()
   const [imageErrors, setImageErrors] = useState({});
 
   // Fonction pour obtenir le type de média et l'URL complète
@@ -154,7 +154,7 @@ const RecentPosts = ({
     if (visibleMedia.length === 0) return null;
 
     return (
-      <div className="post-thumbnails">
+      <div className="post-thumbnails" {...blockDrag}>
         {visibleMedia.map((item, index) => (
           <div key={index} className={`thumbnail ${item.type}`}>
             {item.type === 'image' && item.thumbnail ? (
