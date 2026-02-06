@@ -4,6 +4,7 @@ import { FaEye } from 'react-icons/fa';
 import MediaThumbnails from './media_section/MediaThumbnails';
 import FullscreenView from './media_section/FullscreenView';
 import { getMediaType, getFileName, getFileIcon } from '../../utils/mediaUtils';
+
 const MediaSection = ({ mediaFiles = [], activeMediaIndex = 0, onMediaChange }) => {
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [fullscreenIndex, setFullscreenIndex] = useState(activeMediaIndex);

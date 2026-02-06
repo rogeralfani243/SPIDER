@@ -163,13 +163,9 @@ const ProfileAvatar = ({ profile, isTop100, top100Rank }) => {
                     {/* Autres classements - Visible quand développé */}
                     <Collapse in={showRankings} timeout="auto">
                       <Grid item xs={12}>
-                        <Box container  sx={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: 1,
-        mt: 1, 
- '@media(min-width:946px)':{ gridTemplateColumns: 'repeat(1, 1fr)',}
-      }}>
+                        <Box container  gap={1} sx={{ display:'grid',s: '1fr',
+  sm: 'repeat(2, 1fr)',
+  lg: 'repeat(1, 1fr)', gap:1}}>
                           {/* Category */}
                           {rankings.category?.rank && (
                             <Grid item xs={6}>
@@ -321,6 +317,7 @@ const ProfileAvatar = ({ profile, isTop100, top100Rank }) => {
                               </Tooltip>
                             </Grid>
                           ): null}
+                         
                         </Box>
                         
                                            </Grid>

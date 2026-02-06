@@ -283,14 +283,15 @@ const RecentPosts = ({
         </h3>
       </div>
 
-      <div className="recent-posts-list">
+      <div className="recent-posts-list" >
         {recentPosts.slice(0, maxPosts).map((post) => {
           return (
             <div
               key={post.id}
               className="recent-post-car"
              
-              style={{ cursor: 'pointer' }}
+            
+            
             >
     
 

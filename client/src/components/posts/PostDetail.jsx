@@ -233,7 +233,7 @@ const handleDeletePost = useCallback((post) => {
   return (
     <div className="post-detail-wrapper" {...dragBlock}>
   
-      <div className="post-detail-container">
+      <div className="post-detail-container" {...dragBlock}>
         
         {/* Header avec navigation et actions */}
         <div className="post-header" 
