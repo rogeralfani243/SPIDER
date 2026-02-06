@@ -1,6 +1,7 @@
 import React from 'react';
 import DashboardMain from '../dashboard_main';
 import UserProfileBar from '../profile/UserProfilBar';
+import { CircularProgress } from '@mui/material';
 const AppLayout = {
   LoadingScreen: () => (
     <div style={{
@@ -12,8 +13,7 @@ const AppLayout = {
       background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
     }}>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '48px', marginBottom: '20px' }}>🔒</div>
-        <div>Loading security system...</div>
+     <CircularProgress color="error"/> 
       </div>
     </div>
   ),
