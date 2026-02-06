@@ -126,12 +126,13 @@ const ProfileAvatar = ({ profile, isTop100, top100Rank }) => {
         {profile.image_bio ? (
           <>
             <img
+             loading="lazy"
               src={profile.image_bio} 
               alt={`Profile of ${profile.first_name || profile.username}`}
               className="profile-image-bio"
               onClick={() => openImageModal('bio')}
-              style={{ cursor: 'pointer' , backgroundColor:'red'}}
-              
+              style={{ cursor: 'pointer' }}
+               decoding="async"
             />
             
             {/* Overlay des classements en bas de l'image_bio */}
