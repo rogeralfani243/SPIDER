@@ -376,7 +376,7 @@ class CheckReportAPIView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Valider dle content_type
+            # Valider le content_type
             valid_types = [choice[0] for choice in ContentType.choices]
             if content_type not in valid_types:
                 return Response(
