@@ -37,9 +37,9 @@ if not DEBUG:
 # Pour aucun print en production
 # settings.py
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
-STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', 'pk_test_51Sy785Dy7jwUEGTDVMjlBzE1RdumLNyk8BxUsTYCi5Tondu4JEX0CQv96zBgUqD9sB1xYmSUZc7uj2np8OHAviBI000EZxW5Ti')
-STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_51Sy785Dy7jwUEGTDLtrwj7ecRX6xBfGWLPS3qgvJN5I7ydfKG5m5RCun2490MfyBunzSa6X2JpgmSf2TxRLWdR8x00FPCBiPgQ')
-STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_5f761f1f65cad49f63aa1854a3fcc040098690c28459ad08df459415b9624bbd')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
 
 # Configuration des plans
 
