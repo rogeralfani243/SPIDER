@@ -25,8 +25,128 @@ ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-# Pour aucun print en production
+"""
+if not DEBUG:
+    import builtins
 
+    def _no_print(*args, **kwargs):
+        pass
+
+    builtins.print = _no_print
+"""
+# Pour aucun print en production
+# settings.py
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY', 'pk_test_51Sy785Dy7jwUEGTDVMjlBzE1RdumLNyk8BxUsTYCi5Tondu4JEX0CQv96zBgUqD9sB1xYmSUZc7uj2np8OHAviBI000EZxW5Ti')
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_51Sy785Dy7jwUEGTDLtrwj7ecRX6xBfGWLPS3qgvJN5I7ydfKG5m5RCun2490MfyBunzSa6X2JpgmSf2TxRLWdR8x00FPCBiPgQ')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'whsec_5f761f1f65cad49f63aa1854a3fcc040098690c28459ad08df459415b9624bbd')
+
+# Configuration des plans
+
+# settings.py - Ajoutez cette configuration
+STRIPE_BOOST_PLANS = {
+    'standard_7': {
+  'name': 'Standard Boost – 7 Days',
+    'description': '50% increased visibility for 7 days',
+    'amount': 1000,  # $10.00
+    'currency': 'usd',
+    'duration_days': 7,
+    'multiplier': 1.5,
+    'features': [
+        'Sponsored badge',
+        'Detailed performance analytics'
+    ],
+        'price_id': 'price_1Sz2lqDy7jwUEGTDnFrshVR5',  # Créez ce price dans Stripe Dashboard
+    },
+'premium_14': {
+    'name': 'Premium Boost – 14 Days',
+    'description': 'Double visibility for 14 days',
+    'amount': 2500,  # €25.00
+    'currency': 'eur',
+    'duration_days': 14,
+    'multiplier': 2.0,
+    'features': [
+        'All Standard features included',
+        'Highlighted placement within the category'
+    ],
+    'price_id': 'price_1Sz4ndDy7jwUEGTDDrACei2x',
+},
+
+'featured_7': {
+    'name': 'Featured Boost – 7 Days',
+    'description': 'Triple visibility with priority placement',
+    'amount': 5000,  # €50.00
+    'currency': 'eur',
+    'duration_days': 7,
+    'multiplier': 3.0,
+    'always_on_top': True,
+    'features': [
+        'All Premium features included',
+        'Always displayed at the top of its category',
+        'Promotional email campaign'
+    ],
+    'price_id': 'price_1Sz4mnDy7jwUEGTD0i8RDoEU',
+},
+
+    'spotlight_7': {
+        'name': 'Spotlight Boost – 7 Days',
+'description': 'Maximum visibility and exclusive promotion',
+'amount': 10000,  # 100.00 EUR
+'currency': 'eur',
+'duration_days': 7,
+'multiplier': 5.0,
+'always_on_top': True,
+'features': [
+    'All Featured features included',
+    'Top placement across all feeds',
+    'Dedicated email campaign'
+],
+
+        'price_id': 'price_1Sz4llDy7jwUEGTDNaolGgG0',
+    },
+}
+STRIPE_PLANS = {
+    'individual_monthly': {
+        'price_id': 'price_1Sy7HCDy7jwUEGTDQjuKWMah',  # ID du prix depuis Stripe Dashboard
+        'amount': 1000,  # 10.00 USD en cents
+        'currency': 'usd',
+        'interval': 'month',
+        'interval_count': 1,
+        'name': 'Monthly Individual',
+        'description': 'Perfect for getting started',
+        'duration_days': 30,
+    },
+    'individual_yearly': {
+        'price_id': 'price_1Sy7L9Dy7jwUEGTDu4O4O6UU',
+        'amount': 10000,  # 100.00 USD en cents
+        'currency': 'usd',
+        'interval': 'year',
+        'interval_count': 1,
+        'name': 'Yearly Individual',
+        'description': 'Save 2 months',
+        'duration_days': 365,
+    },
+    'organization_basic': {
+        'price_id': 'price_1Sy7M9Dy7jwUEGTDw08HgZ9x',
+        'amount': 5000,  # 50.00 USD en cents
+        'currency': 'usd',
+        'interval': 'month',
+        'interval_count': 1,
+        'name': 'Organization Basic',
+        'description': 'For small teams',
+        'duration_days': 30,
+    },
+    'organization_pro': {
+        'price_id': 'price_1Sy7MjDy7jwUEGTDM56nb2zy',
+        'amount': 10000,  # 100.00 USD en cents
+        'currency': 'usd',
+        'interval': 'month',
+        'interval_count': 1,
+        'name': 'Organization Pro',
+        'description': 'Advanced features',
+        'duration_days': 30,
+    },
+}
 
 ALLOWED_HOSTS = [
     'spider-app-d4d82ba4f1c1.herokuapp.com',
@@ -63,6 +183,8 @@ INSTALLED_APPS = [
     'storages',
     'cryptography',
         'django_cryptography',
+        'certfications',
+        'dashboard_admin',
 ]
 
 MIDDLEWARE = [

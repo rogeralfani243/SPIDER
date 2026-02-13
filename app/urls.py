@@ -16,7 +16,7 @@ urlpatterns = [
 
     # Authentification
     path('register/', views.register_view, name='register'),
-
+    path('security/log-violation/', views.log_security_violation, name='log-security-violation'),
     #Category URL 
     path('categories/', views.category_list, name='category-list'),
     # Profil
@@ -40,8 +40,8 @@ urlpatterns = [
      # Profil utilisateur courant
     path('profile/me/', views.current_user_profile_id, name='current-user-profile-id'),
     path('auth/user/', views.get_current_user, name='current_user'),
-
-     path('api/user/<int:user_id>/get-profile-id/', views.get_profile_by_user, name='get-profile-by-user'),
+    path('auth/permissions/', views.get_user_permissions, name='current_user_permissions'),
+  path('api/user/<int:user_id>/get-profile-id/', views.get_profile_by_user, name='get-profile-by-user'),
 
         # Suppression de compte
     path('account/delete/', views.delete_account, name='delete_account'),
@@ -78,7 +78,7 @@ urlpatterns = [
          views.opening_hour_detail, name='opening_hour_detail'),
     
     # Statut d'ouverture search
-    path('/profile/<int:profile_id>/rankings/', views.get_profile_rankings, name='profile-rankings'),
+    path('profile/<int:profile_id>/rankings/', views.get_profile_rankings, name='profile-rankings'),
     path('profile/<int:profile_id>/is-open/',  views.check_if_open, name='check_if_open'),
     path('search/profile/',  views.search_profiles, name='search_profiles'),
  path('rankings/category/<int:category_id>/', views.get_top_by_category, name='top-by-category'),

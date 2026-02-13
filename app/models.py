@@ -9,6 +9,7 @@ from django.db.models import JSONField
 from datetime import timedelta
 from django.db.models import Sum, Count, Avg, Q, F
 from feedback.models import Feedback
+
 User = get_user_model()
 #here's the model for categories on posts
 class Category(models.Model):           
@@ -329,3 +330,22 @@ class OpeningHours(models.Model):
             return self.open_time <= current_time <= self.close_time
         
         return False
+
+
+
+
+class SecurityViolation(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    path = models.CharField(max_length=255)
+    reason = models.TextField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Violation {self.user} - {self.path}"

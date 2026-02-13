@@ -226,6 +226,7 @@ class ReportAction(models.Model):
         ('ban', 'Ban User'),
         ('ignore', 'Ignore Report'),
         ('edit', 'Edit Content'),
+        ('email', 'Send Email'),
     ]
     
     report = models.ForeignKey(
@@ -245,7 +246,7 @@ class ReportAction(models.Model):
         verbose_name='Moderator'
     )
     performed_at = models.DateTimeField(auto_now_add=True)
-    
+    details = models.TextField(blank=True, null=True)
     # For suspensions/bans
     duration_days = models.PositiveIntegerField(
         null=True, 

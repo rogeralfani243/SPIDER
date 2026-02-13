@@ -85,6 +85,64 @@ from .serializers import OpeningHoursSerializer  # Vous devrez créer ce seriali
 
 logger = logging.getLogger(__name__)
 
+
+from .models import SecurityViolation
+
+User = get_user_model()
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])  # volontairement ouvert
+def log_security_violation(request):
+    """
+    Log a frontend security violation attempt.
+    This endpoint must NEVER break the frontend.
+    """
+
+    try:
+        user_id = request.data.get('user_id')
+        path = request.data.get('path', '')
+        reason = request.data.get('reason', 'Unknown reason')
+
+        user = None
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+
+        SecurityViolation.objects.create(
+            user=user,
+            path=path[:255],
+            reason=reason,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:1000]
+        )
+
+    except Exception:
+        # ⚠️ NE JAMAIS lever d'erreur ici
+        pass
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_permissions(request):
+    user = request.user
+
+    return Response({
+        "is_authenticated": True,
+        "is_admin": user.is_staff,
+        "is_superuser": user.is_superuser,
+        "user_id": user.id,
+        "username": user.username,
+        "groups": list(user.groups.values_list("name", flat=True)),
+    })
+
 @api_view(['GET'])
 def get_categories(request):
     categories = Category.objects.all()
@@ -282,18 +340,14 @@ def register_view(request):
     except Exception as e :
         print (f" registration erreir: {str(e)}")
         return Response ({ 'error': 'Error while the process for registration '})
-
-
-@api_view(['GET', 'PUT'])
+@api_view(['GET','PUT'])
 @permission_classes([AllowAny])
 def profile_detail_public(request, profile_id):
     """
     Public profile detail - accessible without authentication
     AVEC vérification des blocages utilisant votre modèle Block
-    ET informations de classement optimisées
     """
     try:
-        # Récupérer le profil
         profile = get_object_or_404(Profile, id=profile_id, user__is_active=True)
         profile_user = profile.user
         
@@ -301,62 +355,70 @@ def profile_detail_public(request, profile_id):
         if request.user.is_authenticated:
             current_user = request.user
             
-            # Vérifier les blocages actifs dans les deux sens
+            # Vérifier les blocages actifs dans les deux sens avec votre modèle
+            # 1. Vérifier si l'utilisateur courant a bloqué ce profil
             user_has_blocked = Block.objects.filter(
                 blocker=current_user,
                 blocked=profile_user,
                 is_active=True
             ).exists()
             
+            # 2. Vérifier si ce profil a bloqué l'utilisateur courant
             is_blocked_by_user = Block.objects.filter(
                 blocker=profile_user,
                 blocked=current_user,
                 is_active=True
             ).exists()
             
-            # Vérifier les blocages expirés
+            # 3. Vérifier les blocages expirés
             if user_has_blocked:
-                expired_blocks = Block.objects.filter(
+                # Vérifier si le blocage a expiré
+                active_blocks = Block.objects.filter(
                     blocker=current_user,
                     blocked=profile_user,
-                    is_active=True,
-                    expires_at__lt=timezone.now()
+                    is_active=True
                 )
-                if expired_blocks.exists():
-                    expired_blocks.update(is_active=False)
-                    user_has_blocked = False
+                for block in active_blocks:
+                    if block.is_expired:
+                        block.is_active = False
+                        block.save()
+                        user_has_blocked = False
             
             if is_blocked_by_user:
-                expired_blocks = Block.objects.filter(
+                # Vérifier si le blocage a expiré
+                active_blocks = Block.objects.filter(
                     blocker=profile_user,
                     blocked=current_user,
-                    is_active=True,
-                    expires_at__lt=timezone.now()
+                    is_active=True
                 )
-                if expired_blocks.exists():
-                    expired_blocks.update(is_active=False)
-                    is_blocked_by_user = False
+                for block in active_blocks:
+                    if block.is_expired:
+                        block.is_active = False
+                        block.save()
+                        is_blocked_by_user = False
             
             # Si l'utilisateur a bloqué ce profil OU est bloqué par ce profil
             if user_has_blocked or is_blocked_by_user:
-                # Récupérer les détails du blocage
+                # Déterminer le type de blocage
+                block_type = None
                 if user_has_blocked:
                     block = Block.objects.filter(
                         blocker=current_user,
                         blocked=profile_user,
                         is_active=True
                     ).first()
-                else:
+                    block_type = block.block_type if block else 'both'
+                elif is_blocked_by_user:
                     block = Block.objects.filter(
                         blocker=profile_user,
                         blocked=current_user,
                         is_active=True
                     ).first()
+                    block_type = block.block_type if block else 'both'
                 
-                block_type = block.block_type if block else 'both'
-                
-                # Blocage complet ou du profil - accès limité
-                if block_type in ['both', 'profile']:
+                # Selon le type de blocage, déterminer ce qui est accessible
+                if block_type == 'both' or block_type == 'profile':
+                    # Blocage complet ou du profil - accès limité
                     if request.method == 'GET':
                         return Response({
                             'error': 'Access denied',
@@ -378,230 +440,16 @@ def profile_detail_public(request, profile_id):
                             'error': 'Access denied',
                             'message': 'You cannot modify this profile due to blocking restrictions'
                         }, status=status.HTTP_403_FORBIDDEN)
+                elif block_type == 'user':
+                    # Blocage utilisateur seulement - le profil reste visible
+                    # Mais certaines interactions sont bloquées
+                    pass
         
-        # ==================== CALCUL DES CLASSEMENTS OPTIMISÉ ====================
-        
-        # Fonction pour calculer le score d'engagement (optimisée)
-        def calculate_engagement_score(profile_obj):
-            """Calcule le score d'engagement pour le classement"""
-            try:
-                # Compter les feedbacks
-                feedbacks_count = Feedback.objects.filter(professional=profile_obj.user).count()
-                if feedbacks_count < 3:  # Minimum 3 feedbacks pour être classé
-                    return 0
-                
-                # Note moyenne
-                avg_rating_result = Feedback.objects.filter(
-                    professional=profile_obj.user
-                ).aggregate(avg=Avg('rating'))
-                avg_rating = avg_rating_result['avg'] or 0
-                
-                # Feedback de la semaine
-                week_start = timezone.now() - timedelta(days=7)
-                weekly_feedbacks = Feedback.objects.filter(
-                    professional=profile_obj.user,
-                    created_at__gte=week_start
-                ).count()
-                
-                # Total "helpful" votes
-                helpful_result = Feedback.objects.filter(
-                    professional=profile_obj.user
-                ).aggregate(total=Sum('helpful_count'))
-                helpful_count = helpful_result['total'] or 0
-                
-                # Followers
-                followers_count = profile_obj.followers.count()
-                
-                # Calculer le score avec pondérations
-                score = 0
-                score += avg_rating * 10  # Note moyenne (0-50 points)
-                score += min(followers_count * 0.5, 20)  # Followers (0-20 points)
-                score += min(weekly_feedbacks * 10, 30)  # Feedback semaine (0-30 points)
-                score += min(helpful_count * 0.1, 20)  # Utile votes (0-20 points)
-                
-                # Bonus pour la régularité
-                if weekly_feedbacks >= 5:
-                    score += 10  # Bonus de régularité
-                
-                return round(score, 2)
-            except Exception as e:
-                print(f"❌ Error calculating engagement score: {e}")
-                return 0
-        
-        # Fonction pour trouver le rang dans un contexte (optimisée)
-        def get_profile_rank_in_context(profile_obj, context='global', filters=None):
-            """Trouve le rang réel d'un profil dans un contexte"""
-            try:
-                # Base queryset optimisé
-                queryset = Profile.objects.filter(
-                    is_active=True,
-                    user__is_active=True
-                ).select_related('user', 'category')
-                
-                # Appliquer les filtres selon le contexte
-                if context == 'category' and filters and 'category_id' in filters:
-                    queryset = queryset.filter(category_id=filters['category_id'])
-                elif context == 'country' and filters and 'country' in filters:
-                    queryset = queryset.filter(country__iexact=filters['country'])
-                elif context == 'city' and filters:
-                    if 'city' in filters and 'country' in filters:
-                        queryset = queryset.filter(
-                            city__iexact=filters['city'],
-                            country__iexact=filters['country']
-                        )
-                
-                # Récupérer tous les profils dans ce contexte
-                profile_ids = list(queryset.values_list('id', flat=True))
-                
-                if not profile_ids:
-                    return None
-                
-                # Calculer les scores uniquement pour les profils qui ont des feedbacks
-                scores_dict = {}
-                
-                # Récupérer les données de feedbacks en une seule requête
-                feedback_stats = Feedback.objects.filter(
-                    professional__profile__id__in=profile_ids
-                ).values('professional__profile__id').annotate(
-                    total_feedbacks=Count('id'),
-                    avg_rating=Avg('rating'),
-                    weekly_feedbacks=Count(
-                        'id',
-                        filter=Q(created_at__gte=timezone.now() - timedelta(days=7))
-                    ),
-                    total_helpful=Sum('helpful_count')
-                )
-                
-                # Transformer en dictionnaire pour accès rapide
-                for stat in feedback_stats:
-                    prof_id = stat['professional__profile__id']
-                    scores_dict[prof_id] = {
-                        'total_feedbacks': stat['total_feedbacks'] or 0,
-                        'avg_rating': stat['avg_rating'] or 0,
-                        'weekly_feedbacks': stat['weekly_feedbacks'] or 0,
-                        'total_helpful': stat['total_helpful'] or 0,
-                    }
-                
-                # Calculer les scores d'engagement
-                profile_scores = []
-                for prof in queryset:
-                    prof_id = prof.id
-                    stats = scores_dict.get(prof_id, {})
-                    
-                    total_feedbacks = stats.get('total_feedbacks', 0)
-                    if total_feedbacks < 3:  # Minimum 3 feedbacks pour être classé
-                        continue
-                    
-                    avg_rating = stats.get('avg_rating', 0)
-                    weekly_feedbacks = stats.get('weekly_feedbacks', 0)
-                    total_helpful = stats.get('total_helpful', 0)
-                    followers_count = prof.followers.count()
-                    
-                    # Calcul du score (même formule que calculate_engagement_score)
-                    score = 0
-                    score += avg_rating * 10
-                    score += min(followers_count * 0.5, 20)
-                    score += min(weekly_feedbacks * 10, 30)
-                    score += min(total_helpful * 0.1, 20)
-                    
-                    if weekly_feedbacks >= 5:
-                        score += 10
-                    
-                    if score > 0:
-                        profile_scores.append((prof_id, round(score, 2)))
-                
-                # Trier par score décroissant
-                profile_scores.sort(key=lambda x: x[1], reverse=True)
-                
-                # Trouver le rang du profil demandé
-                if not profile_scores:
-                    return None
-                
-                # Organiser par score pour les égalités
-                ranked_profiles = []
-                current_rank = 1
-                previous_score = None
-                
-                for i, (prof_id, score) in enumerate(profile_scores):
-                    if score != previous_score:
-                        current_rank = i + 1
-                        previous_score = score
-                    
-                    ranked_profiles.append({
-                        'profile_id': prof_id,
-                        'score': score,
-                        'rank': current_rank
-                    })
-                    
-                    if prof_id == profile_obj.id:
-                        return {
-                            'rank': current_rank,
-                            'score': score,
-                            'total_ranked': len(profile_scores)
-                        }
-                
-                return None
-                
-            except Exception as e:
-                print(f"❌ Error in get_profile_rank_in_context: {e}")
-                return None
-        
-        # Calculer les rangs du profil
-        engagement_score = calculate_engagement_score(profile)
-        rankings = {
-            'global': None,
-            'category': None,
-            'country': None,
-            'city': None,
-            'is_rising': False,
-            'weekly_feedbacks': 0
-        }
-        
-        # Vérifier si le profil est "rising" (3+ feedbacks cette semaine)
-        week_start = timezone.now() - timedelta(days=7)
-        weekly_feedbacks = Feedback.objects.filter(
-            professional=profile.user,
-            created_at__gte=week_start
-        ).count()
-        
-        rankings['weekly_feedbacks'] = weekly_feedbacks
-        rankings['is_rising'] = weekly_feedbacks >= 3
-        
-        # Calculer les rangs seulement si le profil a un score
-        if engagement_score > 0:
-            # Calculer le rang global
-            rankings['global'] = get_profile_rank_in_context(profile, 'global')
-            
-            # Calculer le rang par catégorie
-            if profile.category:
-                rankings['category'] = get_profile_rank_in_context(
-                    profile, 
-                    'category', 
-                    {'category_id': profile.category.id}
-                )
-            
-            # Calculer le rang par pays
-            if profile.country:
-                rankings['country'] = get_profile_rank_in_context(
-                    profile,
-                    'country',
-                    {'country': profile.country}
-                )
-                
-                # Calculer le rang par ville
-                if profile.city:
-                    rankings['city'] = get_profile_rank_in_context(
-                        profile,
-                        'city',
-                        {'city': profile.city, 'country': profile.country}
-                    )
-        
-        # ==================== FIN SECTION CLASSEMENTS ====================
-        
-        # Construire les URLs des images avec gestion d'erreurs
+        # Initialiser les variables d'images
         image_url = None
         image_bio_url = None
         
+        # Construire les URLs des images avec gestion d'erreurs
         if profile.image:
             try:
                 image_url = request.build_absolute_uri(profile.image.url)
@@ -618,37 +466,38 @@ def profile_detail_public(request, profile_id):
         
         # Gestion sécurisée des feedbacks
         try:
-            # Calculer le rating moyen
-            avg_rating_result = Feedback.objects.filter(
-                professional=profile_user
-            ).aggregate(Avg('rating'))
+            # Calculer le rating moyen et le nombre de feedbacks
+            avg_rating_result = Feedback.objects.filter(professional=profile_id).aggregate(
+                Avg('rating')
+            )
             avg_rating = avg_rating_result['rating__avg'] or 0.0
             
-            # Récupérer les feedbacks avec filtrage des blocages
+            # Récupérer les feedbacks (avec filtrage des blocages)
             feedbacks_query = Feedback.objects.filter(
-                professional=profile_user
-            ).select_related('user').prefetch_related('user__profile')
+                professional=profile_id
+            ).select_related('user')
             
             # Si l'utilisateur est authentifié, filtrer les feedbacks des utilisateurs bloqués
             if request.user.is_authenticated:
                 current_user = request.user
                 
-                # Récupérer tous les IDs bloqués/bloquants
-                blocked_ids = Block.objects.filter(
-                    Q(blocker=current_user) | Q(blocked=current_user),
+                # Récupérer les IDs des utilisateurs que j'ai bloqués
+                blocked_users_ids = Block.objects.filter(
+                    blocker=current_user,
                     is_active=True
-                ).values_list('blocker', 'blocked')
+                ).values_list('blocked', flat=True)
                 
-                # Créer un set des utilisateurs à exclure
-                exclude_users = set()
-                for blocker_id, blocked_id in blocked_ids:
-                    if blocker_id == current_user.id:
-                        exclude_users.add(blocked_id)
-                    else:
-                        exclude_users.add(blocker_id)
+                # Récupérer les IDs des utilisateurs qui m'ont bloqué
+                blocking_users_ids = Block.objects.filter(
+                    blocked=current_user,
+                    is_active=True
+                ).values_list('blocker', flat=True)
                 
-                if exclude_users:
-                    feedbacks_query = feedbacks_query.exclude(user_id__in=exclude_users)
+                # Combiner les deux listes
+                all_blocked_ids = set(blocked_users_ids) | set(blocking_users_ids)
+                
+                # Exclure les feedbacks des utilisateurs bloqués/bloquants
+                feedbacks_query = feedbacks_query.exclude(user__in=all_blocked_ids)
             
             feedback_count = feedbacks_query.count()
             recent_feedbacks = feedbacks_query.order_by('-created_at')[:10]
@@ -657,17 +506,15 @@ def profile_detail_public(request, profile_id):
             for feedback in recent_feedbacks:
                 try:
                     user_image_url = None
-                    if hasattr(feedback.user, 'profile') and feedback.user.profile.image:
+                    if feedback.user.profile.image:
                         user_image_url = request.build_absolute_uri(feedback.user.profile.image.url)
                     
                     feedbacks_data.append({
                         'id': feedback.id,
-                        'user_id': feedback.user.id,
                         'user_name': f"{feedback.user.first_name} {feedback.user.last_name}".strip() or feedback.user.username,
                         'user_image': user_image_url,
                         'rating': feedback.rating,
                         'comment': feedback.comment,
-                        'helpful_count': feedback.helpful_count,
                         'created_at': feedback.created_at
                     })
                 except Exception as e:
@@ -682,34 +529,32 @@ def profile_detail_public(request, profile_id):
         
         # Calcul des statistiques de followers/following avec filtrage des blocages
         try:
-            # Compter les followers
+            # Compter les followers (avec filtrage des blocages)
             followers_query = profile.followers.all()
             
             if request.user.is_authenticated:
                 current_user = request.user
                 # Récupérer les IDs des utilisateurs bloqués dans les deux sens
                 blocked_ids = Block.objects.filter(
-                    Q(blocker=current_user) | Q(blocked=current_user),
+                    blocker=current_user,
                     is_active=True
-                ).values_list('blocker', 'blocked')
+                ).values_list('blocked', flat=True)
                 
-                exclude_users = set()
-                for blocker_id, blocked_id in blocked_ids:
-                    if blocker_id == current_user.id:
-                        exclude_users.add(blocked_id)
-                    else:
-                        exclude_users.add(blocker_id)
+                blocking_ids = Block.objects.filter(
+                    blocked=current_user,
+                    is_active=True
+                ).values_list('blocker', flat=True)
                 
-                if exclude_users:
-                    followers_query = followers_query.exclude(id__in=exclude_users)
+                all_blocked_ids = set(blocked_ids) | set(blocking_ids)
+                followers_query = followers_query.exclude(id__in=all_blocked_ids)
             
             followers_count = followers_query.count()
             
             # Compter les following
             following_query = profile.following.all()
             
-            if request.user.is_authenticated and exclude_users:
-                following_query = following_query.exclude(id__in=exclude_users)
+            if request.user.is_authenticated:
+                following_query = following_query.exclude(id__in=all_blocked_ids)
             
             following_count = following_query.count()
             
@@ -744,7 +589,7 @@ def profile_detail_public(request, profile_id):
             'bio': profile.bio,
             'social_links': profile.social_links,
             'city': profile.city,
-            'phone': profile.phone,
+            'phone':profile.phone,
             "zip_code": profile.zip_code,
             'state': profile.state,
             'country': profile.country,
@@ -753,114 +598,19 @@ def profile_detail_public(request, profile_id):
             'website': profile.website,
             'birth_date': profile.birth_date,
             'category_name': profile.category.name if profile.category else None,
-            'category_id': profile.category.id if profile.category else None,
             'avg_rating': float(avg_rating),
             'feedback_count': feedback_count,
             'followers_count': followers_count,
             'following_count': following_count,
             'created_at': profile.created_at,
             'feedbacks': feedbacks_data,
-            
-            # ==================== INFORMATIONS DE CLASSEMENT ====================
-            'ranking': {
-                'engagement_score': engagement_score,
-                'is_rising': rankings['is_rising'],
-                'weekly_feedbacks': rankings['weekly_feedbacks'],
-                'global': {
-                    'rank': rankings['global']['rank'] if rankings['global'] else None,
-                    'score': rankings['global']['score'] if rankings['global'] else None,
-                    'total_ranked': rankings['global']['total_ranked'] if rankings['global'] else None,
-                } if rankings['global'] else None,
-                'category': {
-                    'rank': rankings['category']['rank'] if rankings['category'] else None,
-                    'score': rankings['category']['score'] if rankings['category'] else None,
-                    'total_ranked': rankings['category']['total_ranked'] if rankings['category'] else None,
-                    'category_name': profile.category.name if profile.category else None,
-                } if rankings['category'] else None,
-                'country': {
-                    'rank': rankings['country']['rank'] if rankings['country'] else None,
-                    'score': rankings['country']['score'] if rankings['country'] else None,
-                    'total_ranked': rankings['country']['total_ranked'] if rankings['country'] else None,
-                    'country_name': profile.country,
-                } if rankings['country'] else None,
-                'city': {
-                    'rank': rankings['city']['rank'] if rankings['city'] else None,
-                    'score': rankings['city']['score'] if rankings['city'] else None,
-                    'total_ranked': rankings['city']['total_ranked'] if rankings['city'] else None,
-                    'city_name': profile.city,
-                    'country_name': profile.country,
-                } if rankings['city'] else None,
-                'badges': [],  # Seront remplis plus bas
-            },
-            # ==================== FIN SECTION CLASSEMENT ====================
-            
             # Informations sur le statut de blocage
             'block_status': {
-                'is_blocked': False,
-                'can_interact': True,
+                'is_blocked': False,  # Par défaut
+                'can_interact': True,  # Par défaut
                 'block_type': None
             }
         }
-        
-        # Ajouter les badges basés sur les rangs
-        badges = []
-        
-        # Badges globaux
-        if rankings['global'] and rankings['global']['rank']:
-            rank = rankings['global']['rank']
-            if rank == 1:
-                badges.append({'name': '🥇 Global #1', 'color': 'gold', 'type': 'global'})
-            elif rank == 2:
-                badges.append({'name': '🥈 Global #2', 'color': 'silver', 'type': 'global'})
-            elif rank == 3:
-                badges.append({'name': '🥉 Global #3', 'color': 'bronze', 'type': 'global'})
-            elif rank <= 10:
-                badges.append({'name': '🏆 Top 10 Global', 'color': 'blue', 'type': 'global'})
-            elif rank <= 50:
-                badges.append({'name': '📈 Top 50 Global', 'color': 'green', 'type': 'global'})
-            elif rank <= 100:
-                badges.append({'name': '⭐ Top 100 Global', 'color': 'orange', 'type': 'global'})
-        
-        # Badges de catégorie
-        if rankings['category'] and rankings['category']['rank']:
-            rank = rankings['category']['rank']
-            category_name = profile.category.name if profile.category else "Category"
-            if rank == 1:
-                badges.append({'name': f'🏆 #1 in {category_name}', 'color': 'purple', 'type': 'category'})
-            elif rank <= 3:
-                badges.append({'name': f'🥇 Top 3 in {category_name}', 'color': 'purple', 'type': 'category'})
-            elif rank <= 10:
-                badges.append({'name': f'⭐ Top 10 in {category_name}', 'color': 'purple', 'type': 'category'})
-        
-        # Badges de pays
-        if rankings['country'] and rankings['country']['rank']:
-            rank = rankings['country']['rank']
-            if rank == 1:
-                badges.append({'name': f'🇺🇸 #1 in {profile.country}', 'color': 'cyan', 'type': 'country'})
-            elif rank <= 5:
-                badges.append({'name': f'⭐ Top 5 in {profile.country}', 'color': 'cyan', 'type': 'country'})
-        
-        # Badges de ville
-        if rankings['city'] and rankings['city']['rank']:
-            rank = rankings['city']['rank']
-            if rank == 1:
-                badges.append({'name': f'🏙️ #1 in {profile.city}', 'color': 'magenta', 'type': 'city'})
-        
-        # Badges de performance
-        if rankings['is_rising']:
-            badges.append({'name': '🔥 Rising Star', 'color': 'red', 'type': 'rising'})
-        
-        if avg_rating >= 4.8:
-            badges.append({'name': '⭐⭐⭐⭐⭐ Excellent', 'color': 'gold', 'type': 'rating'})
-        elif avg_rating >= 4.5:
-            badges.append({'name': '⭐ High Rating', 'color': 'gold', 'type': 'rating'})
-        
-        if feedback_count >= 100:
-            badges.append({'name': '💬 Feedback Expert', 'color': 'blue', 'type': 'feedback'})
-        elif feedback_count >= 50:
-            badges.append({'name': '💬 Active Reviewer', 'color': 'green', 'type': 'feedback'})
-        
-        profile_data['ranking']['badges'] = badges
         
         # Ajouter les informations de blocage si l'utilisateur est authentifié
         if request.user.is_authenticated:
@@ -889,9 +639,7 @@ def profile_detail_public(request, profile_id):
                 'user_blocked_profile': bool(user_blocked_profile),
                 'profile_blocked_user': bool(profile_blocked_user),
                 'block_reason': user_blocked_profile.reason if user_blocked_profile else 
-                              profile_blocked_user.reason if profile_blocked_user else None,
-                'block_expires_at': user_blocked_profile.expires_at if user_blocked_profile else 
-                                  profile_blocked_user.expires_at if profile_blocked_user else None
+                              profile_blocked_user.reason if profile_blocked_user else None
             }
         
         print(f"✅ Profile data successfully built for profile {profile_id}")
@@ -1212,6 +960,7 @@ def get_my_profile_id(request):
             'profile_id': profile.id,
             'user_id': request.user.id,
             'username': request.user.username,
+            'email': request.user.email,
      
         })
         
@@ -1253,7 +1002,7 @@ def profiles_by_category(request, category_id=None):
             result = []
             
             for category in all_categories:
-                profiles_in_category = Profile.objects.filter(category=category)
+                profiles_in_category = Profile.objects.filter(category=category, user__is_active=True).select_related('user')
                 
                 if not profiles_in_category.exists():
                     continue
@@ -1346,7 +1095,7 @@ def profiles_by_category(request, category_id=None):
             except Category.DoesNotExist:
                 return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
             
-            profiles = Profile.objects.filter(category=category)
+            profiles = Profile.objects.filter(category=category, user__is_active=True)
             profile_data = []
             
             for profile in profiles:

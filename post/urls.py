@@ -4,7 +4,7 @@ from . import views
 # urls.py
 from django.urls import path
 from . import views
-
+from . import ad_views
 urlpatterns = [
     # Posts
     path('posts/', views.post_list_create, name='post-list-create'),
@@ -49,4 +49,38 @@ urlpatterns = [
     path('ratings/my-ratings/', views.get_user_ratings, name='get_user_ratings'),
         path('posts/<int:post_id>/download-media/', views.download_post_media, name='download_post_media'),
     path('posts/<int:post_id>/media-list/', views.get_post_media_list, name='get_post_media_list'),
-]
+
+
+  # Ad Campaigns
+    path('api/ad-campaigns/', ad_views.ad_campaign_list, name='ad-campaign-list'),
+    path('api/ad-campaigns/<int:pk>/', ad_views.ad_campaign_detail, name='ad-campaign-detail'),
+    path('api/ad-campaigns/<int:pk>/activate/', ad_views.ad_campaign_activate, name='ad-campaign-activate'),
+    path('api/ad-campaigns/<int:pk>/pause/', ad_views.ad_campaign_pause, name='ad-campaign-pause'),
+    path('api/ad-campaigns/<int:pk>/stats/', ad_views.ad_campaign_stats, name='ad-campaign-stats'),
+    
+    # Sponsored Posts
+    path('api/sponsored-posts/', ad_views.sponsored_post_list, name='sponsored-post-list'),
+    path('api/sponsored-posts/<int:pk>/', ad_views.sponsored_post_detail, name='sponsored-post-detail'),
+    path('api/sponsored-posts/<int:pk>/process-payment/', 
+         ad_views.sponsored_post_process_payment, 
+         name='sponsored-post-process-payment'),
+    path('api/sponsored-posts/active/', ad_views.sponsored_post_active, name='sponsored-post-active'),
+    
+    # Payments
+    path('api/payments/', ad_views.payment_list, name='payment-list'),
+    path('api/payments/<int:pk>/', ad_views.payment_detail, name='payment-detail'),
+    path('api/sponsored-posts/<int:sponsored_post_id>/create-payment-intent/', 
+         ad_views.create_boost_payment_intent, 
+         name='create-boost-payment-intent'),
+    # Boost Posts
+    path('api/posts/<int:post_id>/boost/', ad_views.boost_post, name='boost-post'),
+    path('api/posts/<int:post_id>/create-boost-checkout/', ad_views.create_boost_checkout_session, name='boost-post'),
+    path('api/posts/<int:post_id>/boost-options/', ad_views.boost_post_options, name='boost-post-options'),
+    path('api/posts/<int:post_id>/confirm-boost/', ad_views.confirm_boost_payment, name='confirm-boost-payment'),
+    path('api/posts/<int:post_id>/check-boost/', ad_views.check_post_boost_status, name='check-boost-status'),
+    path('api/posts/<int:post_id>/check-boost/', ad_views.check_post_boost_status, name='check-boost-status'),
+    # Public endpoints
+    path('api/active-boosts/', ad_views.get_active_boosts, name='active-boosts'),
+    
+    # Webhook
+    path('api/webhooks/stripe/', ad_views.stripe_webhook, name='stripe-webhook'),]

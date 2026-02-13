@@ -168,9 +168,9 @@ class MessageSerializer(serializers.ModelSerializer):
             return 'image'
         elif obj.file:
             filename = obj.file.name.lower()
-            if any(filename.endswith(ext) for ext in ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv', '.m4v']):
+            if any(filename.endswith(ext) for ext in ['.mp4', '.avi', '.mov', '.wmv', '.flv',  '.mkv', '.m4v']):
                 return 'video'
-            elif any(filename.endswith(ext) for ext in ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.webm', '.aac']):
+            elif any(filename.endswith(ext) for ext in ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.webm', '.aac','.webm']):
                 return 'audio'
             elif filename.endswith('.pdf'):
                 return 'pdf'

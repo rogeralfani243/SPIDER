@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
 import re
-
+from django.utils import timezone   
 #here's the model for categories on posts
 class Category(models.Model):           
     name = models.CharField(max_length=50, unique=True)
@@ -203,3 +203,153 @@ class UserInteraction(models.Model):
             models.Index(fields=['user', 'interaction_type']),
             models.Index(fields=['post', 'interaction_type']),
         ]
+
+
+
+
+# models.py - Modèles pour le système de publicité
+
+class AdCampaign(models.Model):
+    """
+    Campagne publicitaire pour un utilisateur
+    """
+    STATUS_CHOICES = [
+        ('draft', 'Brouillon'),
+        ('active', 'Active'),
+        ('paused', 'En pause'),
+        ('completed', 'Terminée'),
+        ('cancelled', 'Annulée'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='ad_campaigns')
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    budget = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    spent = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    
+    # Durée de la campagne
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    
+    # Paramètres de ciblage
+    target_categories = models.ManyToManyField(Category, blank=True, related_name='ad_campaigns')
+    target_tags = models.ManyToManyField(Tag, blank=True, related_name='ad_campaigns')
+    
+    # Priorité (plus élevé = plus prioritaire)
+    priority = models.IntegerField(default=1, choices=[
+        (1, 'Normal'),
+        (2, 'Élevée'),
+        (3, 'Très élevée'),
+    ])
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    
+    # Métriques
+    impressions = models.IntegerField(default=0)  # Nombre de fois affiché
+    clicks = models.IntegerField(default=0)       # Nombre de clics
+    conversions = models.IntegerField(default=0)  # Interactions (likes, commentaires, etc.)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-priority', '-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.get_status_display()}"
+    
+    def is_active(self):
+        now = timezone.now()
+        return (
+            self.status == 'active' and 
+            self.start_date <= now <= self.end_date and
+            self.budget > self.spent
+        )
+    
+    def remaining_budget(self):
+        return self.budget - self.spent
+    
+    def update_spent(self, amount):
+        """Mettre à jour le budget dépensé"""
+        self.spent += amount
+        self.save(update_fields=['spent', 'updated_at'])
+
+
+class SponsoredPost(models.Model):
+    """
+    Post sponsorisé (publicité)
+    """
+    POST_TYPE_CHOICES = [
+        ('standard', 'Post standard'),
+        ('premium', 'Post premium'),
+        ('featured', 'Post en vedette'),
+        ('spotlight', 'Post spotlight'),
+    ]
+    
+    PAYMENT_STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('paid', 'Payé'),
+        ('failed', 'Échoué'),
+        ('refunded', 'Remboursé'),
+    ]
+    
+    # Référence au post original
+    original_post = models.OneToOneField(Post, on_delete=models.CASCADE, related_name='sponsored_post')
+    
+    # Référence à la campagne
+    campaign = models.ForeignKey(AdCampaign, on_delete=models.CASCADE, related_name='sponsored_posts')
+    
+    # Type de post sponsorisé
+    post_type = models.CharField(max_length=20, choices=POST_TYPE_CHOICES, default='standard')
+    
+    # Prix et paiement
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    payment_id = models.CharField(max_length=100, blank=True, null=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    
+    # Durée de la promotion
+    boost_start = models.DateTimeField()
+    boost_end = models.DateTimeField()
+    
+    # Paramètres de boost
+    boost_multiplier = models.FloatField(default=1.0, help_text="Multiplicateur de visibilité")
+    always_on_top = models.BooleanField(default=False, help_text="Toujours afficher en haut")
+    featured_in_feed = models.BooleanField(default=True, help_text="Afficher dans le flux principal")
+    featured_in_category = models.BooleanField(default=False, help_text="Afficher en vedette dans la catégorie")
+    
+    # Statistiques
+    boosted_views = models.IntegerField(default=0)
+    boosted_clicks = models.IntegerField(default=0)
+    boosted_engagement = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-boost_multiplier', '-created_at']
+    
+    def __str__(self):
+        return f"Sponsored: {self.original_post.title}"
+    
+    def is_active(self):
+        now = timezone.now()
+        return (
+            self.payment_status == 'paid' and
+            self.boost_start <= now <= self.boost_end and
+            self.campaign.is_active()
+        )
+    
+    def days_remaining(self):
+        if not self.is_active():
+            return 0
+        remaining = self.boost_end - timezone.now()
+        return max(0, remaining.days)
+    
+    def record_view(self, user):
+        """Enregistrer une vue boostée"""
+        if self.is_active():
+            self.boosted_views += 1
+            self.campaign.impressions += 1
+            self.save(update_fields=['boosted_views', 'updated_at'])
+            self.campaign.save(update_fields=['impressions'])
