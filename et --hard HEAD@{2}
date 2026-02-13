@@ -1,0 +1,96 @@
+[33m40e5014[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: commit: no.142
+[33m7381886[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: pull: Fast-forward
+[33mb1ae3a1[m HEAD@{2}: reset: moving to HEAD~2
+[33m7381886[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{3}: reset: moving to HEAD~1
+[33mc70ba6f[m HEAD@{4}: commit: no.140
+[33m7381886[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{5}: reset: moving to HEAD~1
+[33mc70ca40[m HEAD@{6}: commit: no.140
+[33m7381886[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{7}: commit: commit -m no.126
+[33m0139aff[m HEAD@{8}: commit: commit 132
+[33mb1ae3a1[m HEAD@{9}: commit: commit 131
+[33m84b5487[m HEAD@{10}: commit: commit 130
+[33mdf13936[m HEAD@{11}: commit: commit n0.125
+[33mee4cf58[m HEAD@{12}: commit: commit n0.124
+[33mcc6ccfe[m HEAD@{13}: commit: commit n0.123
+[33mcb249a8[m HEAD@{14}: commit: commit n0.122
+[33m3df5bc3[m HEAD@{15}: commit: commit n0.121
+[33m285c47c[m HEAD@{16}: commit: commit n0.120
+[33m8181dd9[m HEAD@{17}: commit: commit n0.120
+[33m966f707[m HEAD@{18}: commit: commit n0.119
+[33mfaa9e9f[m HEAD@{19}: commit: commit n0.118
+[33m52f5048[m HEAD@{20}: commit: commit n0.117
+[33m28565a3[m HEAD@{21}: commit: commit np.116
+[33md395b4b[m HEAD@{22}: commit: commit np.115
+[33mfd32994[m HEAD@{23}: commit: commit no.114
+[33m2c10cae[m HEAD@{24}: commit: commit no.113
+[33m11e0780[m HEAD@{25}: commit: commit no.112
+[33m9abda61[m HEAD@{26}: commit: no.111
+[33m7bfcbe2[m HEAD@{27}: commit: no.110
+[33m1226df5[m HEAD@{28}: commit: no.95
+[33m2491b38[m HEAD@{29}: commit: no.94
+[33mc512ad0[m HEAD@{30}: commit: commit no.107
+[33ma8116cd[m HEAD@{31}: commit: commit no.106
+[33m485db7a[m HEAD@{32}: commit: commit no.106
+[33m2e1a84b[m HEAD@{33}: commit: commit no.105
+[33m2c27417[m HEAD@{34}: commit: commit no.104
+[33m5c67cfd[m HEAD@{35}: commit: commit no.103
+[33me153094[m HEAD@{36}: commit: commit no.102
+[33m6b66661[m HEAD@{37}: commit: commit no.102
+[33m69cf226[m HEAD@{38}: commit: commit no.101
+[33m379a33a[m HEAD@{39}: commit: commit no.100
+[33ma6f84a6[m HEAD@{40}: commit: commit no.99
+[33m336faf4[m HEAD@{41}: commit: commit no.99
+[33m4796492[m HEAD@{42}: commit: commit no.98
+[33m4344be8[m HEAD@{43}: commit: commit no.97
+[33m8e6fd82[m HEAD@{44}: commit: commit no.96
+[33maddebff[m HEAD@{45}: commit: commit no.95
+[33m0527cf8[m HEAD@{46}: commit: commit no.94
+[33m616eb18[m HEAD@{47}: commit: commit no.94
+[33m442e40c[m HEAD@{48}: commit: commit no.93
+[33m96d7238[m HEAD@{49}: commit: commit no.92
+[33mdb70f02[m HEAD@{50}: commit: commit no.91
+[33mf91f0ff[m HEAD@{51}: commit: commit no.94
+[33m24e9e54[m HEAD@{52}: commit: commit no.93
+[33m599838c[m HEAD@{53}: commit: commit no.92
+[33m0ec41da[m HEAD@{54}: commit: commit no.91
+[33m06b68ad[m HEAD@{55}: commit: commit no.89
+[33m4f6e844[m HEAD@{56}: commit: commit no.88
+[33m1c93d32[m HEAD@{57}: commit: commit no.89
+[33m7df4f42[m HEAD@{58}: commit: commit no.89
+[33m1dfe764[m HEAD@{59}: commit: commit no.89
+[33mdec78b4[m HEAD@{60}: commit: commit no.88
+[33m9585eea[m HEAD@{61}: commit: commit no.87
+[33md3a20e6[m HEAD@{62}: commit: commit no.86
+[33m05c6351[m HEAD@{63}: commit: commit no.85
+[33m75ee8de[m HEAD@{64}: commit: commit no.84
+[33m0d3790a[m HEAD@{65}: commit: commit no.84
+[33mf346a44[m HEAD@{66}: commit: commit no.84
+[33m0c38cc6[m HEAD@{67}: commit: commit no.84
+[33mf0eb09f[m HEAD@{68}: commit: commit no.84
+[33mf6eac05[m HEAD@{69}: commit: commit no.84
+[33me8339ac[m HEAD@{70}: commit: commit no.83
+[33m4bf4a63[m HEAD@{71}: commit: commit no.82
+[33mf966e85[m HEAD@{72}: commit: commit no.81
+[33mdaab31a[m HEAD@{73}: commit: commit no.80
+[33m343a6e4[m HEAD@{74}: commit: commit no.80
+[33m91bb578[m HEAD@{75}: commit: commit no.79
+[33m3875053[m HEAD@{76}: commit: commit no.78
+[33mfea59a3[m HEAD@{77}: commit: commit no.77
+[33mc57a822[m HEAD@{78}: commit: commit no.76
+[33md5f7832[m HEAD@{79}: commit: commit no.75
+[33m2b7a788[m HEAD@{80}: commit: commit no.74
+[33m17a6e1e[m HEAD@{81}: commit: commit no.73
+[33m5fd8f7c[m HEAD@{82}: commit: commit no.72
+[33m39af7ff[m HEAD@{83}: commit: commit no.71
+[33maecd2f3[m HEAD@{84}: commit: commit no.70
+[33mdb81c80[m HEAD@{85}: commit: commit no.69
+[33m0631573[m HEAD@{86}: commit: commit no.68
+[33m2f42322[m HEAD@{87}: commit: commit no.67
+[33m17ee88d[m HEAD@{88}: commit: commit no.68
+[33m5d6be4c[m HEAD@{89}: commit: commit no.67
+[33mc9c0aa2[m HEAD@{90}: commit: commit no.67
+[33m95fe957[m HEAD@{91}: commit: commit no.66
+[33m52998ba[m HEAD@{92}: commit: commit no.65
+[33m4abe2b5[m HEAD@{93}: commit: commit no.64
+[33meb3e35d[m HEAD@{94}: commit (merge): commit no.51
+[33mf541520[m HEAD@{95}: filter-branch: rewrite
