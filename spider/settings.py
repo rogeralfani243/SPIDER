@@ -25,7 +25,7 @@ ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY",get_random_secret_key())
 #ECRET_KEY = 'django-insecure-bnt3@*u*vwxxv6aue%*bbs6w+%r#e6!77gl$24$kg$^4*-%f@3'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-"""
+
 if not DEBUG:
     import builtins
 
@@ -33,7 +33,7 @@ if not DEBUG:
         pass
 
     builtins.print = _no_print
-"""
+
 # Pour aucun print en production
 # settings.py
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
