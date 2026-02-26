@@ -9,7 +9,7 @@ import DeleteAccountModal from './commentPost/comment/delete-modal/DeleteAccount
 import DropdownMenu from './commentPost/comment/delete-modal/DropdownMenu';
 import PasswordChangeModal from './auth-passcode/PassswordChangeModal';
 import API_URL from '../hooks/useApiUrl';
-import handleSupportClick from '../hooks/useSupport';
+import {handleSupportClick} from '../hooks/useSupport';
 import { useNavigate } from 'react-router-dom';
 // Configuration des options
 const mainOptions = [

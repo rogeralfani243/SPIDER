@@ -8,7 +8,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardMain from '../../dashboard_main';
 import CategoryList from './CategoryList';
 import useParamDrag from '../../../utils/useDrag';
-// Composant pour le sélecteur d'algorithme
 import AlgorithmSelector from './AlgorithmSelector';
 
 const PostList = () => {
@@ -21,7 +20,7 @@ const PostList = () => {
   const [filters, setFilters] = useState({
     category: '',
     search: '',
-    algorithm: 'recommended', // Nouveau: algorithme de recommandation
+    algorithm: 'recommended',
     sort: 'newest',
     tag: '',
     user: ''
@@ -29,16 +28,19 @@ const PostList = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [highlightedPostId, setHighlightedPostId] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [localFilters, setLocalFilters] = useState(filters);
-  const dragBlock = useParamDrag()
-  // Nouveau: métadonnées de l'algorithme
+  const dragBlock = useParamDrag();
   const [algorithmInfo, setAlgorithmInfo] = useState(null);
   const [userContext, setUserContext] = useState(null);
   const [paginationMeta, setPaginationMeta] = useState(null);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const highlightedPostRef = useRef(null);
+
+  // Définir les types d'algorithmes
+  const CUSTOM_ALGORITHMS = ['recommended', 'country_priority', 'discovery_new', 'avoid_seen', 'similar_users'];
+  const SIMPLE_SORTS = ['newest', 'oldest', 'popular', 'top_rated', 'most_commented', 'random', 'country'];
 
   // Fonction pour récupérer l'utilisateur connecté
   const fetchCurrentUser = async () => {
@@ -62,8 +64,6 @@ const PostList = () => {
         const userData = await response.json();
         console.log('✅ Current user fetched:', userData);
         setCurrentUser(userData);
-        
-        // Stocker aussi dans localStorage pour une utilisation facile
         localStorage.setItem('currentUser', JSON.stringify(userData));
       } else {
         console.warn('Failed to fetch current user:', response.status);
@@ -75,8 +75,8 @@ const PostList = () => {
     }
   };
 
-  // Fonction pour récupérer les posts avec l'algorithme de recommandation
-  const fetchPosts = useCallback(async (reset = false, customFilters = null) => {
+  // Fonction pour récupérer les posts
+  const fetchPosts = useCallback(async (reset = false, customFilters = null, force = false) => {
     try {
       if (reset) {
         setRefreshing(true);
@@ -88,13 +88,17 @@ const PostList = () => {
       
       console.log('🔍 Current filters:', currentFilters);
       console.log('🤖 Using algorithm:', currentFilters.algorithm);
+      console.log('📊 Using sort:', currentFilters.sort);
       
-      // Construire les paramètres pour l'API de recommandation
+      // Construire les paramètres pour l'API
       const params = new URLSearchParams({
         page: reset ? 1 : page,
         page_size: 20,
-        algorithm: currentFilters.algorithm || 'recommended', // Paramètre algorithm
       });
+      
+      // TOUJOURS ENVOYER LES DEUX PARAMÈTRES
+      params.append('algorithm', currentFilters.algorithm || 'recommended');
+      params.append('sort', currentFilters.sort || 'newest');
       
       // Ajouter la catégorie SEULEMENT si elle existe et n'est pas vide
       if (currentFilters.category && currentFilters.category !== '') {
@@ -120,12 +124,10 @@ const PostList = () => {
         console.log(`🔍 Adding user filter: "${currentFilters.user}"`);
       }
       
-      // Pour les algorithmes spéciaux, on utilise l'endpoint principal
-      // car l'algorithme est géré côté backend
       const url = `${URL}/post/posts/?${params.toString()}`;
       
       console.log('📡 Fetching from:', url);
-      console.log('📊 Parameters:', params.toString());
+      console.log('📊 Full parameters:', params.toString());
       
       const response = await fetch(url, {
         headers: {
@@ -159,10 +161,6 @@ const PostList = () => {
         setUserContext(data.user_context);
       }
       
-      if (data.filters) {
-        console.log('🎯 Active filters from backend:', data.filters);
-      }
-      
       // GESTION DES POSTS
       let postsArray = [];
       
@@ -175,7 +173,6 @@ const PostList = () => {
       } else if (Array.isArray(data.data)) {
         postsArray = data.data;
       } else {
-        // Chercher un tableau dans l'objet
         for (const key in data) {
           if (Array.isArray(data[key])) {
             postsArray = data[key];
@@ -219,8 +216,32 @@ const PostList = () => {
     } finally {
       setLoading(false);
       setRefreshing(false);
+      setIsInitialLoad(false);
     }
   }, [filters, page]);
+
+  // Effet pour le chargement initial
+  useEffect(() => {
+    const loadInitialData = async () => {
+      await fetchCurrentUser();
+      await fetchPosts(true);
+      checkForPostHighlighting();
+    };
+    
+    // Ne charger qu'au premier rendu
+    if (isInitialLoad) {
+      loadInitialData();
+    }
+  }, []); // Tableau de dépendances VIDE - s'exécute une seule fois au montage
+
+  // Effet séparé pour les changements de filtres
+  useEffect(() => {
+    // Ne pas exécuter lors du chargement initial
+    if (!isInitialLoad) {
+      console.log('🔄 Filters changed, fetching posts...');
+      fetchPosts(true, filters, true);
+    }
+  }, [filters]); // S'exécute quand filters change
 
   // Fonction pour vérifier et gérer la mise en évidence
   const checkForPostHighlighting = () => {
@@ -259,17 +280,6 @@ const PostList = () => {
     }
   };
 
-  // Effet pour charger l'utilisateur, les posts et vérifier la mise en évidence
-  useEffect(() => {
-    const loadInitialData = async () => {
-      await fetchCurrentUser();
-      await fetchPosts(true);
-      checkForPostHighlighting();
-    };
-    
-    loadInitialData();
-  }, [filters]);
-
   // Effet pour scroller vers le post mis en évidence
   useEffect(() => {
     if (highlightedPostId && posts.length > 0) {
@@ -307,8 +317,9 @@ const PostList = () => {
     setPage(prev => prev + 1);
   };
 
+  // Effet pour charger plus de posts quand la page change
   useEffect(() => {
-    if (page > 1) {
+    if (page > 1 && !isInitialLoad) {
       fetchPosts(false);
     }
   }, [page]);
@@ -318,25 +329,47 @@ const PostList = () => {
     fetchPosts(true);
   };
 
-  // Gérer les filtres
+  // Gérer les filtres - RÉDUIT AU MINIMUM
   const handleFilterChange = (newFilters) => {
+    console.log('🔄 Setting new filters:', newFilters);
     setFilters(prev => ({ ...prev, ...newFilters }));
     setPage(1);
   };
 
-  // Gérer le changement d'algorithme
-  const handleAlgorithmChange = (newAlgorithm) => {
-    console.log('Changing algorithm to:', newAlgorithm);
-    setFilters(prev => ({ 
-      ...prev, 
-      algorithm: newAlgorithm,
-      sort: newAlgorithm === 'newest' ? 'newest' : prev.sort
-    }));
+  // Gérer le changement d'algorithme - CORRIGÉ
+  const handleAlgorithmChange = (selectedAlgorithm) => {
+    console.log('🔄 Algorithm change requested:', selectedAlgorithm);
+    
+    let newFilters = { ...filters };
+    
+    // DÉTERMINER SI C'EST UN ALGORITHME PERSONNALISÉ OU UN TRI SIMPLE
+    if (CUSTOM_ALGORITHMS.includes(selectedAlgorithm)) {
+      newFilters.algorithm = selectedAlgorithm;
+      newFilters.sort = 'newest';
+    } else if (SIMPLE_SORTS.includes(selectedAlgorithm)) {
+      newFilters.sort = selectedAlgorithm;
+      newFilters.algorithm = 'newest';
+    } else {
+      newFilters.algorithm = 'recommended';
+      newFilters.sort = 'newest';
+    }
+    
+    console.log('🔄 Setting new filters:', newFilters);
+    
+    // Mettre à jour les filtres UNE SEULE FOIS
+    setFilters(newFilters);
     setPage(1);
     setPosts([]);
     
-    // Recharger les posts avec le nouvel algorithme
-    fetchPosts(true, { ...filters, algorithm: newAlgorithm });
+    // NE PAS appeler fetchPosts ici - l'effet le fera automatiquement
+  };
+
+  // Fonction pour déterminer l'algorithme à afficher
+  const getCurrentAlgorithmForDisplay = () => {
+    if (filters.sort && filters.sort !== 'newest' && SIMPLE_SORTS.includes(filters.sort)) {
+      return filters.sort;
+    }
+    return filters.algorithm;
   };
 
   // Fonction pour les actions du post
@@ -430,18 +463,19 @@ const PostList = () => {
     const newFilters = {
       ...filters,
       category: categoryId || '',
-      page: 1
     };
     
+    console.log('🔄 Setting new category filters:', newFilters);
     setFilters(newFilters);
     setPage(1);
     setPosts([]);
-    fetchPosts(true, newFilters);
-  }, [filters, fetchPosts]);
+    
+    // NE PAS appeler fetchPosts ici - l'effet le fera automatiquement
+  }, [filters]); // Attention: dépend de filters
 
-  // Récupérer
+  // Créer un post
   const handleCreatePost = () => {
-    window.location.href=('/create-post/');
+    window.location.href = '/create-post/';
   };
 
   // Fonction pour supprimer la mise en évidence
@@ -449,6 +483,48 @@ const PostList = () => {
     setHighlightedPostId(null);
     sessionStorage.removeItem('highlightedPost');
     sessionStorage.removeItem('highlightTimestamp');
+  };
+
+  // Badge pour afficher le type de tri actif
+  const getSortBadge = () => {
+    if (filters.sort && SIMPLE_SORTS.includes(filters.sort) && filters.sort !== 'newest' && filters.sort !== 'random') {
+      return (
+        <div className="sort-badge">
+          {filters.sort === 'top_rated' && <><i className="fas fa-star"></i> Top Rated</>}
+          {filters.sort === 'most_commented' && <><i className="fas fa-comments"></i> Most Commented</>}
+          {filters.sort === 'popular' && <><i className="fas fa-fire"></i> Popular</>}
+          {filters.sort === 'oldest' && <><i className="fas fa-history"></i> Oldest</>}
+          {filters.sort === 'country' && <><i className="fas fa-globe"></i> From Your Country</>}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Information sur l'algorithme actif
+  const getAlgorithmInfoForDisplay = () => {
+    const currentAlgo = getCurrentAlgorithmForDisplay();
+    
+    const descriptions = {
+      'recommended': 'Personalized recommendations based on your activity',
+      'country_priority': 'Priority to posts from your country',
+      'discovery_new': 'Discover new content you haven\'t seen yet',
+      'avoid_seen': 'Hide posts you have already viewed',
+      'similar_users': 'Content liked by users with similar interests',
+      'newest': 'Chronological order - newest posts first',
+      'oldest': 'Oldest posts first',
+      'popular': 'Most liked and engaged content',
+      'top_rated': 'Highest rated content (minimum 3 ratings, average ≥ 4.0)',
+      'most_commented': 'Content with the most discussions',
+      'random': 'Completely random order',
+      'country': 'Posts from your country first',
+    };
+    
+    return {
+      name: currentAlgo,
+      description: descriptions[currentAlgo] || 'Custom sorting algorithm',
+      type: CUSTOM_ALGORITHMS.includes(currentAlgo) ? 'custom' : 'simple'
+    };
   };
 
   if (error) {
@@ -486,20 +562,28 @@ const PostList = () => {
           {/* Sélecteur d'algorithme */}
           <div className="algorithm-selector-container">
             <AlgorithmSelector
-              currentAlgorithm={filters.algorithm}
+              currentAlgorithm={getCurrentAlgorithmForDisplay()}
               onAlgorithmChange={handleAlgorithmChange}
-              algorithmInfo={algorithmInfo}
+              algorithmInfo={getAlgorithmInfoForDisplay()}
               userContext={userContext}
             />
           </div>
           
-          {/* Filtres standards */}
-
+          {/* Badge du tri actif */}
+          {getSortBadge()}
+          
           {/* Info sur l'algorithme actuel */}
-        
+          {algorithmInfo && (
+            <div className="algorithm-info-display">
+              <div className="info-icon">
+                <i className="fas fa-info-circle"></i>
+              </div>
+              <div className="info-content">
+             
+              </div>
+            </div>
+          )}
         </div>
-
-       
 
         {/* Grille de posts */}
         {loading && posts.length === 0 ? (
@@ -514,7 +598,7 @@ const PostList = () => {
           </div>
         ) : (
           <>
-            <div className="posts-grid2"   >
+            <div className="posts-grid2">
               {posts.map(post => {
                 const isHighlighted = post.id === highlightedPostId;
                 return (
@@ -524,13 +608,13 @@ const PostList = () => {
                     className={`post-cad-wrapper ${isHighlighted ? 'highlighted' : ''}`}
                     data-post-id={post.id}
                   >
-                    {/* Badge d'algorithme (optionnel) */}
-                    {/*post.recommendation_score && post.recommendation_score > 50 && (
-                      <div className="recommendation-badge">
-                        <i className="fas fa-star"></i>
-                        <span>Recommended for you</span>
+                    {/* Badge pour les posts boostés */}
+                    {post.is_boosted && (
+                      <div className={`boost-badge ${post.is_spotlight ? 'spotlight-badge' : 'regular-boost-badge'}`}>
+                        <i className="fas fa-bolt"></i>
+                        {post.is_spotlight ? 'Spotlight' : 'Boosted'}
                       </div>
-                    )*/}
+                    )}
                     
                     <PostCard 
                       currentUser={currentUser}

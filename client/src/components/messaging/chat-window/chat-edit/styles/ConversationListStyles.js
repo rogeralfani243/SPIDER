@@ -105,9 +105,10 @@ getDisplayNameStyle: (unreadCount) => ({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  wordBreak: 'break-word', // Permet de couper les mots longs
   flex: 1, // Prend l'espace disponible
   minWidth: 0, // Important pour que text-overflow fonctionne avec flex
-  maxWidth: '100%', // S'adapte au conteneur
+  maxWidth: '400px', // S'adapte au conteneur
   marginRight: '5px',
     '@media (max-width: 1060px)': {
     maxWidth: '700px', // Réduit sur mobile

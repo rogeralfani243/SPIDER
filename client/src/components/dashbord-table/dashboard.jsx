@@ -48,7 +48,19 @@ import {
   Favorite as FavoriteIcon,
   LocationOn as LocationIcon,
   Language as WebsiteIcon,
-  Cake as BirthdayIcon
+  Cake as BirthdayIcon,
+} from '@mui/icons-material';
+import {
+  Assessment,
+  TrendingUp,
+  Timeline,
+  Public,
+  Groups,
+  Star,
+  WorkspacePremium,
+  Lock,
+  BarChart,
+  CheckCircle
 } from '@mui/icons-material';
 import {
   Language as LanguageIcon,
@@ -73,6 +85,11 @@ import { formatDistanceToNow } from 'date-fns';
 import SettingsDashboard from './settings';
 import ReportAccount from './ReportAccount.jsx';
 import { useNavigate } from 'react-router-dom';
+import AnalyticsDashboard from './analyticsDashboard';
+import { usePremiumStatus } from '../../hooks/usePremiumStatus';
+import UpgradeButton from './analytics/UpgradeButton';
+import CertificationDashboard from '../certifications/CertificationDashboard';
+
 const DashboardContainer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
   minHeight: '100vh',
@@ -114,11 +131,32 @@ const ProfileAvatar = styled(Avatar)(({ theme }) => ({
 
 const NavigationTabs = styled(Tabs)(({ theme }) => ({
   marginBottom: theme.spacing(3),
+  backgroundColor: 'white',
+  borderRadius: theme.shape.borderRadius * 2,
+  padding: theme.spacing(0.5),
+  boxShadow: '0 4px 20px rgba(0,0,0,0.02)',
+  '& .MuiTabs-indicator': {
+    height: '100%',
+    borderRadius: theme.shape.borderRadius * 1.5,
+    background: 'linear-gradient(135deg, rgb(60, 10, 10), rgb(180, 20, 20), rgb(255, 0, 80))',
+    zIndex: 1,
+  },
   '& .MuiTab-root': {
     textTransform: 'none',
-    fontWeight: 500,
+    fontWeight: 600,
     fontSize: '0.95rem',
     minHeight: 48,
+    color: '#64748B',
+    zIndex: 2,
+    transition: 'color 0.2s ease',
+    '&.Mui-selected': {
+      color: 'white',
+      fontWeight: 700,
+    },
+    '&:hover:not(.Mui-selected)': {
+      color: 'rgb(255, 0, 80)',
+      backgroundColor: 'rgba(255, 0, 80, 0.04)',
+    },
   },
 }));
 
@@ -186,10 +224,12 @@ const Dashboard = () => {
     'Posts',
     'Comments',
     'Reports',
-   // 'Statistics',
-    'Settings'
+   
+    'Settings',
+     'Statistics',
+     'certifications'
   ];
-
+const { isPremium } = usePremiumStatus();
   useEffect(() => {
     fetchProfileData();
   }, []);
@@ -833,24 +873,43 @@ const getSocialLinksArray = () => {
 </ProfileHeader>
 
         {/* Navigation Tabs */}
-        <NavigationTabs
-          value={activeTab}
-          onChange={handleTabChange}
-          variant="scrollable"
-          scrollButtons="auto"
-        >
-          {tabLabels.map((label, index) => (
-            <Tab 
-              key={index} 
-              label={label} 
-              sx={{ 
-                '&.Mui-selected': {
-                  color: theme.palette.primary.main,
-                }
-              }}
-            />
-          ))}
-        </NavigationTabs>
+      <NavigationTabs
+  value={activeTab}
+  onChange={handleTabChange}
+  variant="scrollable"
+  scrollButtons="auto"
+  sx={{
+    '& .MuiTabs-flexContainer': {
+      gap: 1,
+    },
+  }}
+>
+  {tabLabels.map((label, index) => (
+    <Tab 
+      key={index} 
+      label={label}
+      sx={{
+        borderRadius: 1.5,
+        mx: 0.5,
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: index === activeTab ? 'transparent' : 'transparent',
+          transition: 'all 0.2s ease',
+        },
+        '&:hover::before': {
+          background: index === activeTab ? 'transparent' : 'rgba(255, 0, 80, 0.02)',
+        },
+      }}
+    />
+  ))}
+</NavigationTabs>
 
         {/* Main Content */}
         {activeTab === 0 && (
@@ -1168,8 +1227,160 @@ const getSocialLinksArray = () => {
     </CardContent>
   </SectionCard>
 )}
-
-
+{activeTab === 6 && ( 
+<SectionCard>
+  <CardHeader
+        title={
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+              <Assessment />
+            </Avatar>
+            <Box>
+              <Typography variant="h5" fontWeight={700}>
+                Analytics Dashboard
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {isPremium 
+                  ? '✨ Your premium analytics are ready' 
+                  : 'Track your growth and engagement'
+                }
+              </Typography>
+            </Box>
+          </Box>
+        }
+        subheader={
+          <Box sx={{ mt: 2 }}>
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                p: 2, 
+                bgcolor: isPremium 
+                  ? 'rgba(76, 175, 80, 0.05)' 
+                  : 'rgba(255, 215, 0, 0.05)',
+                border: '1px solid',
+                borderColor: isPremium 
+                  ? 'rgba(76, 175, 80, 0.2)' 
+                  : 'rgba(255, 215, 0, 0.2)',
+                borderRadius: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 2
+              }}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
+                {isPremium ? (
+                  <CheckCircle sx={{ color: 'success.main' }} />
+                ) : (
+                  <Lock sx={{ color: '#ffd700' }} />
+                )}
+                <Box>
+                  <Typography 
+                    variant="body2" 
+                    fontWeight={600} 
+                    color={isPremium ? 'success.main' : '#b8860b'}
+                  >
+                    {isPremium ? 'Premium Active' : 'Premium Feature'}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {isPremium 
+                      ? 'You have full access to all analytics features' 
+                      : 'Unlock advanced analytics, geographic data, and performance trends'
+                    }
+                  </Typography>
+                </Box>
+              </Box>
+              
+              {/* ✅ BOUTON CONDITIONNEL */}
+              <UpgradeButton variant="contained" size="small" showBadge={!isPremium} setActiveTab={setActiveTab} />
+            </Paper>
+            
+            {/* Features list - toujours visible mais avec style différent si premium */}
+            <Box display="flex" gap={3} sx={{ mt: 2 }} flexWrap="wrap">
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <CheckCircle sx={{ 
+                  fontSize: 14, 
+                  color: isPremium ? 'success.main' : 'text.disabled' 
+                }} />
+                <Typography variant="caption" color={isPremium ? 'text.primary' : 'text.disabled'}>
+                  Real-time metrics
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <CheckCircle sx={{ 
+                  fontSize: 14, 
+                  color: isPremium ? 'success.main' : 'text.disabled' 
+                }} />
+                <Typography variant="caption" color={isPremium ? 'text.primary' : 'text.disabled'}>
+                  30-day history
+                </Typography>
+              </Box>
+               <Box display="flex" alignItems="center" gap={0.5}>
+                <CheckCircle sx={{ 
+                  fontSize: 14, 
+                  color: isPremium ? 'success.main' : 'text.disabled' 
+                }} />
+                <Typography variant="caption" color={isPremium ? 'text.primary' : 'text.disabled'}>
+                  Downloading your charts
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <CheckCircle sx={{ 
+                  fontSize: 14, 
+                  color: isPremium ? 'success.main' : 'text.disabled' 
+                }} />
+                <Typography variant="caption" color={isPremium ? 'text.primary' : 'text.disabled'}>
+                  Geographic distribution
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <CheckCircle sx={{ 
+                  fontSize: 14, 
+                  color: isPremium ? 'success.main' : 'text.disabled' 
+                }} />
+                <Typography variant="caption" color={isPremium ? 'text.primary' : 'text.disabled'}>
+                  Exportable reports
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+        }
+      />
+      <Divider />
+      <CardContent>
+        {/* ✅ AFFICHAGE CONDITIONNEL DU DASHBOARD */}
+        {isPremium ? (
+          <AnalyticsDashboard />
+        ) : (
+          <Box 
+            sx={{ 
+              py: 8, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center',
+              gap: 2,
+              bgcolor: 'rgba(0,0,0,0.02)',
+              borderRadius: 2
+            }}
+          >
+            <Lock sx={{ fontSize: 48, color: 'text.disabled' }} />
+            <Typography variant="h6" color="text.secondary">
+              Premium Analytics Locked
+            </Typography>
+            <Typography variant="body2" color="text.secondary" align="center" sx={{ maxWidth: 400 }}>
+              Upgrade to Premium to unlock detailed analytics about your posts, 
+              comments, ratings and audience engagement.
+            </Typography>
+            <UpgradeButton variant="contained" size="medium" sx={{ mt: 2 }} setActiveTab={setActiveTab} />
+          </Box>
+        )}
+      </CardContent>
+</SectionCard>
+)}
+{activeTab === 7 && ( 
+  <CertificationDashboard />
+)}
       </Container>
 
       {/* Snackbar for errors */}

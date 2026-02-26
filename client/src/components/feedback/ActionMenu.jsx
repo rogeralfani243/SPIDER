@@ -78,9 +78,7 @@ const ActionMenu = ({
   const handleReportSuccess = () => {
     onClose(); // Fermer le menu
     // Optionnel: appeler l'ancienne fonction si nécessaire
-    if (onReport) {
-      onReport();
-    }
+   
   };
 
   if (!isOpen) return null;

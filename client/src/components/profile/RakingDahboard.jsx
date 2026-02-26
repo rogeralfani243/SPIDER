@@ -20,7 +20,7 @@ import {
   FilterOutlined,
   SearchOutlined
 } from '@ant-design/icons';
-
+import '../../styles/profiles/ranking-dashboard.css';
 import RisingStarsList from './rankings/RisingStarsList.jsx';
 import TopProfilesList from './rankings/TopProfilesList.jsx';
 import CategoryRanking from './rankings/CategoryRanking.jsx';
@@ -184,7 +184,7 @@ const RankingDashboard = () => {
   };
 
   return (
-    <div style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
+    <div  className='rank-div' style={{ padding: 24, maxWidth: 1200, margin: '0 auto' }}>
       <div style={{ marginBottom: 32 }}>
         <Title level={2} style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 12 }}>
           <TrophyOutlined style={{ color: '#faad14' }} />

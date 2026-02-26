@@ -445,7 +445,7 @@ const AudioPlayer = ({
               </div>
             </div>
             
-            <span className="whatsapp-volume-percentage">
+            <span className="whatsapp-volume-percentage" >
               {muted ? 'Muet' : `${Math.round(volume * 100)}%`}
             </span>
           </div>

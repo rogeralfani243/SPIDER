@@ -1,0 +1,15 @@
+@media (max-width:388px){
+    .rank-div{
+        width: 350px;
+    }
+}
+@media (max-width:468px){
+    .rank-div{
+        width: 400px;
+    }
+}
+@media (max-width:768px){
+    .rank-div{
+        width: 400px;
+    }
+}

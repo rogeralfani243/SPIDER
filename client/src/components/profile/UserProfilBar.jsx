@@ -7,6 +7,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-coverflow';
 import '../../styles/userbar/user_profil_bar.css';
 import RankingDashboard from './RakingDahboard';
+import CertificationDisplay from '../profil_details/certifications/CertificationDisplay';
 import URL from '../../hooks/useUrl';
 import { 
   FiGlobe, 
@@ -342,9 +343,9 @@ const navigate = useNavigate()
   }
 
   return (   <div {...dragBlock}>
-     <RankingDashboard />
-    <div className="user-profile-bar" >
 
+    <div className="user-profile-bar" >
+ 
       {/* Header */}
       <div className="user-header">
         {showWelcome && (
@@ -417,8 +418,9 @@ const navigate = useNavigate()
             </div>
           </div>
         )}
+     
       </div>
-
+     <RankingDashboard />
       {categories.map((category, categoryIndex) => {
         const categoryId = category.category_id || category.id;
         const categoryName = category.category_name || category.name;
@@ -429,6 +431,8 @@ const navigate = useNavigate()
         const middleIndex = getMiddleIndex(profiles);
 
         return (
+      
+            
           <section key={categoryId} className="category-section">
             <div className="category-header">
               <h2 className="category-title"> <span className='category'>▶</span> {categoryName}</h2>
@@ -454,11 +458,19 @@ const navigate = useNavigate()
                       role="button"
                       tabIndex={0}
                     >
-                      {profile.is_premium && (
-                        <div className="premium-badge-3d">Premium</div>
-                      )}
                       
-                      <div className="profile-avatar-container-3d">
+       
+                       
+                   
+                      
+                      <div className="profile-avatar-container-3d" style={{ position: 'relative !important', display: 'inline-block' }}>
+                        <CertificationDisplay 
+            profileId={profile?.id}
+            position="absolute"
+            placement="bottom-right"
+            showChips={false}
+            size="medium"
+          /> 
                         {renderAvatar(profile)}
                         {profile.image && profile.image !== '/default-avatar.png' && !profile.image.includes('default-avatar') && (
                           <div 
@@ -469,8 +481,10 @@ const navigate = useNavigate()
                             }}
                           >
                             {getInitials(profile)}
+                            
                           </div>
                         )}
+                          
                       </div>
                       
                       <div className="profile-content-3d">
@@ -509,6 +523,7 @@ const navigate = useNavigate()
               </Swiper>
             </div>
           </section>
+            
         );
       })}
     </div>

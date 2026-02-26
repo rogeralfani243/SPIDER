@@ -15,7 +15,6 @@ import {
 import {
   Category as CategoryIcon,
   Description as DescriptionIcon,
-  Image as ImageIcon,
 } from '@mui/icons-material';
 
 const ProfessionalDetailsStep = ({ 
@@ -24,9 +23,7 @@ const ProfessionalDetailsStep = ({
   loading, 
   categories, 
   categoriesLoading, 
-  previewImageBio,
   handleInputChange,
-  handleImageBioChange 
 }) => {
   return (
     <Grid container spacing={3}>
@@ -83,51 +80,6 @@ const ProfessionalDetailsStep = ({
             ),
           }}
         />
-      </Grid>
-      
-      <Grid item xs={12}>
-        <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
-          <input
-            accept="image/*"
-            style={{ display: 'none' }}
-            id="bio-image-upload"
-            type="file"
-            onChange={handleImageBioChange}
-          />
-          <Typography variant="subtitle2" sx={{ mb: 2, alignSelf: 'flex-start' }}>
-            Bio Image (Optional)
-          </Typography>
-          <label htmlFor="bio-image-upload">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<ImageIcon />}
-              sx={{ mb: 2 }}
-            >
-              Choose Bio Image
-            </Button>
-          </label>
-          {previewImageBio && (
-            <Box sx={{ mt: 2, width: '100%' }}>
-              <Typography variant="caption" color="textSecondary" sx={{ mb: 1, display: 'block' }}>
-                Preview:
-              </Typography>
-              <img
-                src={previewImageBio}
-                alt="Bio preview"
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '200px',
-                  borderRadius: '8px',
-                  objectFit: 'cover'
-                }}
-              />
-            </Box>
-          )}
-          <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
-            This image will be displayed in your profile bio section (max 5MB)
-          </Typography>
-        </Box>
       </Grid>
     </Grid>
   );

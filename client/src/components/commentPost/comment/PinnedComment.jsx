@@ -20,20 +20,7 @@ const PinnedCommentsSection = ({
     <div className="pinned-comments-section" ref={ref}>
       <div className="pinned-header">
         <div className="pinned-header-content">
-          <div className="pinned-icon-wrapper">
-            <PiPushPinFill className="pinned-main-icon" />
-          </div>
-          <div className="pinned-title-section">
-            <h4 className="pinned-comments-title">
-              Pinned Comments
-              <span className="pinned-count">
-                {pinnedComments.length}
-              </span>
-            </h4>
-            <p className="pinned-subtitle">
-              Important messages from the post author
-            </p>
-          </div>
+         
         </div>
         <div className="pinned-divider"></div>
       </div>

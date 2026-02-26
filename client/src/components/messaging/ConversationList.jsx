@@ -36,6 +36,20 @@ import { enUS } from 'date-fns/locale';
 import { conversationAPI } from '../../hooks/messaging/messagingApi';
 import { useAuth } from '../../hooks/useAuth';
 import ConversationListStyles from './chat-window/chat-edit/styles/ConversationListStyles';
+import {
+  Mic as MicIcon,
+  Videocam as VideocamIcon,
+  Image as ImageIcon,
+  AttachFile as AttachFileIcon,
+  Phone as PhoneIcon,
+  Settings as SettingsIcon,
+  Chat as ChatIcon,
+} from '@mui/icons-material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import EditIcon from '@mui/icons-material/Edit';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 const ConversationList = ({
   conversations,
@@ -164,24 +178,83 @@ const ConversationList = ({
     }
   };
 
-  const getLastMessagePreview = (conversation) => {
-    if (!conversation.last_message) {
-      return conversation.is_group ? 'No messages in group' : 'No messages';
+const getLastMessagePreview = (conversation) => {
+  if (!conversation.last_message) {
+    return conversation.is_group ? 'No messages in group' : 'No messages';
+  }
+  
+  const message = conversation.last_message;
+  const content = message.content || '';
+  const sender = message.sender;
+  const fileType = message.file_type;
+  const isSystem = message.is_system_message;
+  const systemType = message.system_message_type;
+  const messageType = message.message_type;
+  
+  let prefix = '';
+  if (sender && sender.id === currentUserId) {
+    prefix = 'You: ';
+  } else if (sender && conversation.is_group) {
+    prefix = `${sender.username}: `;
+  }
+  
+  // Déterminer l'icône et le texte
+  let IconComponent = null;
+  let previewText = '';
+  
+  if (isSystem) {
+    switch (systemType) {
+      case 'user_joined':
+        IconComponent = PersonAddIcon;
+        previewText = 'User joined';
+        break;
+      case 'user_left':
+        IconComponent = PersonRemoveIcon;
+        previewText = 'User left';
+        break;
+      case 'group_created':
+        IconComponent = GroupAddIcon;
+        previewText = 'Group created';
+        break;
+      case 'name_changed':
+        IconComponent = EditIcon;
+        previewText = 'Group name changed';
+        break;
+      default:
+        IconComponent = SettingsIcon;
+        previewText = 'System message';
     }
-    
-    const content = conversation.last_message.content || '';
-    const sender = conversation.last_message.sender;
-    
-    let prefix = '';
-    if (sender && sender.id === currentUserId) {
-      prefix = 'You: ';
-    } else if (sender && conversation.is_group) {
-      prefix = `${sender.username}: `;
+  } else if (messageType === 'call') {
+    IconComponent = PhoneIcon;
+    previewText = 'Call';
+  } else if (fileType === 'image') {
+    IconComponent = ImageIcon;
+    previewText = 'Image';
+  } else if (fileType === 'video') {
+    IconComponent = VideocamIcon;
+    previewText = 'Video';
+  } else if (fileType === 'audio') {
+    IconComponent = MicIcon;
+    previewText = 'Audio';
+  } else if (fileType === 'pdf') {
+    IconComponent = PictureAsPdfIcon;
+    previewText = 'PDF';
+  } else if (fileType === 'file') {
+    IconComponent = AttachFileIcon;
+    previewText = 'File';
+  } else {
+    previewText = content.trim() || 'Message';
+    if (previewText === 'Message') {
+      IconComponent = ChatIcon;
     }
-    
-    const preview = prefix + content;
-    return preview.length > 30 ? `${preview.substring(0, 30)}...` : preview;
+  }
+  
+  return {
+    IconComponent,
+    previewText: prefix + previewText,
+    hasIcon: IconComponent !== null
   };
+};
 
   const getGroupTypeBadge = (conversation) => {
     if (!conversation.is_group) return null;
@@ -261,7 +334,7 @@ const ConversationList = ({
             const displayName = getDisplayName(conversation);
             const avatarInfo = getAvatarInfo(conversation);
             const isOnline = otherParticipant?.is_online === true;
-
+            const displayUnreadCount = unreadCount > 99 ? '99+' : unreadCount.toString();
             return (
               <React.Fragment key={conversation.id}>
                 <ListItem
@@ -272,8 +345,8 @@ const ConversationList = ({
                 >
                   <ListItemAvatar>
                     <Badge
-                      badgeContent={unreadCount}
-                      color="primary"
+                      badgeContent={displayUnreadCount}
+                      color="error"
                       invisible={unreadCount === 0}
                     >
                       {isGroup ? (
@@ -338,19 +411,58 @@ const ConversationList = ({
                       </Box>
                     }
                     secondary={
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={ConversationListStyles.getLastMessagePreviewStyle(unreadCount)}
-                      >
-                        {isGroup && (
-                          <GroupIcon 
-                            fontSize="inherit" 
-                            sx={ConversationListStyles.groupIcon} 
-                          />
-                        )}
-                        {getLastMessagePreview(conversation)}
-                      </Typography>
+              <Typography
+  variant="body2"
+  color="text.secondary"
+  sx={ConversationListStyles.getLastMessagePreviewStyle(unreadCount)}
+>
+  <Box 
+    sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 0.5,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }}
+  >
+    {isGroup && (
+      <GroupIcon 
+        fontSize="inherit" 
+        sx={ConversationListStyles.groupIcon} 
+      />
+    )}
+    
+    {(() => {
+      const { IconComponent, previewText, hasIcon } = getLastMessagePreview(conversation);
+      
+      return (
+        <>
+          {IconComponent && (
+            <IconComponent 
+              fontSize="inherit" 
+              sx={{ 
+                flexShrink: 0,
+                fontSize: '0.875rem',
+                opacity: 0.7
+              }} 
+            />
+          )}
+          <span 
+            style={{ 
+              flex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {previewText}
+          </span>
+        </>
+      );
+    })()}
+  </Box>
+</Typography>
                     }
                   />
                 </ListItem>

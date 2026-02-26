@@ -135,10 +135,10 @@ setShowProfileEdit(true)
                   ? 'Chargement...'
                   : user
                   ? user.username
-                  : 'Invité'}
+                  : 'Guest'}
               </span>
               <span className="user-email">
-                {user?.email || 'Aucun email'}
+                {profileData?.email || 'No email'}
               </span>
               {profileData?.bio && (
                 <span className="user-bio">

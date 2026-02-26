@@ -17,7 +17,7 @@ import {
   FaTimes,
   FaUser
 } from 'react-icons/fa';
-import handleSupportClick from '../../hooks/useSupport';
+import {handleSupportClick} from '../../hooks/useSupport';
 const getCsrfToken = () => {
   const name = 'csrftoken';
   let cookieValue = null;

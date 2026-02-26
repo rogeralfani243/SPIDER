@@ -91,8 +91,8 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
 
   const getViolationDescription = (type) => {
     const descriptions = {
-      unauthorized: 'You attempted to access a restricted area without proper authentication.',
-      insufficient_permissions: 'Your account does not have sufficient permissions to access this resource.',
+      unauthorized: 'You attempted to access a restricted area without proper authentication, andit it has been logged and reported as a security violation.',
+      insufficient_permissions: 'Your account does not have sufficient permissions to access this resource, and has been reported for review.',
       blocked: 'Your access has been temporarily blocked due to repeated security violations.',
       suspicious_activity: 'Suspicious activity patterns detected from your connection.',
       rate_limit: 'Too many requests from your IP address. Please try again later.',
@@ -199,12 +199,12 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
                   />
                 </Box>
                 
-                <Typography variant="h3" gutterBottom sx={{ fontWeight: 800, mb: 2 }}>
+                <Typography variant="h3"  gutterBottom sx={{ color:'white',fontWeight: 800, mb: 2 }}>
                   <SecurityIcon sx={{ verticalAlign: 'middle', mr: 2 }} />
                   {getViolationTitle(violationType)}
                 </Typography>
                 
-                <Typography variant="h6" sx={{ opacity: 0.9, mb: 4 }}>
+                <Typography variant="h6" sx={{ color:'white',opacity: 0.9, mb: 4 }}>
                   {getViolationDescription(violationType)}
                 </Typography>
                 
@@ -221,7 +221,7 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
               {/* Violation Details */}
               <Fade in={true} timeout={800}>
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="h6" gutterBottom sx={{color:'white', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <WarningIcon /> Violation Details
                   </Typography>
                   
@@ -232,10 +232,10 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
                         icon={<TimelineIcon />}
                         sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }}
                       >
-                        <Typography variant="subtitle2" gutterBottom>
+                        <Typography variant="subtitle2" gutterBottom sx={{color:'white'}}>
                           Path Attempted
                         </Typography>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                        <Typography variant="body2" sx={{color:'white', fontFamily: 'monospace' }}>
                           {violation?.path || 'Unknown'}
                         </Typography>
                       </Alert>
@@ -247,7 +247,7 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
                         icon={<AccountTreeIcon />}
                         sx={{ bgcolor: 'rgba(255, 255, 255, 0.1)', color: 'white' }}
                       >
-                        <Typography variant="subtitle2" gutterBottom>
+                        <Typography variant="subtitle2" gutterBottom sx={{color:'white'}}>
                           Reason
                         </Typography>
                         <Typography variant="body2">
@@ -384,7 +384,7 @@ const SecurityViolationPage = ({ violation, violationType, onContinue }) => {
                   </Tooltip>
                 }
               >
-                <Typography variant="body2">
+                <Typography variant="body2" sx={{ color:'white' }}>
                   If you believe this is an error or your account has been compromised, 
                   you can perform an emergency logout.
                 </Typography>

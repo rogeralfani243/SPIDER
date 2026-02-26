@@ -504,7 +504,7 @@ const Messaging = () => {
       refreshConversations().catch(err => 
         console.warn('⚠️ Auto-refresh:', err.message)
       );
-    }, 30000);
+    }, 1000);
     
     return () => {
       clearInterval(intervalId);

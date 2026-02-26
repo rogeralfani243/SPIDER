@@ -32,6 +32,8 @@
 }
 
 /* Sur mobile, empiler le titre et les boutons */
+
+
 @media (max-width: 600px) {
   .profile-header-with-share {
     flex-direction: column;
@@ -189,14 +191,19 @@
 }
 
 /* Responsive Info */
+
 @media (max-width: 965px) {
   .profile-info-section {
     width: 100%;
-      margin-top: 2em;
+      margin-top: 10em;
   }
 }
 
 @media (max-width: 768px) {
+   .profile-info-section {
+    width: 100%;
+      margin-top: 2em;
+  }
   .profile-name-infos {
     font-size: 19px;
     text-align: center;

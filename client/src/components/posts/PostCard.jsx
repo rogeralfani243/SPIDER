@@ -10,6 +10,10 @@ import { useNavigate } from 'react-router-dom';
 import { Download, Calendar, User, Eye, MessageCircle, Share2, Image, Video, Music, File, Star, Package, Headphones, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import AudioPlayer from './media_section/AudioPlayer';
 import useParamDrag from '../../utils/useDrag';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import { usePostBoost } from '../../hooks/usePostBoost';
+import AdvancedVideoPlayer from './media_section/AdvanceVideoPlayer';
+import CertificationDisplay from '../profil_details/certifications/CertificationDisplay';
 import DownloadMediaModal from './main_post/category/software/DownloadManager';
 const PostCard = ({ 
   post: initialPost, 
@@ -30,6 +34,8 @@ const PostCard = ({
   currentUserId,
   currentUser
 }) => {
+    const [localBoostStatus, setLocalBoostStatus] = useState(null);
+
   const [localPost, setLocalPost] = useState(initialPost);
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -85,7 +91,14 @@ const PostCard = ({
   const [waveformData, setWaveformData] = useState([]);
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
-  
+  const {
+    loading: boostLoading,
+    error: boostError,
+    checkBoostStatus,
+    boostPost,
+    isPostBoosted: isPostBoostedHook,
+    getBoostDetails
+  } = usePostBoost();
   const navigate = useNavigate();
 
   // Check if post belongs to Music category
@@ -137,7 +150,16 @@ const PostCard = ({
       }, 0);
     }
   }, [notifyOtherPosts]);
-
+  useEffect(() => {
+    const checkBoost = async () => {
+      if (localPost?.id) {
+        const status = await checkBoostStatus(localPost.id);
+        setLocalBoostStatus(status);
+      }
+    };
+    
+    checkBoost();
+  }, [localPost?.id, checkBoostStatus]);
   // Update localPost when initialPost changes
   useEffect(() => {
     setLocalPost(initialPost);
@@ -656,7 +678,7 @@ const formatDate = (dateString) => {
       case 'video':
         return (
           <div key={media.id} className="slide">
-  <video
+   {/* <video
               className="slide-video"
               src={mediaUrl}
               autoPlay
@@ -665,7 +687,8 @@ const formatDate = (dateString) => {
               playsInline
               poster="/video-placeholder.png"
                onClick={handlePostView}
-            />
+            /> */}
+            <AdvancedVideoPlayer src={mediaUrl}  />
 
           </div>
         );
@@ -921,7 +944,7 @@ const formatDate = (dateString) => {
 
   const handleReportPost = useCallback((post) => {
     console.log('Reporting post:', post.id);
-    alert(`Report post ${post.id}`);
+
   }, []);
 
   const handleSharePost = useCallback((post) => {
@@ -1010,7 +1033,7 @@ const userInitials = `${localPost.user_name[0]}`;
           className="profile-link-absolute"
           onClick={(e) => {
             if (!userInfo.profileId) e.preventDefault();
-          }}
+          }} 
         >
           {userInfo.profileImage ? (
             <div className="">
@@ -1029,6 +1052,14 @@ const userInitials = `${localPost.user_name[0]}`;
               {userInitials}
             </div>
           )}
+           <CertificationDisplay 
+            profileId={userInfo.profileId}
+            position="absolute"
+            placement="top-right"
+            showChips={false}
+            size="small"
+          /> 
+                 
           <div className=''>
             
             <span className="profile-name-post"  translate="no">{userInfo.userName}</span>
@@ -1057,22 +1088,12 @@ const userInitials = `${localPost.user_name[0]}`;
         <div className="card-content-simple">
           {/* Title and Category */}
           <div className="title-section">
-            <h3 className="app-title-simples"  
-         
-  onSelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}
-            onClick={handlePostView}>
+            <h3 className="app-title-simples"  {...blockDrag}>
               {localPost.title || 'Untitled Post'}
             </h3>
               {/* Description */}
           {localPost.content && (
-            <div className="description-section-simple"          onMouseDown={(e) => e.preventDefault()}
-  onSelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}>
+            <div className="description-section-simple" {...blockDrag}>
               <p className="description-text-simple">
                 {showFullDescription ? description : truncatedDescription}
               </p>
@@ -1086,11 +1107,7 @@ const userInitials = `${localPost.user_name[0]}`;
               )}
             </div>
           )}
-            <div className="category-meta" 
-            SelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}>
+            <div className="category-meta" {...blockDrag}>
               <div className="category-badge">
                 {localPost.category?.image_url ? (
                   <img 
@@ -1138,15 +1155,9 @@ const userInitials = `${localPost.user_name[0]}`;
                 ) : (
                   <Package size={12} />
                 )}
-                <span>{localPost.category_name || 'Post'}</span>
+                <span>{localPost.category_name || 'Post'} </span>
               </div>
-              <div className="size-date-info" 
-              onMouseDown={(e) => e.preventDefault()}
-  onSelectStart={(e) => e.preventDefault()}
-  onContextMenu={(e) => e.preventDefault()}
-  onCopy={(e) => e.preventDefault()}
-  onDragStart={(e) => e.preventDefault()}
-              >
+              <div className="size-date-info" {...blockDrag}>
                 <div className="date-info" > 
                   <Calendar size={12} />
                   <span >{formatDate(localPost.updated_at || localPost.created_at)}</span>
@@ -1233,8 +1244,14 @@ const userInitials = `${localPost.user_name[0]}`;
 
           {/* Action buttons */}
           <div className="action-buttons-simple">
+        {getBoostDetails(localPost) && (
+  <div className="sponsored-badge">
+    <CampaignIcon className="sponsored-icon" />
+    <span>Sponsored</span>
+  </div>
+)}
             <div className="secondary-actions-card">
-            
+           
               <button 
                 className="action-btn-simple"
                 onClick={handlePostView}

@@ -2,7 +2,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaUser } from 'react-icons/fa';
 import URL from '../../hooks/useUrl';
-
+import CertificationDisplay from '../profil_details/certifications/CertificationDisplay';
 const UserInfo = ({ 
   userName, 
   createdAt, 
@@ -75,6 +75,8 @@ const UserInfo = ({
       navigate(`/user/${userId}/profile`);
     }
   };
+    const targetId = profileId || userId;
+
 
   const profileImageUrl = getProfileImageUrl();
   const userInitial = userName?.charAt(0)?.toUpperCase() || '?';
@@ -85,7 +87,7 @@ const UserInfo = ({
         <div 
         className="user-avatars user-avatar"
         onClick={handleProfileClick}
-        style={{ cursor: userId ? 'pointer' : 'default' }}
+        style={{ cursor: userId ? 'pointer' : 'default' ,position:'relative !important'}}
         title={userId ? `View ${userName}'s profile` : 'User profile'}
       >
         {profileImageUrl ? (
@@ -102,23 +104,36 @@ const UserInfo = ({
               setImageError(false);
             }}
           />
+           
         ) : (
           <div className="avatar-fallback">
             {userInitial}
           </div>
         )}
+             
       </div>
-      
-      <div className="user-details">
+   
+
+
+      <div className="user-details" style={{position:'relative'}}>
         <h3 
           className="usernames"
           onClick={handleProfileClick}
-          style={{ cursor: userId ? 'pointer' : 'default' }}
+          style={{ cursor: userId ? 'pointer' : 'default',marginRight:'1em' }}
           title={userId ? `View ${userName}'s profile` : 'User profile'}
-      translate='no'  >
+      translate='no'
+      >
           @{userName || 'Unknown User'}
+      
+      
         </h3>
-       
+        <CertificationDisplay 
+            profileId={targetId}
+            position="absolute"
+            placement="bottom-right"
+            showChips={false}
+            size="small"
+          /> 
       </div>
       
 </div>

@@ -35,8 +35,9 @@ const ProfileModif = ({ open, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { isAuthenticated, user, loading: authLoading } = useAuth();
+    const { refreshUser } = useAuth()
   
-  const [profile, setProfile] = useState({
+  const [ profile, setProfile] = useState({
     first_name: '',
     last_name: '',
     email: '',
@@ -110,6 +111,17 @@ const ProfileModif = ({ open, onClose }) => {
       setCategoriesLoading(false);
     }
   };
+  const handleEmailUpdated = async (newEmail) => {
+    // 1. Mettre à jour le state local
+    setProfile(prev => ({ ...prev, email: newEmail }));
+    
+    // 2. Mettre à jour le contexte d'authentification
+    if (refreshUser) {
+      await refreshUser(); // Rafraîchit les données de l'utilisateur
+    }
+    
+
+} 
 
   const fetchProfileId = async () => {
     try {
@@ -540,7 +552,10 @@ const ProfileModif = ({ open, onClose }) => {
             previewImage={previewImage}
             handleInputChange={handleInputChange}
             handleImageChange={handleImageChange}
-          />
+            previewImageBio={previewImageBio}
+              handleImageBioChange={handleImageBioChange}
+          onEmailUpdated={handleEmailUpdated}
+              />
         );
       case 1:
         return (
@@ -558,9 +573,8 @@ const ProfileModif = ({ open, onClose }) => {
             loading={loading}
             categories={categories}
             categoriesLoading={categoriesLoading}
-            previewImageBio={previewImageBio}
             handleInputChange={handleInputChange}
-            handleImageBioChange={handleImageBioChange}
+          
           />
         );
       case 3:

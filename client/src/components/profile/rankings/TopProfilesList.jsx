@@ -37,12 +37,10 @@ const TopProfilesList = ({ topProfiles, loading }) => {
     if (!user) return 'Unknown User';
     if (typeof user === 'string') return user;
     if (typeof user === 'object') {
-      const firstName = user.first_name || '';
-      const lastName = user.last_name || '';
       const username = user.username || '';
       
-      if (firstName || lastName) {
-        return `${firstName} ${lastName}`.trim();
+      if (username ) {
+        return `${username} `.trim();
       }
       return username;
     }
@@ -247,13 +245,11 @@ const TopProfilesList = ({ topProfiles, loading }) => {
                     <div style={{ marginTop: 4 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <StarFilled style={{ color: '#faad14', fontSize: 12 }} />
-                          <Text style={{ fontSize: 13, fontWeight: 500 }}>
+                          <StarFilled style={{ color: '#faad14', fontSize: 9 }} />
+                          <Text style={{ fontSize: 10, fontWeight: 500 }}>
                             {(profile.average_rating || 0).toFixed(1)}
                           </Text>
-                          <Text type="secondary" style={{ fontSize: 12, marginLeft: 4 }}>
-                            ({profile.total_feedbacks || 0} reviews)
-                          </Text>
+                         
                         </div>
                         {countryName && (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

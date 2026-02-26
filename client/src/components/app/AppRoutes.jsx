@@ -33,6 +33,9 @@ import SecurityLogsPage from '../messaging/securtity/SecurityLogsPage.jsx';
 import NotificationContainer from '../notifications/NotificationContainer';
 import GroupPermissionGuard from '../messaging/securtity/GroupPermissionGuard.jsx';
 import RankingDashboard from '../profile/RakingDahboard.jsx';
+import CertificationDashboard from '../certifications/CertificationDashboard.jsx';
+import PaymentSuccess from '../certifications/tabs/PaymentSuccess.jsx';
+import AdminDashboard from '../dashboard-admin/dashboardAdmin.jsx';
 const AppRoutes = ({ isAuthenticated, user, onLogin, onLogout }) => {
   return (
     <>
@@ -89,7 +92,17 @@ const AppRoutes = ({ isAuthenticated, user, onLogin, onLogout }) => {
             <RankingDashboard />
           </PrivateRoute>
         } />
-        
+        {/* Certification dashboard Routes */}
+        <Route path="certifications" element={
+          <PrivateRoute isAuthenticated={isAuthenticated}>
+            <CertificationDashboard />
+          </PrivateRoute>
+        } />
+        <Route path="certifications/payment/success" element={
+          <PrivateRoute isAuthenticated={isAuthenticated}>
+            <PaymentSuccess />
+          </PrivateRoute>
+        } />
         {/* Messaging Routes */}
         <Route path="message" element={
           <PrivateRoute isAuthenticated={isAuthenticated}>
@@ -238,7 +251,11 @@ const AppRoutes = ({ isAuthenticated, user, onLogin, onLogout }) => {
             <div>System Settings</div>
           </AdminRoute>
         } />
-
+      <Route path="/d!@!a!@s@!/d@!ash!@b@o!a!@rd!/" element={
+          <AdminRoute isAuthenticated={isAuthenticated}>
+           <AdminDashboard />
+          </AdminRoute>
+        } />
         {/* Redirect unknown routes */}
         <Route 
           path="*" 

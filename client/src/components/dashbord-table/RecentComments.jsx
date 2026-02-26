@@ -60,7 +60,7 @@ import {
   VolumeUp as VolumeUpIcon,
   Close as CloseIcon,
   Download as DownloadIcon,
-  Fullscreen as FullscreenIcon
+  Fullscreen as FullscreenIcon,
 } from '@mui/icons-material';
 import { format, formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -1278,26 +1278,7 @@ const RecentComments = ({ comments, total }) => {
                               </Tooltip>
                             )}
                             
-                            {comment.is_post_owner && (
-                              <Chip
-                                label="Post Author"
-                                size="small"
-                                color="primary"
-                                variant="outlined"
-                                sx={{ height: 20 }}
-                              />
-                            )}
-                            
-                            {comment.user_can_pin && comment.is_post_owner && (
-                              <Chip
-                                label="Can Pin"
-                                size="small"
-                                color="success"
-                                variant="outlined"
-                                sx={{ height: 20 }}
-                              />
-                            )}
-                            
+                         
                             <Typography variant="caption" color="text.secondary">
                               {formattedDate} • {timeAgo}
                               {comment.is_edited && ' (edited)'}

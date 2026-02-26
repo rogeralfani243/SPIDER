@@ -23,7 +23,7 @@ import { Download } from 'lucide-react';
 import CommentsSection from '../commentPost/CommentSection';
 import URL from '../../hooks/useUrl';
 import DownloadMediaModal from './main_post/category/software/DownloadManager';
-
+import CertificationDisplay from '../profil_details/certifications/CertificationDisplay';
 // Styles
 import '../../styles/post_detail/post_detail.css';
 import useParamDrag from '../../utils/useDrag';
@@ -263,8 +263,7 @@ const handleDeletePost = useCallback((post) => {
                 userId={post.user_id || userId}
                 profileId={post.user_profile_id}
               />
-              
-       
+
 
                    
                     <div className="container-download-btn-post-detail">
@@ -320,6 +319,7 @@ const handleDeletePost = useCallback((post) => {
                 currentUser={currentUser}
                 totalComments={post.comments_count}
               />
+
             </div>
           </div>
           

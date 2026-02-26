@@ -16,12 +16,11 @@
   object-fit: contain;
   border-radius: 15px;
 }
-.media-display:has(.main-media-videos) {
-  background-color: black;
-}
+
 .main-media-videos {
   width: fit-content;
   height:fit-content;
+  max-height: 600px;
 
 }
 .main-media-videos video {
@@ -89,26 +88,3 @@
   white-space: nowrap;
 }
 
-
-@media(max-width:946px){
-  .main-media-videos {
-  width: fit-content;
-  height:400px;
-
-}
-.main-media-videos video {
-  width: fit-content;
-  height:100%;
-
-}
-
-}
-@media(max-width:746px){
-.main-media-videos {
-  width: fit-content;
-  height:225px;
-
-
-}
-
-}

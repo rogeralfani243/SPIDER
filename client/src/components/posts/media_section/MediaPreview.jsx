@@ -3,6 +3,7 @@ import { MdAudioFile } from 'react-icons/md';
 import { getMediaType, getFileName, getFileIcon } from '../../../utils/mediaUtils';
 import AudioPlayer from './AudioPlayer';
 import VideoPlayer from './VideoPlayer';
+import AdvancedVideoPlayer from './AdvanceVideoPlayer';
 const MediaPreview = ({ media,
   zoomLevel,
   isPlaying,
@@ -50,7 +51,8 @@ const MediaPreview = ({ media,
       case 'video':
         return (
           <div className="main-media-videos">
-            <video src={url} controls className="preview-video" controlsList="nodownload" />
+            <AdvancedVideoPlayer src={url}  />
+
           </div>
         );
       case 'audio':
