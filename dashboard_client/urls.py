@@ -8,7 +8,7 @@ urlpatterns = [
     path('dashboard/stats/', views.dashboard_stats, name='dashboard-stats'),
     path('dashboard/activity/', views.activity_feed, name='activity-feed'),
     path('dashboard/charts/', views.chart_data, name='chart-data'),
-
+      path('analytics/', views.client_analytics, name='dashboard-analytics'),
     # URLs du profil utilisateur
     path('profile/data/', views.profile_data, name='profile-data'),
     path('profile/stats/', views.profile_stats, name='profile-stats'),
@@ -17,5 +17,5 @@ urlpatterns = [
     path('profile/comments/', views.profile_comments, name='profile-comments'),
     path('profile/update/', views.update_profile, name='update-profile'),
       path('profile/report/', views.profile_report, name='report-profile'),
-
+    path('check-premium/', views.check_premium_status, name='check-premium'),
 ]

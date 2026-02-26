@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view , permission_classes
 # Model 
 from django.db.models import BooleanField
 
-from .models import Post, Category, Tag, PostImage, PostFile, PostView
+from .models import Post, Category, Tag, PostImage, PostFile,SponsoredPost, PostView
 from feedback_post.models import Rating
 from comment_post.models import Comment
 
@@ -31,6 +31,8 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 from .serializers import  CategorySerializer,CategoryCreateUpdateSerializer,CategoryListSerializer, TagSerializer
 from django.core.files.storage import default_storage
+import logging
+logger = logging.getLogger(__name__)
 # Permission personnalisée
 def is_owner_or_read_only(request, post):
     """Vérifie si l'utilisateur est propriétaire du post"""
@@ -45,549 +47,816 @@ def is_owner_or_read_only(request, post):
 def post_list_create(request):
     """
     List all posts or create a new post
-    With custom recommendation algorithm
+    With custom recommendation algorithm AND RANDOM SPOTLIGHT BOOST FIRST
     """
     if request.method == 'GET':
-        # Fetch and filter posts
-        queryset = Post.objects.filter(user__is_active=True)
-        
-        # Annotate with comment count
-        queryset = queryset.annotate(
-            comments_count_annotated=Count('post_comments', distinct=True)
-        )
-        
-        # Filter by category
-        category = request.query_params.get('category', None)
-        if category and category != '':
+        try:
+            logger.info("=" * 60)
+            logger.info("🚀 STARTING post_list_create view")
+            logger.info(f"📱 Method: GET | User: {request.user}")
+            logger.info(f"📱 Authenticated: {request.user.is_authenticated}")
+            
+            # ============================================
+            # ÉTAPE 1: CONFIGURATION DE RANDOMISATION
+            # ============================================
+            import random
+            import hashlib
+            import time
+            from datetime import datetime
+            from django.db.models import FloatField, Value, F, Count, ExpressionWrapper, Avg, Q, BooleanField
+            from django.db.models.functions import Coalesce
+            from django.db.models import Case, When, Exists, OuterRef, Subquery
+            from django.db.models import IntegerField
+            from django.db.models.functions import ExtractHour
+            
+            logger.info("✅ Step 1: Randomization setup completed")
+            
+            # Créer une session si elle n'existe pas
+            if not request.session.session_key:
+                request.session.create()
+                logger.info("🆕 Created new session")
+            
+            # Générer un seed UNIQUE à CHAQUE requête
+            timestamp = str(time.time())
+            session_key = request.session.session_key
+            request_count = request.session.get('request_count', 0) + 1
+            request.session['request_count'] = request_count
+            request.session.save()
+            
+            # Seed pour randomisation COMPLÈTE à chaque requête
+            unique_seed = f"{timestamp}-{session_key}-{request_count}"
+            seed_hash = hashlib.md5(unique_seed.encode()).hexdigest()
+            seed_int = int(seed_hash[:8], 16)
+            
+            # Initialiser random avec ce seed unique
+            random.seed(seed_int)
+            
+            logger.info(f"🎲 Random seed: {seed_int}")
+            
+            # ============================================
+            # ÉTAPE 2: RÉCUPÉRER ET SÉLECTIONNER UN SPOTLIGHT ALÉATOIRE
+            # ============================================
+            logger.info("🔍 Step 2: Fetching spotlight boosts...")
+            
+            selected_spotlight_boost = None
+            all_spotlights = []
+            
             try:
-                category_id = int(category)
-                queryset = queryset.filter(category_id=category_id)
-            except ValueError:
-                queryset = queryset.filter(category__name__icontains=category)
-        
-        # Filter by tag
-        tag = request.query_params.get('tag', None)
-        if tag and tag != '':
-            queryset = queryset.filter(tags__name=tag)
-        
-        # Filter by search
-        search = request.query_params.get('search', None)
-        if search and search != '':
-            queryset = queryset.filter(
-                Q(title__icontains=search) | 
-                Q(content__icontains=search)
-            )
-        
-        # Filter by user
-        user = request.query_params.get('user', None)
-        if user and user != '':
-            queryset = queryset.filter(user__username=user)
-        
-        # ADVANCED RECOMMENDATION ALGORITHM LOGIC
-        algorithm = request.query_params.get('algorithm', 'recommended')
-        
-        # Custom recommendation score (if user authenticated)
-        if request.user.is_authenticated and algorithm != 'newest':
-            user_profile = request.user.profile
+                # Récupérer TOUS les spotlight boosts actifs
+                spotlight_boosts = SponsoredPost.objects.filter(
+                    payment_status='paid',
+                    boost_start__lte=timezone.now(),
+                    boost_end__gte=timezone.now(),
+                    featured_in_feed=True,
+                    campaign__status='active',
+                    post_type__icontains='spotlight'
+                ).select_related('original_post', 'original_post__user', 'original_post__category')
+                
+                all_spotlights = list(spotlight_boosts)
+                logger.info(f"🔦 Found {len(all_spotlights)} active spotlight boosts")
+                
+                # CRITIQUE: Sélectionner un spotlight ALÉATOIRE à chaque fois
+                if all_spotlights:
+                    # Sélection aléatoire pure
+                    selected_spotlight_boost = random.choice(all_spotlights)
+                    
+                    logger.info(f"🎯 Selected spotlight boost #{selected_spotlight_boost.id}: {selected_spotlight_boost.original_post.title}")
             
-            # 1. Country similarity score
-            country_score = Case(
-                When(user__profile__country=user_profile.country, then=Value(50.0)),
-                default=Value(0.0),
-                output_field=FloatField()
-            )
+            except Exception as e:
+                logger.error(f"❌ Error fetching spotlight boosts: {str(e)}", exc_info=True)
+                selected_spotlight_boost = None
             
-            # 2. Identify posts already interacted with by the user
-            # Posts rated by the user
-            user_rated_posts = Rating.objects.filter(user=request.user).values_list('post_id', flat=True)
-            user_ratings_dict = dict(Rating.objects.filter(
-                user=request.user
-            ).values_list('post_id', 'stars'))
+            logger.info(f"✅ Step 2: Spotlight selection completed")
             
-            # Posts commented by the user
-            commented_posts = Comment.objects.filter(
-                user=request.user
-            ).values_list('post_id', flat=True).distinct()
+            # ============================================
+            # ÉTAPE 3: RÉCUPÉRER LES AUTRES BOOSTS
+            # ============================================
+            logger.info("🔍 Step 3: Fetching other boosts...")
             
-            # Posts viewed by the user
-            viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
+            all_other_boosts = []
             
-            # 3. Calculate user preferences
-            # Preferred categories (based on ratings)
-            user_category_prefs = {}
-            user_rated_categories = Rating.objects.filter(
-                user=request.user,
-                stars__gte=3  # Only positive ratings
-            ).values('post__category__id').annotate(
-                avg_rating=Avg('stars'),
-                rating_count=Count('id')
-            )
+            try:
+                other_boosts = SponsoredPost.objects.filter(
+                    payment_status='paid',
+                    boost_start__lte=timezone.now(),
+                    boost_end__gte=timezone.now(),
+                    featured_in_feed=True,
+                    campaign__status='active'
+                ).exclude(
+                    post_type__icontains='spotlight'
+                ).select_related('original_post')
+                
+                all_other_boosts = list(other_boosts)
+                logger.info(f"📊 Found {len(all_other_boosts)} other active boosts")
+                
+                # Mélanger aléatoirement les autres boosts
+                random.shuffle(all_other_boosts)
+                
+            except Exception as e:
+                logger.error(f"❌ Error fetching other boosts: {str(e)}", exc_info=True)
+                all_other_boosts = []
             
-            for pref in user_rated_categories:
-                if pref['post__category__id']:
-                    # Score based on average rating and number of ratings
-                    user_category_prefs[pref['post__category__id']] = (
-                        pref['avg_rating'] * 10 + pref['rating_count'] * 2
-                    )
+            logger.info(f"✅ Step 3: Other boosts fetched")
             
-            # Preferred tags
-            user_tag_prefs = {}
-            user_tag_interactions = Post.objects.filter(
-                Q(post_comments__user=request.user) |
-                Q(ratings__user=request.user, ratings__stars__gte=3)
-            ).values('tags__id', 'tags__name').annotate(
-                interaction_count=Count('id')
-            )
+            # ============================================
+            # ÉTAPE 4: PRÉPARER LES POSTS RÉGULIERS
+            # ============================================
+            logger.info("🔍 Step 4: Preparing regular posts...")
             
-            for pref in user_tag_interactions:
-                if pref['tags__id']:
-                    user_tag_prefs[pref['tags__id']] = pref['interaction_count']
+            # Base queryset avec les annotations nécessaires pour le serializer
+            queryset = Post.objects.filter(user__is_active=True)
             
-            # 4. Category similarity score
-            category_similarity_score = Case(
-                *[When(category_id=cat_id, then=Value(score)) 
-                  for cat_id, score in user_category_prefs.items()],
-                default=Value(0.0),
-                output_field=FloatField()
-            )
+            # ============================================
+            # NOUVEAU: FILTRES AVANCÉS
+            # ============================================
+            algorithm = request.query_params.get('algorithm', 'recommended')
+            sort_by = request.query_params.get('sort', 'newest')
+            avoid_seen = request.query_params.get('avoid_seen', 'false').lower() == 'true'
+            country_filter = request.query_params.get('country', None)
             
-            # 5. Tag similarity score
-            tag_similarity_score = Coalesce(
-                Avg(
-                    Case(
-                        *[When(tags__id=tag_id, then=Value(score))
-                          for tag_id, score in user_tag_prefs.items()],
-                        default=Value(0.0),
-                        output_field=FloatField()
-                    )
-                ),
-                Value(0.0),
-                output_field=FloatField()
-            )
+            logger.info(f"🔍 Filters - Algorithm: {algorithm}, Sort: {sort_by}, Avoid seen: {avoid_seen}, Country: {country_filter}")
             
-            # 6. Freshness score - simplified version based on ID
-            freshness_score = ExpressionWrapper(
-                F('id') / 1000000.0 * 10.0,
-                output_field=FloatField()
-            )
-            
-            # 7. Global popularity score based on ratings
-            popularity_score = ExpressionWrapper(
-                Coalesce(Avg('ratings__stars'), Value(0.0)) * 20.0 +
-                Count('ratings', distinct=True) * 2.0 +
-                Count('post_comments', distinct=True) * 1.0,
-                output_field=FloatField()
-            )
-            
-            # 8. NEW LOGIC: Priority score for non-interacted posts
-            # Posts already interacted with (rated OR commented)
-            interacted_posts = set(list(user_rated_posts) + list(commented_posts))
-            
-            # Priority score: high value for non-interacted, low for interacted
-            interaction_priority_score = Case(
-                When(id__in=interacted_posts, then=Value(0.0)),  # Very low for interacted posts
-                default=Value(100.0),  # Very high for non-interacted posts
-                output_field=FloatField()
-            )
-            
-            # 9. Specific interaction score (for posts already interacted with)
-            interaction_score = Case(
-                # Good bonus for well-rated posts (4-5 stars)
-                When(id__in=[pid for pid, stars in user_ratings_dict.items() if stars >= 4], 
-                      then=Value(30.0)),
-                # Small bonus for commented posts
-                When(id__in=commented_posts, then=Value(15.0)),
-                # Penalty for poorly rated posts (1-2 stars)
-                When(id__in=[pid for pid, stars in user_ratings_dict.items() if stars < 3], 
-                      then=Value(-50.0)),
-                # Light penalty for viewed but otherwise not interacted posts
-                When(id__in=viewed_posts, then=Value(-10.0)),
-                default=Value(0.0),
-                output_field=FloatField()
-            )
-            
-            # 10. Author activity score
-            author_activity_score = Case(
-                When(user__is_active=True, then=Value(10.0)),
-                default=Value(0.0),
-                output_field=FloatField()
-            )
-            
-            # 11. Final recommendation score WITH PRIORITY FOR NON-INTERACTED POSTS
-            recommendation_score = ExpressionWrapper(
-                interaction_priority_score * 3.0 +  # STRONG PRIORITY to non-interacted posts
-                country_score * 1.5 +  # Country priority
-                category_similarity_score * 1.2 +  # Category similarity
-                tag_similarity_score * 1.0 +  # Tag similarity
-                freshness_score * 0.8 +  # Freshness
-                popularity_score * 0.7 +  # Global popularity
-                interaction_score * 1.0 +  # Interaction score
-                author_activity_score * 0.3,  # Author quality
-                output_field=FloatField()
-            )
-            
-            # Annotate with all scores
+            # Annotations de base pour tous les scénarios
             queryset = queryset.annotate(
-                country_score=country_score,
-                category_similarity=category_similarity_score,
-                tag_similarity=tag_similarity_score,
-                freshness_score=freshness_score,
-                popularity_score=popularity_score,
-                interaction_priority_score=interaction_priority_score,
-                interaction_score=interaction_score,
-                author_activity_score=author_activity_score,
-                recommendation_score=recommendation_score,
-                # Annotations for user information
+                # Pour get_calculated_rating()
+                calculated_avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0), output_field=FloatField()),
+                
+                # Pour get_calculated_rating_count() et get_engagement_score()
+                calculated_rating_count=Count('ratings', distinct=True),
+                
+                # Pour comments_count
+                comments_count_annotated=Count('post_comments', distinct=True),
+                
+                # Pour les permissions
                 user_has_rated=Exists(
-                    Rating.objects.filter(
-                        user=request.user,
-                        post=OuterRef('pk')
-                    )
-                ),
+                    Rating.objects.filter(user=request.user, post=OuterRef('pk'))
+                ) if request.user.is_authenticated else Value(False, output_field=BooleanField()),
+                
                 user_has_viewed=Exists(
-                    PostView.objects.filter(
-                        user=request.user,
-                        post=OuterRef('pk')
-                    )
-                ),
+                    PostView.objects.filter(user=request.user, post=OuterRef('pk'))
+                ) if request.user.is_authenticated else Value(False, output_field=BooleanField()),
+                
                 user_has_commented=Exists(
-                    Comment.objects.filter(
-                        user=request.user,
-                        post=OuterRef('pk')
-                    )
-                ),
-                user_has_interacted=Case(
-                    When(
-                        Q(id__in=user_rated_posts) | Q(id__in=commented_posts),
-                        then=Value(True)
-                    ),
-                    default=Value(False),
-                    output_field=BooleanField()
-                ),
-                user_rating_value=Coalesce(
-                    Subquery(
-                        Rating.objects.filter(
-                            user=request.user,
-                            post=OuterRef('pk')
-                        ).values('stars')[:1]
-                    ),
-                    Value(0),
+                    Comment.objects.filter(user=request.user, post=OuterRef('pk'))
+                ) if request.user.is_authenticated else Value(False, output_field=BooleanField()),
+            )
+            
+            # ============================================
+            # NOUVEAU: FILTRE PAR PAYS
+            # ============================================
+            if country_filter and country_filter != '':
+                if request.user.is_authenticated and country_filter.lower() == 'my_country':
+                    # Utiliser le pays de l'utilisateur connecté
+                    user_country = request.user.profile.country
+                    if user_country:
+                        queryset = queryset.filter(user__profile__country=user_country)
+                        logger.info(f"🌍 Filtering by user's country: {user_country}")
+                else:
+                    # Filtrer par pays spécifié
+                    queryset = queryset.filter(user__profile__country=country_filter)
+                    logger.info(f"🌍 Filtering by country: {country_filter}")
+            
+            # ============================================
+            # NOUVEAU: FILTRE AVOID SEEN
+            # ============================================
+            if avoid_seen and request.user.is_authenticated:
+                # Posts déjà vus par l'utilisateur
+                viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
+                
+                # Posts déjà notés par l'utilisateur
+                rated_posts = Rating.objects.filter(user=request.user).values_list('post_id', flat=True)
+                
+                # Posts déjà commentés par l'utilisateur
+                commented_posts = Comment.objects.filter(user=request.user).values_list('post_id', flat=True).distinct()
+                
+                # Combiner tous les posts avec lesquels l'utilisateur a interagi
+                all_interacted_posts = set(list(viewed_posts) + list(rated_posts) + list(commented_posts))
+                
+                if all_interacted_posts:
+                    queryset = queryset.exclude(id__in=all_interacted_posts)
+                    logger.info(f"👁️ Excluding {len(all_interacted_posts)} interacted posts (avoid_seen)")
+            
+            # Exclure TOUS les posts boostés (après les autres filtres)
+            all_boosted_post_ids = []
+            
+            if selected_spotlight_boost:
+                all_boosted_post_ids.append(selected_spotlight_boost.original_post_id)
+            
+            for boost in all_other_boosts:
+                if boost.original_post_id not in all_boosted_post_ids:
+                    all_boosted_post_ids.append(boost.original_post_id)
+            
+            if all_boosted_post_ids:
+                logger.info(f"🚫 Excluding {len(all_boosted_post_ids)} boosted posts")
+                queryset = queryset.exclude(id__in=all_boosted_post_ids)
+            
+            logger.info(f"✅ Step 4: Regular posts prepared (total: {queryset.count()})")
+            
+            # ============================================
+            # ÉTAPE 5: FILTRES DE BASE
+            # ============================================
+            logger.info("🔍 Step 5: Applying basic filters...")
+            
+            category = request.query_params.get('category', None)
+            if category and category != '':
+                try:
+                    category_id = int(category)
+                    queryset = queryset.filter(category_id=category_id)
+                except ValueError:
+                    queryset = queryset.filter(category__name__icontains=category)
+            
+            tag = request.query_params.get('tag', None)
+            if tag and tag != '':
+                queryset = queryset.filter(tags__name=tag)
+            
+            search = request.query_params.get('search', None)
+            if search and search != '':
+                queryset = queryset.filter(
+                    Q(title__icontains=search) | 
+                    Q(content__icontains=search)
+                )
+            
+            user = request.query_params.get('user', None)
+            if user and user != '':
+                queryset = queryset.filter(user__username=user)
+            
+            # ============================================
+            # ÉTAPE 6: ALGORITHME DE TRI AVANCÉ - CORRIGÉ
+            # ============================================
+            logger.info("🔍 Step 6: Applying advanced sorting algorithm...")
+            
+            # DÉFINIR LES LISTES POUR LA DÉCISION
+            custom_algorithms = ['recommended', 'country_priority', 'discovery_new', 'avoid_seen', 'similar_users']
+            simple_sorts = ['newest', 'oldest', 'popular', 'top_rated', 'most_commented', 'random', 'country']
+            
+            # LOGIQUE DÉCISIONNELLE CORRIGÉE
+            use_custom_algorithm = False
+            
+            if request.user.is_authenticated:
+                # Utilisateur authentifié
+                if algorithm in custom_algorithms:
+                    # Algorithme personnalisé explicitement demandé
+                    use_custom_algorithm = True
+                    logger.info(f"👤 Authenticated - Custom algorithm: {algorithm}")
+                elif sort_by in simple_sorts and sort_by != 'newest':
+                    # Tri simple spécifique demandé (autre que 'newest')
+                    use_custom_algorithm = False
+                    logger.info(f"👤 Authenticated - Simple sort: {sort_by}")
+                else:
+                    # Par défaut pour utilisateur authentifié: algorithme recommandé
+                    use_custom_algorithm = True
+                    algorithm = 'recommended'
+                    logger.info("👤 Authenticated - Default: recommended algorithm")
+            else:
+                # Utilisateur non authentifié
+                use_custom_algorithm = False
+                logger.info("👤 Non-authenticated - Simple sort")
+            
+            logger.info(f"🔍 Decision: use_custom_algorithm={use_custom_algorithm}, algorithm={algorithm}, sort_by={sort_by}")
+            
+            if use_custom_algorithm:
+                # ============================================
+                # ALGORITHME PERSONNALISÉ AVANCÉ
+                # ============================================
+                user_profile = request.user.profile
+                
+                # 1. Score de similarité de pays
+                country_score = Case(
+                    When(user__profile__country=user_profile.country, then=Value(50.0)),
+                    default=Value(0.0),
                     output_field=FloatField()
                 )
-            )
-            
-            # Apply sorting algorithm
-            if algorithm == 'recommended':
-                # NEW LOGIC: Non-interacted posts first, then interacted ones
-                queryset = queryset.order_by(
-                    '-interaction_priority_score',  # Non-interacted first
-                    '-recommendation_score',        # Then by recommendation score
-                    '-created_at'                   # Finally by date
-                )
-            
-            elif algorithm == 'country_priority':
-                # Priority to posts from same country, but non-interacted first
-                queryset = queryset.order_by(
-                    '-interaction_priority_score',  # Non-interacted first
-                    '-country_score',               # Then by country
-                    '-freshness_score',             # Then freshness
-                    '-created_at'
-                )
-            
-            elif algorithm == 'fresh_for_you':
-                # Recent posts but adapted to preferences, non-interacted first
-                recent_days = 7  # Last week
-                recent_posts = queryset.filter(
-                    created_at__gte=timezone.now() - timezone.timedelta(days=recent_days)
-                ).order_by(
-                    '-interaction_priority_score',  # Non-interacted first
-                    '-category_similarity',         # Then category similarity
-                    '-tag_similarity',              # Then tag similarity
-                    '-created_at'
+                
+                # 2. Posts déjà interagis
+                user_rated_posts = Rating.objects.filter(user=request.user).values_list('post_id', flat=True)
+                user_ratings_dict = dict(Rating.objects.filter(
+                    user=request.user
+                ).values_list('post_id', 'stars'))
+                
+                commented_posts = Comment.objects.filter(
+                    user=request.user
+                ).values_list('post_id', flat=True).distinct()
+                
+                viewed_posts = PostView.objects.filter(user=request.user).values_list('post_id', flat=True)
+                
+                # 3. Préférences de catégorie
+                user_category_prefs = {}
+                user_rated_categories = Rating.objects.filter(
+                    user=request.user,
+                    stars__gte=3
+                ).values('post__category__id').annotate(
+                    avg_rating=Avg('stars'),
+                    rating_count=Count('id')
                 )
                 
-                older_posts = queryset.filter(
-                    created_at__lt=timezone.now() - timezone.timedelta(days=recent_days)
-                ).order_by(
-                    '-interaction_priority_score',  # Non-interacted first
-                    '-recommendation_score',        # Then by score
-                    '-created_at'
+                for pref in user_rated_categories:
+                    if pref['post__category__id']:
+                        user_category_prefs[pref['post__category__id']] = (
+                            pref['avg_rating'] * 10 + pref['rating_count'] * 2
+                        )
+                
+                # 4. Score de similarité de catégorie
+                category_similarity_score = Case(
+                    *[When(category_id=cat_id, then=Value(score)) 
+                      for cat_id, score in user_category_prefs.items()],
+                    default=Value(0.0),
+                    output_field=FloatField()
                 )
                 
-                # Combine: recent adapted posts first (with non-interacted first), then recommendations
-                queryset = list(recent_posts) + list(older_posts)
-            
-            elif algorithm == 'similar_users':
-                # Recommendations based on similar users
-                similar_users = User.objects.filter(
-                    profile__country=user_profile.country
-                ).exclude(id=request.user.id)
+                # 5. Score de fraîcheur
+                freshness_score = ExpressionWrapper(
+                    F('id') / 1000000.0 * 10.0,
+                    output_field=FloatField()
+                )
                 
-                # Popular posts among similar users
-                similar_posts = Post.objects.filter(
-                    user__in=similar_users
-                ).annotate(
-                    similar_users_rating_avg=Coalesce(
-                        Avg(
-                            Case(
-                                When(
-                                    ratings__user__in=similar_users,
-                                    then=F('ratings__stars')
-                                ),
-                                default=Value(None),
-                                output_field=FloatField()
-                            )
-                        ),
-                        Value(0.0),
-                        output_field=FloatField()
-                    ),
-                    similar_users_count=Count(
-                        'ratings',
-                        filter=Q(ratings__user__in=similar_users),
-                        distinct=True
-                    ),
-                    # Add priority score for non-interacted posts
-                    interaction_priority_score=Case(
-                        When(
-                            Q(id__in=user_rated_posts) | Q(id__in=commented_posts),
-                            then=Value(0.0)
-                        ),
-                        default=Value(100.0),
+                # 6. Score de popularité globale
+                popularity_score = ExpressionWrapper(
+                    Coalesce(Avg('ratings__stars'), Value(0.0)) * 20.0 +
+                    Count('ratings', distinct=True) * 2.0 +
+                    Count('post_comments', distinct=True) * 1.0,
+                    output_field=FloatField()
+                )
+                
+                # 7. Score de priorité d'interaction (NON-INTERAGIS en premier)
+                interacted_posts = set(list(user_rated_posts) + list(commented_posts))
+                interaction_priority_score = Case(
+                    When(id__in=interacted_posts, then=Value(0.0)),
+                    default=Value(100.0),
+                    output_field=FloatField()
+                )
+                
+                # 8. Score final avec randomisation
+                variation_score = ExpressionWrapper(
+                    (F('id') * seed_int) % 100000 / 100000.0 * 100.0,
+                    output_field=FloatField()
+                )
+                
+                # Score d'engagement
+                engagement_score = ExpressionWrapper(
+                    F('calculated_avg_rating') * (F('calculated_rating_count') + Value(1)),
+                    output_field=FloatField()
+                )
+                
+                # Annoter avec tous les scores
+                queryset = queryset.annotate(
+                    random_score=variation_score,
+                    engagement=engagement_score,
+                    country_score=country_score,
+                    category_similarity=category_similarity_score,
+                    freshness_score=freshness_score,
+                    popularity_score=popularity_score,
+                    interaction_priority_score=interaction_priority_score,
+                    final_score=(
+                        F('engagement') * Value(0.5) + 
+                        F('random_score') * Value(0.2) +
+                        F('country_score') * Value(0.1) +
+                        F('category_similarity') * Value(0.1) +
+                        F('interaction_priority_score') * Value(0.1)
+                    )
+                )
+                
+                # Appliquer l'algorithme spécifique
+                if algorithm == 'recommended':
+                    queryset = queryset.order_by('-final_score', '-created_at')
+                    logger.info("🎯 Using RECOMMENDED algorithm")
+                    
+                elif algorithm == 'country_priority':
+                    queryset = queryset.order_by(
+                        '-country_score',
+                        '-interaction_priority_score',
+                        '-freshness_score',
+                        '-created_at'
+                    )
+                    logger.info("🌍 Using COUNTRY PRIORITY algorithm")
+                    
+                elif algorithm == 'discovery_new':
+                    queryset = queryset.order_by(
+                        '-interaction_priority_score',
+                        '-freshness_score',
+                        '-country_score',
+                        '-popularity_score',
+                        '-created_at'
+                    )
+                    logger.info("🔍 Using DISCOVERY NEW algorithm")
+                    
+                elif algorithm == 'avoid_seen':
+                    # Déjà filtré plus haut, maintenant juste trier
+                    queryset = queryset.order_by(
+                        '-country_score',
+                        '-freshness_score',
+                        '-created_at'
+                    )
+                    logger.info("👁️ Using AVOID SEEN algorithm")
+                    
+                elif algorithm == 'similar_users':
+                    # Pour simplifier, utiliser recommended pour similar_users
+                    queryset = queryset.order_by('-final_score', '-created_at')
+                    logger.info("👥 Using SIMILAR USERS algorithm (fallback to recommended)")
+                    
+            else:
+                # ============================================
+                # TRI SIMPLE POUR TOUS
+                # ============================================
+                # RÉ-ANNOVER LES CHAMPS NÉCESSAIRES POUR LES TRIS SIMPLES
+                queryset = queryset.annotate(
+                    rating_count=Count('ratings', distinct=True),
+                    avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0), output_field=FloatField()),
+                    comment_count=Count('post_comments', distinct=True),
+                )
+                
+                if sort_by == 'newest':
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
                         output_field=FloatField()
                     )
-                ).filter(
-                    similar_users_rating_avg__gte=3.5,
-                    similar_users_count__gte=2
-                ).order_by(
-                    '-interaction_priority_score',      # Non-interacted first
-                    '-similar_users_rating_avg',        # Then average rating
-                    '-similar_users_count',             # Then number of users
-                    '-created_at'
-                )
-                
-                queryset = similar_posts
-            
-            elif algorithm == 'avoid_seen':
-                # Avoid posts already seen/rated
-                queryset = queryset.exclude(
-                    id__in=viewed_posts
-                ).exclude(
-                    id__in=list(user_ratings_dict.keys())
-                ).order_by(
-                    '-interaction_priority_score',  # Non-interacted first (all will be)
-                    '-country_score',
-                    '-freshness_score',
-                    '-created_at'
-                )
-            
-            elif algorithm == 'discovery_new':  # NEW ALGORITHM
-                # Strong priority to non-interacted posts
-                queryset = queryset.order_by(
-                    '-interaction_priority_score',  # STRONG PRIORITY to non-interacted
-                    '-freshness_score',             # Then freshness
-                    '-country_score',               # Then country
-                    '-popularity_score',            # Then popularity
-                    '-created_at'
-                )
-            
-        else:
-            # For unauthenticated users or explicit sorting
-            sort_by = request.query_params.get('sort', 'newest')
-            ordering = request.query_params.get('ordering', None)
-            
-            if ordering:
-                queryset = queryset.order_by(ordering)
-            else:
-                if sort_by == 'newest':
-                    queryset = queryset.order_by('-created_at')
+                    queryset = queryset.annotate(random_factor=random_score)
+                    queryset = queryset.order_by('-created_at', '-random_factor')
+                    logger.info("📅 Sorting by NEWEST")
+                    
                 elif sort_by == 'oldest':
-                    queryset = queryset.order_by('created_at')
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
+                        output_field=FloatField()
+                    )
+                    queryset = queryset.annotate(random_factor=random_score)
+                    queryset = queryset.order_by('created_at', 'random_factor')
+                    logger.info("📅 Sorting by OLDEST")
+                    
                 elif sort_by == 'popular':
+                    # Popular = combinaison de nombre de notes et moyenne
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
+                        output_field=FloatField()
+                    )
                     queryset = queryset.annotate(
-                        rating_count=Count('ratings', distinct=True),
-                        avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0))
+                        popularity_score=ExpressionWrapper(
+                            F('avg_rating') * 20.0 + F('rating_count') * 2.0 + F('comment_count') * 1.0,
+                            output_field=FloatField()
+                        ),
+                        random_factor=random_score
                     ).filter(
-                        rating_count__gt=0
-                    ).order_by('-rating_count', '-avg_rating', '-created_at')
+                        rating_count__gt=1  # Au moins une note
+                    ).order_by('-popularity_score', '-random_factor', '-created_at')
+                    logger.info("🔥 Sorting by POPULAR (rating count + avg rating + comments)")
+                    
                 elif sort_by == 'top_rated':
+                    # Top Rated = meilleures notes moyennes avec minimum de votes
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
+                        output_field=FloatField()
+                    )
                     queryset = queryset.annotate(
-                        rating_count=Count('ratings', distinct=True),
-                        avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0))
+                        random_factor=random_score
                     ).filter(
                         rating_count__gte=3,
                         avg_rating__gte=4.0
-                    ).order_by('-avg_rating', '-rating_count', '-created_at')
+                    ).order_by('-avg_rating', '-rating_count', '-random_factor', '-created_at')
+                    logger.info("⭐ Sorting by TOP RATED (min 3 ratings, avg ≥ 4.0)")
+                    
                 elif sort_by == 'most_commented':
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
+                        output_field=FloatField()
+                    )
                     queryset = queryset.annotate(
-                        comment_count=Count('post_comments', distinct=True)
+                        random_factor=random_score
                     ).filter(
                         comment_count__gt=0
-                    ).order_by('-comment_count', '-created_at')
-                elif sort_by == 'country_priority' and request.user.is_authenticated:
-                    # Sort by user's country
+                    ).order_by('-comment_count', '-random_factor', '-created_at')
+                    logger.info("💬 Sorting by MOST COMMENTED")
+                    
+                elif sort_by == 'random':
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000000 / 1000000.0,
+                        output_field=FloatField()
+                    )
+                    queryset = queryset.annotate(random_order=random_score)
+                    queryset = queryset.order_by('random_order')
+                    logger.info("🎲 Sorting by RANDOM")
+                    
+                elif sort_by == 'country' and request.user.is_authenticated:
+                    # Tri par pays de l'utilisateur
                     user_country = request.user.profile.country
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
+                        output_field=FloatField()
+                    )
                     queryset = queryset.annotate(
                         is_same_country=Case(
                             When(user__profile__country=user_country, then=Value(1)),
                             default=Value(0),
                             output_field=FloatField()
-                        )
-                    ).order_by('-is_same_country', '-created_at')
-                elif sort_by == 'discovery_new' and request.user.is_authenticated:
-                    # Discovery algorithm for authenticated users
-                    user_rated_posts = Rating.objects.filter(
-                        user=request.user
-                    ).values_list('post_id', flat=True)
-                    commented_posts = Comment.objects.filter(
-                        user=request.user
-                    ).values_list('post_id', flat=True).distinct()
+                        ),
+                        random_factor=random_score
+                    ).order_by('-is_same_country', '-created_at', '-random_factor')
+                    logger.info(f"🌍 Sorting by USER'S COUNTRY: {user_country}")
                     
-                    interacted_posts = set(list(user_rated_posts) + list(commented_posts))
-                    
-                    interaction_priority = Case(
-                        When(id__in=interacted_posts, then=Value(0.0)),
-                        default=Value(100.0),
+                else:
+                    # Par défaut: newest avec randomisation
+                    random_score = ExpressionWrapper(
+                        (F('id') * seed_int) % 1000 / 1000.0,
                         output_field=FloatField()
                     )
-                    
-                    queryset = queryset.annotate(
-                        interaction_priority=interaction_priority,
-                        is_interacted=Case(
-                            When(id__in=interacted_posts, then=Value(True)),
-                            default=Value(False),
-                            output_field=BooleanField()
-                        )
-                    ).order_by('-interaction_priority', '-created_at')
-                else:
-                    queryset = queryset.order_by('-created_at')
-        
-        # Pagination
-        page = request.query_params.get('page', 1)
-        page_size = request.query_params.get('page_size', 20)
-        
-        try:
-            page = int(page)
-            page_size = int(page_size)
-        except ValueError:
-            page = 1
-            page_size = 20
-        
-        total_posts = queryset.count()
-        
-        start = (page - 1) * page_size
-        end = start + page_size
-        
-        # For combined querysets (lists)
-        if isinstance(queryset, list):
-            paginated_queryset = queryset[start:end]
-            total_posts = len(queryset)
-        else:
-            paginated_queryset = queryset[start:end]
-        
-        # Prefetch relations
-        if isinstance(paginated_queryset, list):
-            # For lists, fetch objects with their relations
-            post_ids = [p.id for p in paginated_queryset]
+                    queryset = queryset.annotate(random_factor=random_score)
+                    queryset = queryset.order_by('-created_at', '-random_factor')
+                    logger.info("📅 Default sorting: NEWEST")
+            
+            logger.info(f"✅ Step 6: Sorting algorithm applied")
+            
+            # ============================================
+            # ÉTAPE 7: CONSTRUCTION DE LA LISTE FINALE
+            # ============================================
+            logger.info("🔍 Step 7: Building final list...")
+            
+            page = int(request.query_params.get('page', 1))
+            page_size = int(request.query_params.get('page_size', 20))
+            
+            final_posts = []
+            
+            # Page 1: spotlight en premier + mélange aléatoire
+            if page == 1 and selected_spotlight_boost:
+                # 1. Spotlight boost TOUJOURS en première position
+                final_posts.append(selected_spotlight_boost.original_post)
+                
+                # 2. Limiter le nombre d'autres boosts
+                max_other_boosts = min(3, len(all_other_boosts))
+                other_boosts_to_show = all_other_boosts[:max_other_boosts]
+                
+                # 3. Calculer combien de posts réguliers nous avons besoin
+                regular_posts_needed = page_size - (1 + len(other_boosts_to_show))
+                
+                # 4. Récupérer les posts réguliers
+                regular_posts = list(queryset[:regular_posts_needed])
+                
+                # 5. MÉLANGE ALÉATOIRE des autres boosts et posts réguliers
+                all_remaining = []
+                
+                for boost in other_boosts_to_show:
+                    all_remaining.append(('boost', boost))
+                
+                for post in regular_posts:
+                    all_remaining.append(('post', post))
+                
+                random.shuffle(all_remaining)
+                
+                # 6. Construire la liste finale
+                for item_type, item in all_remaining:
+                    if item_type == 'boost':
+                        final_posts.append(item.original_post)
+                    else:
+                        final_posts.append(item)
+                
+                # 7. Limiter à la taille de page
+                if len(final_posts) > page_size:
+                    final_posts = final_posts[:page_size]
+                
+                total_regular_count = queryset.count()
+                
+            elif page == 1 and not selected_spotlight_boost:
+                # Page 1 sans spotlight
+                regular_posts = list(queryset[:page_size])
+                final_posts = regular_posts
+                total_regular_count = queryset.count()
+                
+            else:
+                # Pages suivantes
+                start_idx = (page - 1) * page_size
+                end_idx = start_idx + page_size
+                
+                regular_posts = list(queryset[start_idx:end_idx])
+                final_posts = regular_posts
+                total_regular_count = queryset.count()
+            
+            logger.info(f"✅ Step 7: Final list built with {len(final_posts)} posts")
+            
+            # ============================================
+            # ÉTAPE 8: PRÉPARER LES DONNÉES DE BOOST
+            # ============================================
+            logger.info("🔍 Step 8: Preparing boost data...")
+            
+            boost_info_map = {}
+            
+            if page == 1 and selected_spotlight_boost:
+                # Spotlight boost (position 0)
+                boost_info_map[selected_spotlight_boost.original_post_id] = {
+                    'is_boosted': True,
+                    'boost_type': selected_spotlight_boost.post_type,
+                    'boost_multiplier': float(selected_spotlight_boost.boost_multiplier),
+                    'boost_until': selected_spotlight_boost.boost_end,
+                    'boost_start': selected_spotlight_boost.boost_start,
+                    'always_on_top': selected_spotlight_boost.always_on_top,
+                    'sponsored_post_id': selected_spotlight_boost.id,
+                    'is_spotlight': True,
+                    'is_first_spotlight': True,
+                    'spotlight_position': 'first',
+                    'position': 0,
+                }
+                
+                # Autres boosts
+                for i, post in enumerate(final_posts[1:], 1):
+                    for boost in all_other_boosts:
+                        if boost.original_post_id == post.id:
+                            boost_info_map[post.id] = {
+                                'is_boosted': True,
+                                'boost_type': boost.post_type,
+                                'boost_multiplier': float(boost.boost_multiplier),
+                                'boost_until': boost.boost_end,
+                                'boost_start': boost.boost_start,
+                                'always_on_top': boost.always_on_top,
+                                'sponsored_post_id': boost.id,
+                                'is_spotlight': False,
+                                'position': i,
+                            }
+                            break
+            
+            logger.info(f"✅ Step 8: Boost info prepared for {len(boost_info_map)} posts")
+            
+            # ============================================
+            # ÉTAPE 9: OPTIMISER LES REQUÊTES
+            # ============================================
+            logger.info("🔍 Step 9: Optimizing queries...")
+            
+            post_ids = [p.id for p in final_posts]
             
             if post_ids:
-                # Create an ordered queryset according to IDs in the list
+                # Préserver l'ordre exact
+                from django.db.models import Case, When, IntegerField
                 preserved_order = Case(
                     *[When(pk=pk, then=pos) for pos, pk in enumerate(post_ids)],
                     output_field=IntegerField()
                 )
                 
-                optimized_queryset = Post.objects.filter(id__in=post_ids).select_related(
+                # Récupérer avec toutes les relations nécessaires
+                optimized_posts = Post.objects.filter(id__in=post_ids).select_related(
                     'category', 'user', 'user__profile'
                 ).prefetch_related(
-                    'tags', 'mentions', 'post_images', 'post_files',
-                    Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
+                    'tags', 'mentions', 'post_images', 'post_files'
                 ).order_by(preserved_order)
                 
-                paginated_queryset = optimized_queryset
+                # Réappliquer les annotations pour le serializer
+                optimized_posts = optimized_posts.annotate(
+                    calculated_avg_rating=Coalesce(Avg('ratings__stars'), Value(0.0), output_field=FloatField()),
+                    calculated_rating_count=Count('ratings', distinct=True),
+                    comments_count_annotated=Count('post_comments', distinct=True),
+                )
+                
+                final_posts_list = list(optimized_posts)
             else:
-                # If no posts, return empty queryset
-                paginated_queryset = Post.objects.none()
-        else:
-            paginated_queryset = paginated_queryset.select_related(
-                'category', 'user', 'user__profile'
-            ).prefetch_related(
-                'tags', 'mentions', 'post_images', 'post_files',
-                Prefetch('ratings', queryset=Rating.objects.filter(user=request.user) if request.user.is_authenticated else Rating.objects.none())
-            )
-        
-        from .serializers import PostListSerializer 
-        serializer = PostListSerializer(paginated_queryset, many=True, context={'request': request})
-        
-        # Information about applied algorithm
-        algorithm_info = {
-            'name': algorithm,
-            'description': {
-                'recommended': 'Personalized recommendation with priority to new posts',
-                'country_priority': 'Priority to posts from the same country (new ones first)',
-                'fresh_for_you': 'Recent posts adapted to your preferences',
-                'similar_users': 'Recommendations based on similar users',
-                'avoid_seen': 'Avoids posts already seen/rated',
-                'discovery_new': 'Discovery: priority to non-interacted posts',
-                'newest': 'Newest posts',
-                'popular': 'Most popular posts',
-                'top_rated': 'Best rated posts',
-                'most_commented': 'Most commented posts',
-            }.get(algorithm, 'Standard sorting'),
-            'logic': 'Posts already rated or commented are placed at the bottom to favor discovery'
-        }
-        
-        # Count interacted vs non-interacted posts
-        if request.user.is_authenticated and algorithm != 'newest':
-            interacted_count = Rating.objects.filter(
-                user=request.user
-            ).values('post').distinct().count()
-            interacted_count += Comment.objects.filter(
-                user=request.user
-            ).values('post').distinct().count()
-            # Avoid double counting
-            total_interacted = len(set(
-                list(Rating.objects.filter(user=request.user).values_list('post_id', flat=True)) +
-                list(Comment.objects.filter(user=request.user).values_list('post_id', flat=True).distinct())
-            ))
-        else:
-            total_interacted = 0
-        
-        # Return with metadata
-        response_data = {
-            'posts': serializer.data,
-            'pagination': {
-                'page': page,
-                'page_size': page_size,
-                'total_posts': total_posts,
-                'total_pages': (total_posts + page_size - 1) // page_size,
-                'has_next': end < total_posts,
-                'has_previous': page > 1
-            },
-            'filters': {
-                'algorithm': algorithm,
-                'category': category,
-                'search': search,
-                'tag': tag,
-                'user': user
-            },
-            'algorithm_info': algorithm_info,
-            'user_context': {
-                'country': request.user.profile.country if request.user.is_authenticated else None,
-                'is_authenticated': request.user.is_authenticated,
-                'preferences_calculated': request.user.is_authenticated and algorithm != 'newest',
-                'total_interacted_posts': total_interacted if request.user.is_authenticated else 0
-            },
-            'discovery_stats': {
-                'posts_non_interacted_first': True,
-                'interaction_based_ordering': True,
-                'new_content_priority': 'high'
+                final_posts_list = []
+            
+            logger.info(f"✅ Step 9: Optimized queries, got {len(final_posts_list)} posts")
+            
+            # ============================================
+            # ÉTAPE 10: SÉRIALISATION
+            # ============================================
+            logger.info("🔍 Step 10: Serializing data...")
+            
+            from .serializers import PostListSerializer
+            
+            context = {
+                'request': request,
+                'boost_info': boost_info_map,
+                'spotlight_first': selected_spotlight_boost.original_post_id if (page == 1 and selected_spotlight_boost) else None
             }
-        }
-        
-        return Response(response_data)
+            
+            # Ajouter des attributs pour le serializer
+            for post in final_posts_list:
+                if post.id in boost_info_map:
+                    post.is_boosted = True
+                    post.boost_type = boost_info_map[post.id]['boost_type']
+                    post.boost_multiplier = boost_info_map[post.id]['boost_multiplier']
+                    post.is_spotlight = boost_info_map[post.id].get('is_spotlight', False)
+                    post.is_first_spotlight = boost_info_map[post.id].get('is_first_spotlight', False)
+                    post.sponsored_post_id = boost_info_map[post.id].get('sponsored_post_id')
+                    post.boost_until = boost_info_map[post.id].get('boost_until')
+            
+            try:
+                serializer = PostListSerializer(final_posts_list, many=True, context=context)
+                logger.info("✅ Step 10: Serialization successful")
+                
+                # DEBUG: Vérifier le premier post
+                if serializer.data and len(serializer.data) > 0:
+                    first_post = serializer.data[0]
+                    logger.info("=" * 50)
+                    logger.info(f"🎯 FIRST POST INFO:")
+                    logger.info(f"   ID: {first_post.get('id')}")
+                    logger.info(f"   Title: {first_post.get('title')[:30]}...")
+                    logger.info(f"   Is Boosted: {first_post.get('is_boosted')}")
+                    logger.info(f"   Boost Type: {first_post.get('boost_details', {}).get('type') if first_post.get('boost_details') else 'None'}")
+                    logger.info(f"   Is Spotlight: {first_post.get('boost_details', {}).get('is_spotlight') if first_post.get('boost_details') else False}")
+                    logger.info("=" * 50)
+            
+            except Exception as e:
+                logger.error(f"❌ Serialization error: {str(e)}", exc_info=True)
+                return Response(
+                    {'error': 'Serialization failed', 'details': str(e)}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # ============================================
+            # ÉTAPE 11: CONSTRUIRE LA RÉPONSE AVEC MÉTADONNÉES
+            # ============================================
+            logger.info("🔍 Step 11: Building response with metadata...")
+            
+            # Informations sur l'algorithme appliqué
+            algorithm_info = {
+                'name': algorithm if use_custom_algorithm else sort_by,
+                'type': 'custom' if use_custom_algorithm else 'simple',
+                'description': {
+                    'recommended': 'Personalized recommendation with random variation',
+                    'country_priority': 'Priority to posts from the same country',
+                    'discovery_new': 'Discovery: priority to non-interacted posts',
+                    'avoid_seen': 'Avoids posts already seen/rated/commented',
+                    'similar_users': 'Content liked by users with similar tastes',
+                    'newest': 'Newest posts with random variation',
+                    'oldest': 'Oldest posts',
+                    'popular': 'Most popular posts (ratings + comments)',
+                    'top_rated': 'Best rated posts (min 3 ratings, avg ≥ 4.0)',
+                    'most_commented': 'Most commented posts',
+                    'random': 'Completely random order',
+                    'country': 'Posts from your country first',
+                }.get(algorithm if use_custom_algorithm else sort_by, 'Standard sorting'),
+            }
+            
+            # Statistiques de découverte
+            discovery_stats = {}
+            if request.user.is_authenticated:
+                # Compter les posts interagis
+                user_rated = Rating.objects.filter(user=request.user).values('post').distinct().count()
+                user_commented = Comment.objects.filter(user=request.user).values('post').distinct().count()
+                user_viewed = PostView.objects.filter(user=request.user).values('post').distinct().count()
+                
+                # Éviter les doublons
+                all_interacted = set()
+                all_interacted.update(Rating.objects.filter(user=request.user).values_list('post_id', flat=True))
+                all_interacted.update(Comment.objects.filter(user=request.user).values_list('post_id', flat=True))
+                total_interacted_unique = len(all_interacted)
+                
+                discovery_stats = {
+                    'total_rated_posts': user_rated,
+                    'total_commented_posts': user_commented,
+                    'total_viewed_posts': user_viewed,
+                    'total_interacted_posts_unique': total_interacted_unique,
+                    'avoid_seen_applied': avoid_seen,
+                    'non_interacted_priority': use_custom_algorithm,
+                }
+            
+            response_data = {
+                'posts': serializer.data,
+                'pagination': {
+                    'page': page,
+                    'page_size': page_size,
+                    'total_posts': total_regular_count + len(all_other_boosts) + (1 if selected_spotlight_boost else 0),
+                    'total_pages': max(1, (total_regular_count + page_size - 1) // page_size),
+                    'has_next': (page * page_size) < total_regular_count,
+                    'has_previous': page > 1
+                },
+                'filters': {
+                    'algorithm': algorithm,
+                    'sort': sort_by,
+                    'category': category,
+                    'search': search,
+                    'tag': tag,
+                    'user': user,
+                    'country': country_filter,
+                    'avoid_seen': avoid_seen,
+                },
+                'algorithm_info': algorithm_info,
+                'randomization': {
+                    'seed': seed_int,
+                    'has_spotlight': page == 1 and selected_spotlight_boost is not None,
+                    'spotlight_changes_on_refresh': True,
+                    'feed_changes_on_refresh': True,
+                },
+                'spotlight_info': {
+                    'enabled': selected_spotlight_boost is not None,
+                    'post_id': selected_spotlight_boost.original_post_id if selected_spotlight_boost else None,
+                    'guaranteed_first_position': True,
+                    'changes_every_refresh': True
+                },
+                'user_context': {
+                    'country': request.user.profile.country if request.user.is_authenticated else None,
+                    'is_authenticated': request.user.is_authenticated,
+                    'preferences_calculated': use_custom_algorithm,
+                },
+                'discovery_stats': discovery_stats
+            }
+            
+            logger.info("✅ Step 11: Response built successfully")
+            logger.info(f"📊 Sending {len(serializer.data)} posts to client")
+            logger.info("=" * 60)
+            
+            return Response(response_data)
+            
+        except Exception as e:
+            logger.error(f"❌ CRITICAL ERROR in post_list_create: {str(e)}", exc_info=True)
+            return Response(
+                {'error': 'Internal server error', 'details': str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     elif request.method == 'POST':
-        # ... (the rest of your POST code remains unchanged) ...
+        # ... (votre code POST existant reste inchangé) ...
         print("=" * 60)
         print("🔍 [POST CREATE] DEBUG START")
         print("🔍 [POST CREATE] User:", request.user.username)
@@ -671,7 +940,7 @@ def post_list_create(request):
                 post_images_count = PostImage.objects.filter(post=post).count()
                 print(f"  - Post Images count: {post_images_count}")
                 
-                post_files_count = PostFile.objects.filter(post=post).count();
+                post_files_count = PostFile.objects.filter(post=post).count()
                 print(f"  - Post Files count: {post_files_count}")
                 
                 if post_files_count > 0:
@@ -692,7 +961,8 @@ def post_list_create(request):
                 )
         else:
             print("❌ [POST CREATE] Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)      
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 @permission_classes([permissions.IsAuthenticatedOrReadOnly])
 def post_detail_update_delete(request, pk):
@@ -2401,3 +2671,4 @@ def format_file_size(bytes_size):
             return f"{bytes_size:.1f} {unit}"
         bytes_size /= 1024.0
     return f"{bytes_size:.1f} TB"
+    

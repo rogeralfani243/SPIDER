@@ -33,7 +33,9 @@ urlpatterns = [
     path('msg/', include('messaging.urls')),
     path('report/', include('report.urls')),
     path('dashboard/', include('dashboard_client.urls')),
-    path('search/', include('searchs.urls'))
+    path('search/', include('searchs.urls')),
+    path('certifications/', include('certfications.urls')),
+    path('dash/admin/', include('dashboard_admin.urls'))
 
 
 ]

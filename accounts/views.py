@@ -445,51 +445,48 @@ def cancel_registration(request):
 print(User.USERNAME_FIELD)
 
 #for user login
+from django.contrib.auth import get_user_model
+from django.db.models import Q
+
+User = get_user_model()
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
-    username = request.data.get('username')
+    login_value = request.data.get('username')  # peut être email ou username
     password = request.data.get('password')
-    
-    print(f"🔐 Login attempt for: {username}")
-    
-    if not username or not password:
+
+    if not login_value or not password:
         return Response(
-            {'error': 'Le nom d\'utilisateur et le mot de passe sont requis'},
+            {'error': 'Username/email and password are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
-    
-    # Authentifier l'utilisateur
-    user = authenticate(username=username, password=password)
-    
-    if user is not None:
-        if user.is_active:
-            # Obtenir ou créer le token
-            token, created = Token.objects.get_or_create(user=user)
-            
-            print(f"✅ Login successful for: {user.username}")
-            
-            return Response({
-                'token': token.key,
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name
-                }
-            })
-        else:
-            return Response(
-                {'error': ' User account disabled '}, 
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-    else:
-        print(f"❌ Login failed for: {username}")
-        return Response(
-            {'error': 'Incorrect username or password'}, 
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+
+    # 🔎 Vérifier si c'est un email
+    user = User.objects.filter(
+        Q(username=login_value) | Q(email=login_value)
+    ).first()
+
+    if user:
+        user = authenticate(username=user.username, password=password)
+
+    if user and user.is_active:
+        token, created = Token.objects.get_or_create(user=user)
+
+        return Response({
+            'token': token.key,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+            }
+        })
+
+    return Response(
+        {'error': 'Invalid credentials'},
+        status=status.HTTP_401_UNAUTHORIZED
+    )
+
 #for user logout
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -520,3 +517,31 @@ def check_auth(request):
     })
 
 
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def verify_password(request):
+    """
+    Vérifie si le mot de passe fourni correspond à celui de l'utilisateur
+    """
+    password = request.data.get('password')
+    
+    if not password:
+        return Response(
+            {'error': 'Password is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    user = request.user
+    
+    # Vérifier le mot de passe
+    if user.check_password(password):
+        return Response({
+            'verified': True,
+            'message': 'Password verified successfully'
+        })
+    else:
+        return Response({
+            'verified': False,
+            'error': 'Incorrect password'
+        }, status=status.HTTP_401_UNAUTHORIZED)

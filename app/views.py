@@ -85,6 +85,64 @@ from .serializers import OpeningHoursSerializer  # Vous devrez créer ce seriali
 
 logger = logging.getLogger(__name__)
 
+
+from .models import SecurityViolation
+
+User = get_user_model()
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])  # volontairement ouvert
+def log_security_violation(request):
+    """
+    Log a frontend security violation attempt.
+    This endpoint must NEVER break the frontend.
+    """
+
+    try:
+        user_id = request.data.get('user_id')
+        path = request.data.get('path', '')
+        reason = request.data.get('reason', 'Unknown reason')
+
+        user = None
+        if user_id:
+            user = User.objects.filter(id=user_id).first()
+
+        SecurityViolation.objects.create(
+            user=user,
+            path=path[:255],
+            reason=reason,
+            ip_address=get_client_ip(request),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')[:1000]
+        )
+
+    except Exception:
+        # ⚠️ NE JAMAIS lever d'erreur ici
+        pass
+
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0]
+    return request.META.get('REMOTE_ADDR')
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_permissions(request):
+    user = request.user
+
+    return Response({
+        "is_authenticated": True,
+        "is_admin": user.is_staff,
+        "is_superuser": user.is_superuser,
+        "user_id": user.id,
+        "username": user.username,
+        "groups": list(user.groups.values_list("name", flat=True)),
+    })
+
 @api_view(['GET'])
 def get_categories(request):
     categories = Category.objects.all()
@@ -902,6 +960,7 @@ def get_my_profile_id(request):
             'profile_id': profile.id,
             'user_id': request.user.id,
             'username': request.user.username,
+            'email': request.user.email,
      
         })
         
@@ -943,7 +1002,7 @@ def profiles_by_category(request, category_id=None):
             result = []
             
             for category in all_categories:
-                profiles_in_category = Profile.objects.filter(category=category)
+                profiles_in_category = Profile.objects.filter(category=category, user__is_active=True).select_related('user')
                 
                 if not profiles_in_category.exists():
                     continue
@@ -1036,7 +1095,7 @@ def profiles_by_category(request, category_id=None):
             except Category.DoesNotExist:
                 return Response({'error': 'Category not found'}, status=status.HTTP_404_NOT_FOUND)
             
-            profiles = Profile.objects.filter(category=category)
+            profiles = Profile.objects.filter(category=category, user__is_active=True)
             profile_data = []
             
             for profile in profiles:
@@ -3056,7 +3115,8 @@ def top_profiles(request):
             total_feedbacks = Feedback.objects.filter(
                 professional=profile.id
             ).count()
-            
+            if total_feedbacks <= 2 :
+                continue
             # Only include profiles with more than 2 feedbacks
        
                 
@@ -3132,10 +3192,10 @@ def top_profiles(request):
         profiles_with_scores.sort(key=lambda x: x[1], reverse=True)
         
         # Take top 10
-        top_10 = [item[0] for item in profiles_with_scores[:10]]
+        top_100 = [item[0] for item in profiles_with_scores[:100]]
         
-        print(f"Returning {len(top_10)} top profiles")
-        return Response(top_10)
+        print(f"Returning {len(top_100)} top profiles")
+        return Response(top_100)
         
     except Exception as e:
         import traceback
@@ -3172,7 +3232,7 @@ def top_by_category(request):
                 print(f"Profile {profile.user.username}: {total_feedbacks} feedbacks")
                 
                 # Only include profiles with more than 2 feedbacks
-                if total_feedbacks <= 2:
+                if total_feedbacks <= 3:
                     continue
                 
                 # Calculate engagement score
@@ -3199,10 +3259,10 @@ def top_by_category(request):
             
             # Sort and take top 5
             profiles_with_scores.sort(key=lambda x: x[1], reverse=True)
-            top_5 = [item[0] for item in profiles_with_scores[:5]]
+            top_100 = [item[0] for item in profiles_with_scores[:100]]
             
-            print(f"Returning {len(top_5)} profiles with >2 feedbacks")
-            return Response(top_5)
+            print(f"Returning {len(top_100)} profiles with >2 feedbacks")
+            return Response(top_100)
             
         else:
             # Return tops for all categories
@@ -3290,12 +3350,12 @@ def calculate_profile_engagement(profile):
     
     # Feedback de la semaine
     weekly_feedbacks = Feedback.objects.filter(
-        user=profile.user,
+        professional=profile.id,
         created_at__gte=week_start
     ).count()
     
     # Note moyenne
-    avg_rating = get_average_rating(profile.user)
+    avg_rating = get_average_rating(profile.id)
     
     # Followers
     followers_count = profile.followers.count()
@@ -3310,7 +3370,7 @@ def calculate_profile_engagement(profile):
 def get_average_rating(user):
     """Retourne la note moyenne d'un user"""
     result = Feedback.objects.filter(
-        user=user
+        professional=user
     ).aggregate(avg=Avg('rating'))
     return float(result['avg']) if result['avg'] else 0.0
 
@@ -3318,7 +3378,7 @@ def is_profile_rising(user, min_feedbacks=3):
     """Vérifie si un user est rising star"""
     week_start = timezone.now() - timedelta(days=7)
     weekly_count = Feedback.objects.filter(
-        user=user,
+        professional=user,
         created_at__gte=week_start
     ).count()
     return weekly_count >= min_feedbacks
@@ -3334,59 +3394,98 @@ def get_categories(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 @api_view(['GET'])
 def get_top_by_category(request, category_id):
-    """Top 5 profils par catégorie spécifique"""
+    """Top profils par catégorie avec limitation intelligente par feedback"""
     try:
-        # Vérifier que la catégorie existe
         category = Category.objects.get(id=category_id)
-        
+
         profiles = Profile.objects.filter(
             category=category,
             is_active=True
         ).select_related('user', 'category')
-        
-        profiles_with_scores = []
+
+        profiles_data = []
+
+        # ---------- PARAMÈTRES ----------
+        MAX_VISIBLE_PROFILES = 100
+        INITIAL_FEEDBACK_THRESHOLD = 2
+        STEP = 1
+        # --------------------------------
+
+        # 1️⃣ Collecte des profils valides
         for profile in profiles:
-            # Calculer le score d'engagement
-            engagement_score = calculate_profile_engagement(profile)
-            total_feedbacks=Feedback.objects.filter(professional=profile.id).count()
-            if total_feedbacks <= 1 :
+            total_feedbacks = Feedback.objects.filter(
+                professional=profile.id
+            ).count()
+
+            if total_feedbacks <= 2:
                 continue
-            profile_data = {
-                'id': profile.id,
-                'user': {
-                    'id': profile.user.id,
-                    'username': profile.user.username,
-                    'first_name': profile.user.first_name,
-                    'last_name': profile.user.last_name,
-                },
-                'bio': profile.bio,
-                'image': request.build_absolute_uri(profile.image.url) if profile.image else None,
-                'country': profile.country,
-                'city': profile.city,
-                'category': {
-                    'id': profile.category.id,
-                    'name': profile.category.name,
-                },
-                'average_rating': get_average_rating(profile.user),
+
+            engagement_score = calculate_profile_engagement(profile)
+
+            profiles_data.append({
+                'profile': profile,
                 'total_feedbacks': total_feedbacks,
-                'weekly_feedbacks': get_weekly_feedbacks_count(profile.user),
-                'followers_count': profile.followers.count(),
                 'engagement_score': engagement_score,
-                'is_rising': is_profile_rising(profile.user),
-                'created_at': profile.created_at,
-            }
-            profiles_with_scores.append((profile_data, engagement_score))
-        
-        # Trier par score d'engagement
-        profiles_with_scores.sort(key=lambda x: x[1], reverse=True)
-        top_profiles = [item[0] for item in profiles_with_scores[:100]]
-        
-        return Response(top_profiles)
-        
+                'data': {
+                    'id': profile.id,
+                    'user': {
+                        'id': profile.user.id,
+                        'username': profile.user.username,
+                        'first_name': profile.user.first_name,
+                        'last_name': profile.user.last_name,
+                    },
+                    'bio': profile.bio,
+                    'image': request.build_absolute_uri(profile.image.url) if profile.image else None,
+                    'country': profile.country,
+                    'city': profile.city,
+                    'category': {
+                        'id': profile.category.id,
+                        'name': profile.category.name,
+                    },
+                    'average_rating': get_average_rating(profile.id),
+                    'total_feedbacks': total_feedbacks,
+                    'weekly_feedbacks': get_weekly_feedbacks_count(profile.id),
+                    'followers_count': profile.followers.count(),
+                    'engagement_score': engagement_score,
+                    'is_rising': is_profile_rising(profile.id),
+                    'created_at': profile.created_at,
+                }
+            })
+
+        # 2️⃣ Trier par score d’engagement
+        profiles_data.sort(
+            key=lambda p: p['engagement_score'],
+            reverse=True
+        )
+
+        # 3️⃣ Limitation intelligente par concurrence
+        threshold = INITIAL_FEEDBACK_THRESHOLD
+
+        while True:
+            filtered = [
+                p for p in profiles_data
+                if p['total_feedbacks'] >= threshold
+            ]
+
+            if len(filtered) <= MAX_VISIBLE_PROFILES:
+                break
+
+            threshold += STEP
+
+        # 4️⃣ Résultat final
+        visible_profiles = filtered[:MAX_VISIBLE_PROFILES]
+        response_data = [p['data'] for p in visible_profiles]
+
+        return Response(response_data)
+
     except Category.DoesNotExist:
         return Response({'error': 'Category not found'}, status=404)
+
     except Exception as e:
         return Response({'error': str(e)}, status=500)
 
@@ -3415,8 +3514,10 @@ def get_top_by_country(request, country_code):
         
         profiles_with_scores = []
         for profile in profiles:
+            total_feedbacks= Feedback.objects.filter(professional=profile.id).count()
             engagement_score = calculate_profile_engagement(profile)
-            
+            if total_feedbacks <= 2 :
+                continue
             profile_data = {
                 'id': profile.id,
                 'user': {
@@ -3432,11 +3533,11 @@ def get_top_by_country(request, country_code):
                     'id': profile.category.id if profile.category else None,
                     'name': profile.category.name if profile.category else None,
                 } if profile.category else None,
-                'average_rating': get_average_rating(profile.user),
-                'total_feedbacks': Feedback.objects.filter(professional=profile.user).count(),
-                'weekly_feedbacks': get_weekly_feedbacks_count(profile.user),
+                'average_rating': get_average_rating(profile.id),
+                'total_feedbacks':total_feedbacks,
+                'weekly_feedbacks': get_weekly_feedbacks_count(profile.id),
                 'followers_count': profile.followers.count(),
-                'is_rising': is_profile_rising(profile.user),
+                'is_rising': is_profile_rising(profile.id),
                 'engagement_score': engagement_score,
             }
             profiles_with_scores.append((profile_data, engagement_score))
@@ -3469,7 +3570,9 @@ def get_top_by_city(request):
         profiles_with_scores = []
         for profile in profiles:
             engagement_score = calculate_profile_engagement(profile)
-            
+            total_feedbacks = Feedback.objects.filter(professional=profile.id).count()
+            if total_feedbacks <= 2 :
+                continue
             profile_data = {
                 'id': profile.id,
                 'user': {
@@ -3484,10 +3587,10 @@ def get_top_by_city(request):
                     'id': profile.category.id if profile.category else None,
                     'name': profile.category.name if profile.category else None,
                 } if profile.category else None,
-                'average_rating': get_average_rating(profile.user),
-                'total_feedbacks': Feedback.objects.filter(professional=profile.user).count(),
+                'average_rating': get_average_rating(profile.id),
+                'total_feedbacks': total_feedbacks,
                 'followers_count': profile.followers.count(),
-                'is_rising': is_profile_rising(profile.user),
+                'is_rising': is_profile_rising(profile.id),
                 'engagement_score': engagement_score,
             }
             profiles_with_scores.append((profile_data, engagement_score))
@@ -3534,11 +3637,37 @@ def search_profiles(request):
             )
         
         # Limiter les résultats
-        profiles = profiles[:50]
+        profiles = profiles[:100]
         
         # Préparer les données
-        results = []
+        results_with_scores = []
         for profile in profiles:
+            engagement_score = calculate_profile_engagement(profile)
+            total_feedbacks = Feedback.objects.filter(professional=profile.id).count()
+            if total_feedbacks <= 0:
+                continue
+            
+            # Get real ranks based on filters
+            rank_filters = {}
+            if category_id:
+                rank_filters['category_id'] = category_id
+            if country:
+                rank_filters['country'] = country
+                if city:
+                    rank_filters['city'] = city
+            
+            # Determine context for ranking
+            if city and country:
+                context = 'city'
+            elif country:
+                context = 'country'
+            elif category_id:
+                context = 'category'
+            else:
+                context = 'global'
+            
+            rank_info = get_profile_rank_in_context(profile.id, context, rank_filters)
+            
             profile_data = {
                 'id': profile.id,
                 'user': {
@@ -3551,14 +3680,32 @@ def search_profiles(request):
                 'image': request.build_absolute_uri(profile.image.url) if profile.image else None,
                 'city': profile.city,
                 'country': profile.country,
-                'category': profile.category.name if profile.category else None,
-                'average_rating': get_average_rating(profile.user),
+                'category': {
+                    'id': profile.category.id if profile.category else None,
+                    'name': profile.category.name if profile.category else None,
+                } if profile.category else None,
+                'average_rating': get_average_rating(profile.id),
                 'followers_count': profile.followers.count(),
-                'is_rising': is_profile_rising(profile.user),
+                'is_rising': is_profile_rising(profile.id),
+                'total_feedbacks': total_feedbacks,
+                'engagement_score': engagement_score,
+                # RANG RÉEL DANS LE CONTEXTE DE RECHERCHE
+                'real_rank': rank_info['rank'] if rank_info else None,
+                'ranking_context': context,
+                'ranking_filters': rank_filters if rank_filters else None,
             }
-            results.append(profile_data)
+            
+            results_with_scores.append((profile_data, engagement_score))
         
-        return Response(results)
+        # Trier par score
+        results_with_scores.sort(key=lambda x: x[1], reverse=True)
+        top_100 = [item[0] for item in results_with_scores[:100]]
+        
+        # Ajouter la position dans la liste de résultats
+        for index, profile_data in enumerate(top_100):
+            profile_data['search_position'] = index + 1
+        
+        return Response(top_100)
         
     except Exception as e:
         return Response({'error': str(e)}, status=500)
@@ -3614,7 +3761,9 @@ def get_top_by_country_and_category(request, country_code):
         profiles_with_scores = []
         for profile in profiles:
             engagement_score = calculate_profile_engagement(profile)
-            
+            total_feedbacks = Feedback.objects.filter(professional=profile.id).count()
+            if total_feedbacks <= 2:
+                continue
             profile_data = {
                 'id': profile.id,
                 'user': {
@@ -3630,11 +3779,11 @@ def get_top_by_country_and_category(request, country_code):
                     'id': profile.category.id if profile.category else None,
                     'name': profile.category.name if profile.category else None,
                 } if profile.category else None,
-                'average_rating': get_average_rating(profile.user),
-                'total_feedbacks': Feedback.objects.filter(professional=profile.user).count(),
-                'weekly_feedbacks': get_weekly_feedbacks_count(profile.user),
+                'average_rating': get_average_rating(profile.id),
+                'total_feedbacks': total_feedbacks,
+                'weekly_feedbacks': get_weekly_feedbacks_count(profile.id),
                 'followers_count': profile.followers.count(),
-                'is_rising': is_profile_rising(profile.user),
+                'is_rising': is_profile_rising(profile.id),
                 'engagement_score': engagement_score,
             }
             profiles_with_scores.append((profile_data, engagement_score))
@@ -3674,7 +3823,9 @@ def get_top_by_city_and_category(request):
         profiles_with_scores = []
         for profile in profiles:
             engagement_score = calculate_profile_engagement(profile)
-            
+            total_feedbacks = Feedback.objects.filter(professional=profile.id).count()
+            if total_feedbacks <= 2:
+                continue
             profile_data = {
                 'id': profile.id,
                 'user': {
@@ -3690,11 +3841,11 @@ def get_top_by_city_and_category(request):
                     'id': profile.category.id if profile.category else None,
                     'name': profile.category.name if profile.category else None,
                 } if profile.category else None,
-                'average_rating': get_average_rating(profile.user),
-                'total_feedbacks': Feedback.objects.filter(professional=profile.user).count(),
-                'weekly_feedbacks': get_weekly_feedbacks_count(profile.user),
+                'average_rating': get_average_rating(profile.id),
+                'total_feedbacks': total_feedbacks,
+                'weekly_feedbacks': get_weekly_feedbacks_count(profile.id),
                 'followers_count': profile.followers.count(),
-                'is_rising': is_profile_rising(profile.user),
+                'is_rising': is_profile_rising(profile.id),
                 'engagement_score': engagement_score,
             }
             profiles_with_scores.append((profile_data, engagement_score))
@@ -3705,5 +3856,198 @@ def get_top_by_city_and_category(request):
         
         return Response(top_5)
         
+    except Exception as e:
+        return Response({'error': str(e)}, status=500)
+    
+
+
+# Ajoutez ces fonctions dans votre views.py
+
+def calculate_real_ranks(profiles_with_scores, rank_field='global'):
+    """
+    Calcule les rangs réels basés sur le score d'engagement
+    profiles_with_scores: liste de tuples (profile_data, engagement_score)
+    rank_field: 'global', 'category', 'country', 'city'
+    """
+    if not profiles_with_scores:
+        return []
+    
+    # Trier par score décroissant
+    profiles_with_scores.sort(key=lambda x: x[1], reverse=True)
+    
+    result = []
+    current_rank = 1
+    previous_score = None
+    skip_count = 0
+    
+    for i, (profile_data, score) in enumerate(profiles_with_scores):
+        # Si le score est différent du précédent, on donne un nouveau rang
+        if score != previous_score:
+            current_rank = i + 1 - skip_count
+            previous_score = score
+        else:
+            # Même score = même rang
+            skip_count += 1
+        
+        # Ajouter le rang au profile_data
+        if rank_field == 'global':
+            profile_data['global_rank'] = current_rank
+        elif rank_field == 'category':
+            profile_data['category_rank'] = current_rank
+        elif rank_field == 'country':
+            profile_data['country_rank'] = current_rank
+        elif rank_field == 'city':
+            profile_data['city_rank'] = current_rank
+        
+        profile_data['ranking_score'] = score  # Pour référence
+        result.append(profile_data)
+    
+    return result
+
+def get_profile_rank_in_context(profile_id, context='global', filters=None):
+    """
+    Trouve le rang réel d'un profil dans un contexte spécifique
+    context: 'global', 'category', 'country', 'city'
+    filters: dict avec des filtres supplémentaires (category_id, country, etc.)
+    """
+    from django.db.models import Q
+    
+    # Base queryset
+    queryset = Profile.objects.filter(is_active=True)
+    
+    # Appliquer les filtres selon le contexte
+    if context == 'category' and filters and 'category_id' in filters:
+        queryset = queryset.filter(category_id=filters['category_id'])
+    elif context == 'country' and filters and 'country' in filters:
+        queryset = queryset.filter(country__iexact=filters['country'])
+    elif context == 'city' and filters:
+        if 'city' in filters and 'country' in filters:
+            queryset = queryset.filter(
+                city__iexact=filters['city'],
+                country__iexact=filters['country']
+            )
+    
+    # Calculer les scores pour tous les profils dans ce contexte
+    profiles_with_scores = []
+    for profile in queryset:
+        total_feedbacks = Feedback.objects.filter(professional=profile.id).count()
+        if total_feedbacks <= 2:
+            continue
+        
+        engagement_score = calculate_profile_engagement(profile)
+        profiles_with_scores.append((profile.id, engagement_score))
+    
+    # Trier par score
+    profiles_with_scores.sort(key=lambda x: x[1], reverse=True)
+    
+    # Trouver le rang du profil demandé
+    for rank, (profile_id_in_list, score) in enumerate(profiles_with_scores, 1):
+        if profile_id_in_list == profile_id:
+            # Vérifier si d'autres profils ont le même score
+            same_score_count = sum(1 for pid, s in profiles_with_scores if s == score)
+            
+            return {
+                'rank': rank,
+                'score': score,
+                'same_score_count': same_score_count,
+                'total_in_context': len(profiles_with_scores)
+            }
+    
+    return None
+
+
+
+@api_view(['GET'])
+def get_profile_rankings(request, profile_id):
+    """Obtenir tous les rangs d'un profil spécifique"""
+    try:
+        profile = Profile.objects.get(id=profile_id, is_active=True)
+        
+        rankings = {
+            'profile_id': profile.id,
+            'user': {
+                'id': profile.user.id,
+                'username': profile.user.username,
+                'full_name': f"{profile.user.first_name} {profile.user.last_name}".strip(),
+            },
+            'stats': {
+                'average_rating': get_average_rating(profile.id),
+                'total_feedbacks': Feedback.objects.filter(professional=profile.id).count(),
+                'followers_count': profile.followers.count(),
+                'weekly_feedbacks': get_weekly_feedbacks_count(profile.id),
+            }
+        }
+        
+        # Rangs globaux
+        global_rank = get_profile_rank_in_context(profile.id, 'global')
+        rankings['global'] = {
+            'rank': global_rank['rank'] if global_rank else None,
+            'score': global_rank['score'] if global_rank else None,
+            'total_ranked': global_rank['total_in_context'] if global_rank else None,
+            'top_percentage': round((global_rank['rank'] / global_rank['total_in_context'] * 100), 2) 
+                           if global_rank and global_rank['total_in_context'] > 0 else None,
+        }
+        
+        # Rang par catégorie
+        if profile.category:
+            category_rank = get_profile_rank_in_context(
+                profile.id, 
+                'category', 
+                {'category_id': profile.category.id}
+            )
+            rankings['category'] = {
+                'name': profile.category.name,
+                'rank': category_rank['rank'] if category_rank else None,
+                'score': category_rank['score'] if category_rank else None,
+                'total_ranked': category_rank['total_in_context'] if category_rank else None,
+            }
+        
+        # Rang par pays
+        if profile.country:
+            country_rank = get_profile_rank_in_context(
+                profile.id,
+                'country',
+                {'country': profile.country}
+            )
+            rankings['country'] = {
+                'name': profile.country,
+                'rank': country_rank['rank'] if country_rank else None,
+                'score': country_rank['score'] if country_rank else None,
+                'total_ranked': country_rank['total_in_context'] if country_rank else None,
+            }
+            
+            # Rang par ville
+            if profile.city:
+                city_rank = get_profile_rank_in_context(
+                    profile.id,
+                    'city',
+                    {'city': profile.city, 'country': profile.country}
+                )
+                rankings['city'] = {
+                    'name': profile.city,
+                    'rank': city_rank['rank'] if city_rank else None,
+                    'score': city_rank['score'] if city_rank else None,
+                    'total_ranked': city_rank['total_in_context'] if city_rank else None,
+                }
+        
+        # Badges basés sur les rangs
+        badges = []
+        if global_rank and global_rank['rank'] <= 10:
+            badges.append({'name': 'Top 10 Global', 'color': 'gold'})
+        elif global_rank and global_rank['rank'] <= 50:
+            badges.append({'name': 'Top 50 Global', 'color': 'silver'})
+        elif global_rank and global_rank['rank'] <= 100:
+            badges.append({'name': 'Top 100 Global', 'color': 'bronze'})
+        
+        if is_profile_rising(profile.id):
+            badges.append({'name': 'Rising Star', 'color': 'red'})
+        
+        rankings['badges'] = badges
+        rankings['last_updated'] = timezone.now().isoformat()
+        
+        return Response(rankings)
+        
+    except Profile.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=404)
     except Exception as e:
         return Response({'error': str(e)}, status=500)

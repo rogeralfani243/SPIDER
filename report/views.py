@@ -384,7 +384,7 @@ class CheckReportAPIView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Valider le content_id
+            # Valider les content_id
             try:
                 content_id = int(content_id)
                 if content_id <= 0:
