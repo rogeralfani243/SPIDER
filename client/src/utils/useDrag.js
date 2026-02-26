@@ -16,8 +16,6 @@ const useParamDrag = () => {
     // bloque clic droit (optionnel)
     document.addEventListener("contextmenu", prevent);
 
-    // bloque drag tactile
-    document.addEventListener("touchmove", prevent, { passive: false });
 
     return () => {
       document.removeEventListener("dragstart", prevent);
