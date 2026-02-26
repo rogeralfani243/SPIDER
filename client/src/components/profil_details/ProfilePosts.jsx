@@ -346,7 +346,7 @@ const ProfilePosts = ({ profileId, userId }) => {
               return (
                 <div 
                   key={post.id} 
-                  className={`posts-card ${layoutMode === 'grid' ? 'grid-item' : 'list-item'}`}
+                  className={`post-card ${layoutMode === 'grid' ? 'grid-item' : 'list-item'}`}
                   role="button"
                   tabIndex={0}
                 >

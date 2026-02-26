@@ -116,8 +116,7 @@ const LocationMap = ({ profile, onRetry }) => {
       <div className="map-placeholder">
         <FaMapMarkerAlt className="error-icon" />
         <p>Unable to load map</p>
-        <small className="error-message">{error || 'Geocoding failed'}</small>
-        <div className="address-preview">
+   <div className="address-preview">
           <strong>Address used:</strong>
           <p>{fullAddress}</p>
         </div>
